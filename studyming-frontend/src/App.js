@@ -1,4 +1,4 @@
-import './App.css'
+import './styles/common.css'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
 import Header from './components/shared/Header'
@@ -8,12 +8,12 @@ import WelcomePage from './pages/WelcomePage'
 
 function App() {
    return (
-      <BrowserRouter>
+      <>
          <Header />
          <WelcomePage />
          {/* <Sidebar/> */}
          <Footer />
-      </BrowserRouter>
+      </>
    )
 }
 
