@@ -1,19 +1,37 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
-import MyProfile from '../components/myPage/MyProfile'
+import Board from '../page/Board'
 
-function MyPage() {
-   const [selectedMenu, setSelectedMenu] = useState('내 프로필') // 기본 선택된 메뉴
-   const menuList = ['내 프로필', '내 정보', '내 아이템', '결제 및 밍 내역', '회원 탈퇴']
+/* 각 페이지 불러오기 (테스트로 채팅만 불러봄봄) */
+// import ChatPage from './ChatPage'
+
+const Sidebar = () => {
+   const [selectedMenu, setSelectedMenu] = useState('자유') // 기본 선택된 메뉴
+
+   // 🔥 메뉴에 따른 더미 데이터 설정
+   const menuContent = {
+      //   채팅: <ChatPage />,
+      화면공유: '화면공유 관련 내용이 표시됩니다.',
+      카메라: '카메라 관련 내용이 표시됩니다.',
+   }
+
+   const menuScript = {
+      자유: '유저간 자유로운 소통',
+      질문: '유저간의 Q & A',
+      정보: '시험 정보 안내',
+      문의: '관리자와 Q & A',
+   }
+
    return (
       <Container>
          <SidebarContainer>
             <MenuList>
-               {menuList.map((item) => (
+               {['자유', '질문', '정보', '문의'].map((item) => (
                   <MenuItem key={item} isActive={selectedMenu === item} onClick={() => setSelectedMenu(item)}>
                      <StyledButton to={`/${item}`}>{item}</StyledButton>
                      {selectedMenu === item && <ActiveIndicator />} {/* ✅ 활성화된 메뉴에 동그라미 표시 */}
+                     <SubText>{menuScript[item]}</SubText>
                   </MenuItem>
                ))}
             </MenuList>
@@ -21,14 +39,15 @@ function MyPage() {
 
          {/* 🔥 오른쪽 콘텐츠 영역 */}
          <ContentArea>
-            <h2>{selectedMenu}</h2>
-            {selectedMenu === '내 프로필' && <MyProfile />} {/* ✅ '내 프로필' 메뉴일 경우 MyProfile 컴포넌트로 */}
+            <h2>{selectedMenu}게시판</h2>
+            <p>{menuContent[selectedMenu]}</p> {/* ✅ 선택한 메뉴에 맞는 더미 데이터 표시 */}
+            <Board />
          </ContentArea>
       </Container>
    )
 }
 
-export default MyPage
+export default Sidebar
 
 // ⭐ Styled Components
 const Container = styled.div`
@@ -37,7 +56,7 @@ const Container = styled.div`
 `
 
 const SidebarContainer = styled.nav`
-   width: 300px;
+   width: 200px;
    height: 100vh;
    padding: 20px;
    display: flex;
@@ -52,8 +71,9 @@ const MenuList = styled.ul`
    display: flex;
    flex-direction: column;
    align-items: flex-end;
-   gap: 70px; /* :흰색_확인_표시: 메뉴 간 간격 */
+   gap: 70px; /* ✅ 메뉴 간 간격 */
 `
+
 const MenuItem = styled.li`
    flex-direction: column;
    position: relative;
@@ -65,6 +85,7 @@ const MenuItem = styled.li`
    color: ${(props) => (props.isActive ? '#FF7A00' : '#000')};
    cursor: pointer;
 `
+
 const StyledButton = styled.button`
    all: unset;
    text-decoration: none;
@@ -74,6 +95,13 @@ const StyledButton = styled.button`
    &:hover {
       color: #ff7f00;
    }
+`
+
+const SubText = styled.span`
+   font-size: 12px;
+   color: #888;
+   margin-top: 4px;
+   width: 100%;
 `
 
 // 🔥 활성화된 메뉴 오른쪽에 동그라미 표시
@@ -100,4 +128,3 @@ const ContentArea = styled.div`
       margin-bottom: 20px;
    }
 `
-

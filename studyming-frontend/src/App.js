@@ -10,7 +10,7 @@ import SignupPage from './pages/SignupPage'
 import BoardListPage from './pages/BoardListPage'
 import BoardCreatePage from './pages/BoardCreatePage'
 import BoardEditPage from './pages/BoardEditPage'
-import BoardDetail from './pages/BoardDetail'
+import BoardDetailPage from './pages/BoardDetailPage'
 import MyPage from './pages/MyPage'
 
 // import Sidebar from './components/shared/Sidebar'
@@ -27,7 +27,7 @@ function App() {
             <Route path="/board" element={<BoardListPage />} />
             <Route path="/board/create" element={<BoardCreatePage />} />
             <Route path="/board/edit/:id" element={<BoardEditPage />} />
-            <Route path="/board/detail/:id" element={<BoardDetail />} />
+            <Route path="/board/detail/:id" element={<BoardDetailPage />} />
             <Route path="/mypage" element={<MyPage />} />
          </Routes>
 
