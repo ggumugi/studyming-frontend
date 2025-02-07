@@ -3,14 +3,14 @@ import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 
 /* 각 페이지 불러오기 (테스트로 채팅만 불러봄봄) */
-import ChatPage from './ChatPage'
+// import ChatPage from './ChatPage'
 
 const Sidebar = () => {
    const [selectedMenu, setSelectedMenu] = useState('화면공유') // 기본 선택된 메뉴
 
    // 🔥 메뉴에 따른 더미 데이터 설정
    const menuContent = {
-      채팅: <ChatPage />,
+      //   채팅: <ChatPage />,
       화면공유: '화면공유 관련 내용이 표시됩니다.',
       카메라: '카메라 관련 내용이 표시됩니다.',
    }
