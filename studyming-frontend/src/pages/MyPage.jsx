@@ -2,6 +2,9 @@ import React, { useState } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import MyProfile from '../components/myPage/MyProfile'
+import MyInfo from '../components/myPage/MyInfo'
+import MyItem from '../components/myPage/MyItem'
+import MyPay from '../components/myPage/MyPay'
 
 function MyPage() {
    const [selectedMenu, setSelectedMenu] = useState('내 프로필') // 기본 선택된 메뉴
@@ -23,6 +26,9 @@ function MyPage() {
          <ContentArea>
             <h2>{selectedMenu}</h2>
             {selectedMenu === '내 프로필' && <MyProfile />} {/* ✅ '내 프로필' 메뉴일 경우 MyProfile 컴포넌트로 */}
+            {selectedMenu === '내 정보' && <MyInfo />}
+            {selectedMenu === '내 아이템' && <MyItem />}
+            {selectedMenu === '결제 및 밍 내역' && <MyPay />}
          </ContentArea>
       </Container>
    )
@@ -33,12 +39,12 @@ export default MyPage
 // ⭐ Styled Components
 const Container = styled.div`
    display: flex;
-   height: 100vh;
+   height: 100%;
 `
 
 const SidebarContainer = styled.nav`
    width: 300px;
-   height: 100vh;
+   height: 120vh;
    padding: 20px;
    display: flex;
    flex-direction: column;
@@ -100,4 +106,3 @@ const ContentArea = styled.div`
       margin-bottom: 20px;
    }
 `
-

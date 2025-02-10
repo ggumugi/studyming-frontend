@@ -33,7 +33,7 @@ const MyProfile = () => {
             <ProfileForm>
                <FormRow>
                   <EditLabel>닉네임</EditLabel>
-                  <Input type="text" defaultValue="햄버거" maxLength={6} />
+                  <NicknameInput type="text" defaultValue="햄버거" maxLength={6} />
                </FormRow>
                <FormRow>
                   <EditLabel>성별</EditLabel>
@@ -68,6 +68,7 @@ const MyProfile = () => {
                   </SelectWrapper>
                </FormRow>
                <FormRow>
+                  <EditLabel /> {/* 빈 라벨 영역으로 정렬 유지 */}
                   <SelectWrapper>
                      <Select>
                         <option>의료</option>
@@ -80,15 +81,14 @@ const MyProfile = () => {
                   </SelectWrapper>
                </FormRow>
                <FormRow>
+                  <EditLabel /> {/* 빈 라벨 영역으로 정렬 유지 */}
                   <SelectWrapper>
                      <Select>
-                        <option>사회복지</option>
+                        <option>기타</option>
                         <option>미술</option>
                      </Select>
-                     <Select>
-                        <option>음악</option>
-                        <option>연구</option>
-                     </Select>
+                     {/* 기존 Select를 TextInput으로 대체 */}
+                     <TextInput type="text" placeholder="직접 입력" />
                   </SelectWrapper>
                </FormRow>
                <SubmitButton onClick={() => setEditing(false)}>프로필 설정 완료</SubmitButton>
@@ -131,7 +131,8 @@ const Value = styled.div`
 `
 
 const EditButton = styled.button`
-   width: 500px;
+   width: 100%;
+   max-width: 500px;
    height: 50px;
    background-color: #ff7a00;
    color: white;
@@ -160,12 +161,19 @@ const EditLabel = styled.div`
    font-weight: 500;
 `
 
+// 기존 Input 스타일
 const Input = styled.input`
    padding: 10px;
    font-size: 16px;
    border: 1px solid #ddd;
    border-radius: 5px;
-   width: 100%;
+   width: 80%;
+`
+
+// 닉네임 전용 입력창 (Input 확장)
+// width 취향에 따라 더 길게 해두 됨
+const NicknameInput = styled(Input)`
+   width: 25%;
 `
 
 const RadioGroup = styled.div`
@@ -182,11 +190,22 @@ const SelectWrapper = styled.div`
    display: flex;
    flex-wrap: wrap;
    gap: 10px;
-   width: 70%;
+   width: 80%;
+   justify-content: flex-start;
 `
 
+// 기존 Select: 남은 공간을 동일하게 분할
 const Select = styled.select`
-   flex-basis: 45%;
+   flex: 1;
+   padding: 10px;
+   font-size: 16px;
+   border: 1px solid #ddd;
+   border-radius: 5px;
+`
+
+// 새로 추가된 TextInput: flex: 1로 Select와 동일한 레이아웃 적용
+const TextInput = styled.input`
+   flex: 1;
    padding: 10px;
    font-size: 16px;
    border: 1px solid #ddd;
@@ -195,12 +214,14 @@ const Select = styled.select`
 
 const SubmitButton = styled.button`
    width: 100%;
-   padding: 15px;
+   max-width: 500px;
+   height: 50px;
    background-color: #ff7a00;
    color: white;
    font-size: 18px;
    border: none;
    cursor: pointer;
    border-radius: 5px;
-   margin-top: 30px;
+   margin: 20px auto 0;
+   display: block;
 `

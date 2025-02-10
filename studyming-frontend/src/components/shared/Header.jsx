@@ -35,7 +35,7 @@ const Header = () => {
                      <NavItem>밍샵</NavItem>
                   </Link>
 
-                  <NavItem onClick={handleClick} isOpen={open}>
+                  <NavItem onClick={handleClick} $isOpen={open}>
                      게시판 {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
                   </NavItem>
 
@@ -116,7 +116,7 @@ const NavMenu = styled.ul`
 const NavItem = styled.li`
    font-size: 20px;
    font-weight: 300;
-   color: ${(props) => (props.isOpen ? '#ff7f00' : '#000')};
+   color: ${(props) => (props.$isOpen ? '#ff7f00' : '#000')};
    cursor: pointer;
    display: flex;
    align-items: center;
