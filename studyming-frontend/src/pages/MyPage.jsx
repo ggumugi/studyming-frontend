@@ -5,6 +5,7 @@ import MyProfile from '../components/myPage/MyProfile'
 import MyInfo from '../components/myPage/MyInfo'
 import MyItem from '../components/myPage/MyItem'
 import MyPay from '../components/myPage/MyPay'
+import AccountDelete from '../components/myPage/AccountDelete'
 
 function MyPage() {
    const [selectedMenu, setSelectedMenu] = useState('내 프로필') // 기본 선택된 메뉴
@@ -29,6 +30,7 @@ function MyPage() {
             {selectedMenu === '내 정보' && <MyInfo />}
             {selectedMenu === '내 아이템' && <MyItem />}
             {selectedMenu === '결제 및 밍 내역' && <MyPay />}
+            {selectedMenu === '회원 탈퇴' && <AccountDelete />}
          </ContentArea>
       </Container>
    )
