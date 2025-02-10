@@ -36,9 +36,7 @@ function App() {
             <Route path="/mypage" element={<MyPage />} />
             <Route path="/study-list" element={<StudyListPage />} />
          </Routes>
-
          {/* <Sidebar/> */}
-
          <Footer />
       </>
    )

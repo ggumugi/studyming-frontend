@@ -131,7 +131,8 @@ const Value = styled.div`
 `
 
 const EditButton = styled.button`
-   width: 500px;
+   width: 100%;
+   max-width: 500px;
    height: 50px;
    background-color: #ff7a00;
    color: white;
@@ -212,7 +213,8 @@ const TextInput = styled.input`
 `
 
 const SubmitButton = styled.button`
-   width: 500px;
+   width: 100%;
+   max-width: 500px;
    height: 50px;
    background-color: #ff7a00;
    color: white;
