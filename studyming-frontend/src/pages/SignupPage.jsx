@@ -4,7 +4,7 @@ import { TextField, Button } from '@mui/material'
 import { Google } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 
-const SignupPage = () => {
+const Register = () => {
    const navigate = useNavigate()
    const [formData, setFormData] = useState({
       name: '',
@@ -27,7 +27,7 @@ const SignupPage = () => {
       // 이메일 형식 검사
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
       if (!emailRegex.test(formData.email)) {
-         newErrors.email = '올바른 이메일 형식에 맞춰서 작성해주세요.'
+         newErrors.email = '올바른 이메일 형식에 맞춰서 작성해주세요(예시:studyming@google.com).'
       }
 
       // 비밀번호 확인
@@ -74,7 +74,7 @@ const SignupPage = () => {
    )
 }
 
-export default SignupPage
+export default Register
 
 // ⭐ Styled Components
 const Wrapper = styled.div`
@@ -93,7 +93,7 @@ const FormContainer = styled.div`
 const Title = styled.h2`
    font-weight: bold;
    text-align: left;
-   color: black; /* ✅ 회원가입 문구 하얀색 적용 */
+   color: black; /* ✅ 회원가입 문구 검정색 적용 */
 `
 
 const StyledDivider = styled.div`
@@ -119,10 +119,12 @@ const StyledTextField = styled(TextField)`
 const StyledButton = styled(Button)`
    width: 100%;
    background-color: #ff7a00 !important;
-   color: white;
+   height: 60px;
+   color: white !important;
    font-size: 16px;
    padding: 10px;
-   margin-top: 30px; /* ✅ 비밀번호 확인 필드와 회원가입 버튼 사이 margin 추가 */
+   border-radius: 10px !important;
+   margin-top: 20px; /* ✅ 비밀번호 확인 필드와 회원가입 버튼 사이 margin 추가 */
 `
 
 const SNSWrapper = styled.div`
