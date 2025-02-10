@@ -1,15 +1,3 @@
-<<<<<<< HEAD
-// import React, { useState } from 'react'
-// import styled from 'styled-components'
-// import { Link } from 'react-router-dom'
-
-// function MyPage() {
-//      const [selectedMenu, setSelectedMenu] = useState('내 프로필') // 기본 선택된 메뉴
-//     return (  )
-// }
-
-// export default MyPage;
-=======
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
@@ -112,4 +100,3 @@ const ContentArea = styled.div`
       margin-bottom: 20px;
    }
 `
->>>>>>> 7b3b6a4ef7cb271865e4bd8a720f74c447a12268
