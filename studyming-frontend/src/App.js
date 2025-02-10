@@ -12,6 +12,7 @@ import BoardCreatePage from './pages/BoardCreatePage'
 import BoardEditPage from './pages/BoardEditPage'
 import BoardDetailPage from './pages/BoardDetailPage'
 import MyPage from './pages/MyPage'
+import FindIdPage from './pages/FindIdPage'
 
 // import Sidebar from './components/shared/Sidebar'
 
@@ -24,6 +25,7 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/find-id" element={<FindIdPage />} />
             <Route path="/board" element={<BoardListPage />} />
             <Route path="/board/create" element={<BoardCreatePage />} />
             <Route path="/board/edit/:id" element={<BoardEditPage />} />
