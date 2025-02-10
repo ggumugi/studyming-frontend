@@ -32,9 +32,7 @@ function App() {
             <Route path="/board/detail/:id" element={<BoardDetailPage />} />
             <Route path="/mypage" element={<MyPage />} />
          </Routes>
-
          {/* <Sidebar/> */}
-
          <Footer />
       </>
    )
