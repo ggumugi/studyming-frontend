@@ -63,11 +63,10 @@ export default LoginPage
 // 🔥 Styled Components
 const Wrapper = styled.div`
    display: flex;
-   align-items: center;
    justify-content: center;
-   flex-direction: column;
+   align-items: center;
    height: 100vh;
-   padding-top: 130px; /* 로그인 상단 마진 (피그마 기준 조정) */
+   background-color: transparent; /* 배경색 제거 */
 `
 
 const FormContainer = styled.div`
@@ -78,10 +77,9 @@ const FormContainer = styled.div`
 `
 
 const Title = styled.h2`
-   font-weight: bold;
-   text-align: left;
    font-size: 32px;
-   margin-bottom: 8px; /* 피그마 기준 조정 */
+   margin-bottom: 30px;
+   color: black; /* 검정색으로 변경 */
 `
 
 const StyledDivider = styled.div`
