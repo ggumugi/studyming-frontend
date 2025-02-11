@@ -25,7 +25,7 @@ const Header = () => {
          <HeaderContent>
             <LeftSection>
                <Link to="/">
-                  <Logo src="img/studyming-logo.png" alt="스터디밍 로고" />
+                  <Logo src="/img/studyming-logo.png" alt="스터디밍 로고" />
                </Link>
                <NavMenu>
                   <Link to="/study">
