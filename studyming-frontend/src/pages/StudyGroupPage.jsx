@@ -1,7 +1,10 @@
-import React from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components'
 import { useParams } from 'react-router-dom'
 import GroupSidebar from '../components/sidebar/GroupSidebar'
+import Chat from '../components/studyGroup/Chat'
+import ScreenShare from '../components/studyGroup/ScreenShare'
+import Cam from '../components/studyGroup/Cam'
 
 // Mock 데이터
 const mockStudyGroups = {
@@ -13,19 +16,36 @@ const StudyGroupPage = () => {
    const { id } = useParams()
    const studyGroup = mockStudyGroups[id]
 
+   // 🔥 사이드바에서 선택한 메뉴 상태
+   const [selectedMenu, setSelectedMenu] = useState('채팅')
+
+   // 🔥 선택한 메뉴에 따라 렌더링할 컴포넌트 매핑
+   const renderComponent = () => {
+      switch (selectedMenu) {
+         case '채팅':
+            return <Chat />
+         case '화면공유':
+            return <ScreenShare />
+         case '카메라':
+            return <Cam />
+         default:
+            return <p>잘못된 메뉴 선택</p>
+      }
+   }
+
    return (
       <Container>
-         {/* ✅ 왼쪽 사이드바 (GroupSidebar + TeamList 포함) */}
-         <GroupSidebar />
+         {/* ✅ 왼쪽 사이드바 */}
+         <GroupSidebar selectedMenu={selectedMenu} setSelectedMenu={setSelectedMenu} />
 
          {/* ✅ 메인 콘텐츠 영역 */}
          <ContentArea>
-            <h1>스터디 그룹 페이지</h1>
+            {/* 🔥 스터디 그룹 이름이 h1에 자동 반영됨 */}
+            <h1>{studyGroup ? studyGroup.name : '존재하지 않는 스터디 그룹'}</h1>
+
             {studyGroup ? (
-               <div>
-                  <p>그룹 이름: {studyGroup.name}</p>
-                  <p>멤버 수: {studyGroup.members}명</p>
-               </div>
+               /* 🔥 선택한 메뉴에 따라 동적으로 컴포넌트 렌더링 */
+               renderComponent()
             ) : (
                <p>존재하지 않는 스터디 그룹입니다.</p>
             )}
@@ -39,7 +59,7 @@ export default StudyGroupPage
 // ⭐ Styled Components
 const Container = styled.div`
    display: flex;
-   height: 100vh;
+   height: 100%;
 `
 
 const ContentArea = styled.div`

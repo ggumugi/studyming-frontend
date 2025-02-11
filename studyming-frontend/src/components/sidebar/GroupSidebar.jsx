@@ -3,16 +3,15 @@ import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import TeamList from '../studyGroup/TeamList' // ✅ 팀원 목록 추가
 
-const GroupSidebar = () => {
-   const [selectedMenu, setSelectedMenu] = useState('채팅')
-
+const GroupSidebar = ({ selectedMenu, setSelectedMenu }) => {
    return (
       <SidebarContainer>
          <MenuList>
             {['채팅', '화면공유', '카메라'].map((item) => (
-               <MenuItem key={item} isActive={selectedMenu === item} onClick={() => setSelectedMenu(item)}>
-                  <StyledButton to={`/${item}`}>{item}</StyledButton>
-                  {selectedMenu === item && <ActiveIndicator />} {/* ✅ 활성화된 메뉴에 동그라미 표시 */}
+               <MenuItem key={item} isActive={selectedMenu === item}>
+                  {/* ✅ `onClick`을 StyledButton이 아니라 `MenuItem`에 추가해야 제대로 동작함! */}
+                  <StyledButton onClick={() => setSelectedMenu(item)}>{item}</StyledButton>
+                  {selectedMenu === item && <ActiveIndicator />}
                </MenuItem>
             ))}
          </MenuList>
@@ -30,12 +29,12 @@ export default GroupSidebar
 // ⭐ Styled Components
 const SidebarContainer = styled.nav`
    width: 250px;
-   height: 100vh;
+   height: 180vh;
    padding: 20px;
    display: flex;
    flex-direction: column; /* ✅ 아래쪽으로 정렬 */
    border-right: 1px solid #ddd;
-   justify-content: space-between; /* ✅ 상단 메뉴 & 하단 팀원 목록 */
+   gap: 200px;
 `
 
 const MenuList = styled.ul`
@@ -82,6 +81,5 @@ const ActiveIndicator = styled.div`
 `
 
 const TeamListWrapper = styled.div`
-   margin-top: auto; /* ✅ 사이드바 하단에 배치 */
    width: 100%;
 `
