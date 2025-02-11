@@ -43,19 +43,22 @@ const CreateBoard = ({ setIsWriting }) => {
          {/* 내용 */}
          <FormGroup>
             <Label>내용</Label>
-            <StyledTextField variant="outlined" placeholder="내용을 입력해주세요." multiline rows={8} value={content} onChange={(e) => setContent(e.target.value)} />
+            <StyledTextField variant="outlined" placeholder="내용을 입력해주세요." multiline rows={15} value={content} onChange={(e) => setContent(e.target.value)} />
          </FormGroup>
 
          {/* 이미지 업로드 */}
-         <UploadContainer>
-            <UploadButton>
-               <input type="file" accept="image/*" onChange={handleImageUpload} />
-               이미지 업로드
-            </UploadButton>
-         </UploadContainer>
+         <ButtonContainer>
+            <UploadContainer>
+               <UploadButton>
+                  <input type="file" accept="image/*" onChange={handleImageUpload} />
+                  이미지 업로드
+               </UploadButton>
+            </UploadContainer>
+
+            {/* 글쓰기 버튼 */}
+            <SubmitButton onClick={handleSubmit}>글쓰기</SubmitButton>
+         </ButtonContainer>
          <Button onClick={() => setIsWriting(false)}>← 뒤로가기</Button>
-         {/* 글쓰기 버튼 */}
-         <SubmitButton onClick={handleSubmit}>글쓰기</SubmitButton>
       </Container>
    )
 }
@@ -64,7 +67,7 @@ export default CreateBoard
 
 // ⭐ Styled Components
 const Container = styled.div`
-   max-width: 800px;
+   max-width: 100%;
    margin: 100px auto;
    display: flex;
    flex-direction: column;
@@ -73,24 +76,39 @@ const Container = styled.div`
 
 const FormGroup = styled.div`
    display: flex;
-   flex-direction: column;
-   gap: 5px;
+   align-items: flex-start; // Label을 위쪽으로 정렬
+   justify-content: center; // 중앙 정렬
+   width: 100%; // 적절한 너비 조정
+   gap: 20px; // 제목과 입력 필드 간격 조정
+   margin: 0 auto; // 전체적으로 가운데 정렬
 `
 
 const Label = styled.label`
    font-size: 18px;
    font-weight: bold;
+
+   width: 100px; // 고정 너비로 정렬
 `
 
 const StyledTextField = styled(TextField)`
    && {
       background-color: #fff;
+      flex: 1; // 남은 공간을 차지하도록 설정
    }
+`
+
+const ButtonContainer = styled.div`
+   display: flex;
+   justify-content: space-between; // 양쪽 끝 정렬
+   align-items: center;
+   width: 100%;
+   padding: 10px 0;
 `
 
 const UploadContainer = styled.div`
    display: flex;
    justify-content: flex-start;
+   margin-left: 120px;
 `
 
 const UploadButton = styled.label`
@@ -99,7 +117,7 @@ const UploadButton = styled.label`
    font-size: 14px;
    color: #555;
    border: 1px solid #ccc;
-   border-radius: 5px;
+   border-radius: 20px;
    cursor: pointer;
    text-align: center;
    width: 150px;
@@ -120,9 +138,6 @@ const SubmitButton = styled(Button).attrs({
       background-color: #ff7a00;
       color: white;
       font-weight: bold;
-      position: absolute;
-      bottom: 30px;
-      right: 30px;
       padding: 10px 20px;
       border-radius: 20px;
 

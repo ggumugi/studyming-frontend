@@ -13,7 +13,7 @@ import CreateBoard from '../page/CreateBoard'
 /* 각 페이지 불러오기 (테스트로 채팅만 불러봄봄) */
 // import ChatPage from './ChatPage'
 
-const Sidebar = () => {
+const BoardSidebar = () => {
    const [isWriting, setIsWriting] = useState(false)
    const [selectedMenu, setSelectedMenu] = useState('자유') // 기본 선택된 메뉴
 
@@ -62,7 +62,20 @@ const Sidebar = () => {
             {/* ✅ 기존 게시판 유지 */}
             <h2 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                {selectedMenu} 게시판
-               <Button onClick={() => setIsWriting(true)}>글쓰기</Button> {/* ✅ 글쓰기 버튼 */}
+               <Button
+                  variant="contained"
+                  sx={{
+                     borderRadius: '20px',
+                     backgroundColor: '#FF5733',
+                     color: '#fff',
+                     marginRight: '10px',
+                     '&:hover': { backgroundColor: '#E74C3C' },
+                  }}
+                  onClick={() => setIsWriting(true)}
+               >
+                  글쓰기
+               </Button>{' '}
+               {/* ✅ 글쓰기 버튼 */}
             </h2>
 
             {/* ✅ 글쓰기 모드일 때 `CreateBoard`로 변경 */}
@@ -72,7 +85,7 @@ const Sidebar = () => {
    )
 }
 
-export default Sidebar
+export default BoardSidebar
 
 // ⭐ Styled Components
 const Container = styled.div`

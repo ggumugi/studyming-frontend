@@ -1,20 +1,45 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
-import MyProfile from '../components/myPage/MyProfile'
-import MyInfo from '../components/myPage/MyInfo'
-import MyItem from '../components/myPage/MyItem'
-import MyPay from '../components/myPage/MyPay'
-import AccountDelete from '../components/myPage/AccountDelete'
+import ActionsTakenBoard from '../page/ActionsTakenBoard'
+import BanRecordsBoard from '../page/BanRecordsBoard'
+import ReportsBoard from '../page/ReportsBoard'
+import { Paper, Typography, Button, TextField, Box } from '@mui/material'
+import { useEffect } from 'react'
 
-function MyPage() {
-   const [selectedMenu, setSelectedMenu] = useState('내 프로필') // 기본 선택된 메뉴
-   const menuList = ['내 프로필', '내 정보', '내 아이템', '결제 및 밍 내역', '회원 탈퇴']
+import CreateBoard from '../page/CreateBoard'
+
+/* 각 페이지 불러오기 (테스트로 채팅만 불러봄봄) */
+// import ChatPage from './ChatPage'
+
+const AdminBoardSidebar = () => {
+   const [isWriting, setIsWriting] = useState(false)
+   const [selectedMenu, setSelectedMenu] = useState('신고내역') // 기본 선택된 메뉴
+
+   // 🔥 메뉴에 따른 더미 데이터 설정
+   const menuContent = {
+      //   채팅: <ChatPage />,
+      화면공유: '화면공유 관련 내용이 표시됩니다.',
+      카메라: '카메라 관련 내용이 표시됩니다.',
+   }
+
+   useEffect(() => {
+      if (isWriting) {
+         console.log('글쓰기 모드 활성화!')
+      }
+   }, [isWriting]) // ✅ isWriting이 변경될 때 실행
+
+   const boardContent = {
+      신고내역: <ReportsBoard category="신고내역" />, // 신고내역 게시판
+      처리내역: <ActionsTakenBoard category="처리내역" />, // 처리내역 게시판
+      정지내역: <BanRecordsBoard category="정지내역" />, // 정지내역 게시판
+   }
+
    return (
       <Container>
          <SidebarContainer>
             <MenuList>
-               {menuList.map((item) => (
+               {['신고내역', '처리내역', '정지내역'].map((item) => (
                   <MenuItem key={item} isActive={selectedMenu === item} onClick={() => setSelectedMenu(item)}>
                      <StyledButton to={`/${item}`}>{item}</StyledButton>
                      {selectedMenu === item && <ActiveIndicator />} {/* ✅ 활성화된 메뉴에 동그라미 표시 */}
@@ -25,28 +50,26 @@ function MyPage() {
 
          {/* 🔥 오른쪽 콘텐츠 영역 */}
          <ContentArea>
-            <h2>{selectedMenu}</h2>
-            {selectedMenu === '내 프로필' && <MyProfile />} {/* ✅ '내 프로필' 메뉴일 경우 MyProfile 컴포넌트로 */}
-            {selectedMenu === '내 정보' && <MyInfo />}
-            {selectedMenu === '내 아이템' && <MyItem />}
-            {selectedMenu === '결제 및 밍 내역' && <MyPay />}
-            {selectedMenu === '회원 탈퇴' && <AccountDelete />}
+            {/* ✅ 기존 게시판 유지 */}
+            <h2 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>{selectedMenu} 게시판</h2>
+
+            {boardContent[selectedMenu]}
          </ContentArea>
       </Container>
    )
 }
 
-export default MyPage
+export default AdminBoardSidebar
 
 // ⭐ Styled Components
 const Container = styled.div`
    display: flex;
-   height: 100%;
+   height: 100vh;
 `
 
 const SidebarContainer = styled.nav`
-   width: 300px;
-   height: 120vh;
+   width: 200px;
+   height: 100vh;
    padding: 20px;
    display: flex;
    flex-direction: column;
@@ -60,8 +83,9 @@ const MenuList = styled.ul`
    display: flex;
    flex-direction: column;
    align-items: flex-end;
-   gap: 70px; /* :흰색_확인_표시: 메뉴 간 간격 */
+   gap: 70px; /* ✅ 메뉴 간 간격 */
 `
+
 const MenuItem = styled.li`
    flex-direction: column;
    position: relative;
@@ -73,6 +97,7 @@ const MenuItem = styled.li`
    color: ${(props) => (props.isActive ? '#FF7A00' : '#000')};
    cursor: pointer;
 `
+
 const StyledButton = styled.button`
    all: unset;
    text-decoration: none;
@@ -82,6 +107,13 @@ const StyledButton = styled.button`
    &:hover {
       color: #ff7f00;
    }
+`
+
+const SubText = styled.span`
+   font-size: 12px;
+   color: #888;
+   margin-top: 4px;
+   width: 100%;
 `
 
 // 🔥 활성화된 메뉴 오른쪽에 동그라미 표시

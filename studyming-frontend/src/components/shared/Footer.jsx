@@ -32,6 +32,7 @@ export default Footer
 // ⭐ Styled Components
 const FooterContainer = styled.footer`
    width: 100%;
+   height: 225px;
    background-color: #ffa654;
    padding: 15px 0 20px 0;
    display: flex;

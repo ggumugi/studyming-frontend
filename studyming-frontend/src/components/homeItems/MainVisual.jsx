@@ -6,6 +6,8 @@ import 'slick-carousel/slick/slick-theme.css'
 import { AiOutlineLeft, AiOutlineRight } from 'react-icons/ai'
 
 // ✅ 캐러셀 데이터 (예제)
+/* 타이틀 최대 40자.  
+안그러면 줄넘어가고 간격 이상해짐 */
 const carouselData = [
    { title: '제 23회 가맹거래사 1차 빈자리 원서접수', date: '02 / 12' },
    { title: '변리사 2차 시험 D-3000111111111100000111111111', date: '03 / 15' },
@@ -58,7 +60,7 @@ export default MainVisual
 
 /* 🎨 Styled Components */
 const MainBanner = styled.div`
-   width: 100%;
+   width: 90%;
    height: 200px;
    background-image: url(${process.env.PUBLIC_URL + '/img/mainVisual.png'});
    background-size: cover;
@@ -85,13 +87,13 @@ const StyledSlider = styled(Slider)`
    .slick-dots li button:before {
       color: #ffffff;
       font-size: 8px;
-      opacity: 0.5;
+      opacity: 0.3;
    }
 
    .slick-dots li.slick-active button:before {
       color: #ffffff;
       opacity: 1;
-      font-size: 13px;
+      font-size: 8px;
    }
 `
 
@@ -120,7 +122,7 @@ const ArrowButton = styled.button`
    border-radius: 50%;
    width: 40px;
    height: 40px;
-   font-size: 38px;
+   font-size: 28px;
    display: flex;
    align-items: center;
    justify-content: center;
@@ -128,6 +130,6 @@ const ArrowButton = styled.button`
    transition: 0.3s;
 
    &:hover {
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(255, 255, 255, 0.2);
    }
 `
