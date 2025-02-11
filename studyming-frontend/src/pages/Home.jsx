@@ -11,7 +11,9 @@ const Home = () => {
    return (
       <HomeContainer>
          {/* ✅ 메인 비주얼 (캐러셀) */}
-         <MainVisual />
+         <MainVisualWrapper>
+            <MainVisual />
+         </MainVisualWrapper>
 
          {/* 공부 시간 카드 3개 배치 */}
          <StudyTimeWrapper>
@@ -50,6 +52,13 @@ const HomeContainer = styled.div`
    gap: 16px;
    padding: 16px;
 `
+const MainVisualWrapper = styled.div`
+   grid-column: span 3; /* 전체 3칸을 차지하도록 설정 */
+   display: flex;
+   justify-content: center; /* 내부 요소 중앙 정렬 */
+   margin-top: 30px;
+   margin-bottom: 50px;
+`
 
 const StudyTimeWrapper = styled.div`
    grid-column: span 1;
@@ -68,5 +77,5 @@ const WeeklyCalendarWrapper = styled.div`
 const RealTimeAccessWrapper = styled.div`
    grid-column: span 3;
    margin-top: 30px;
-   margin-bottom: 40px;
+   margin-bottom: 50px;
 `

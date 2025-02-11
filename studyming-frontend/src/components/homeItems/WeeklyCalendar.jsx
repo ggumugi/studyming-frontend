@@ -117,8 +117,9 @@ const Container = styled.div`
    // max-width: 1150px;
    width: 94%;
    text-align: center;
-   padding: 15px 20px 20px 20px;
+   padding: 15px 20px 15px 20px;
    background: white;
+   border: 1px solid #eaeaea;
    box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.07);
    border-radius: 8px;
 `
@@ -205,10 +206,14 @@ const ScheduleInputSection = styled.div`
 `
 
 const Input = styled.input`
-   flex: 0.5;
+   flex: 0.3;
    padding: 8px;
    border: 1px solid #ddd;
    border-radius: 5px;
+   outline: none;
+   &:focus {
+      border-color: #ff7a00; /* 포커스 시 테두리 색 변경 */
+   }
 `
 
 const SaveButton = styled.button`

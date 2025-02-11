@@ -65,14 +65,17 @@ const CalendarTodo = () => {
                   type="text"
                   placeholder="할 일 입력 (최대 10자)"
                   value={input}
-                  maxLength={MAX_LENGTH}
+                  maxLength={MAX_LENGTH} // ✅ HTML 속성도 유지
                   onChange={(e) => {
-                     setInput(e.target.value)
-                     if (e.target.value.length > MAX_LENGTH) {
-                        setError('최대 10자까지 입력 가능합니다.') // ⬅️ 글자 수 초과 시 경고
-                     } else {
-                        setError('') // 정상 입력 시 오류 초기화
+                     const value = e.target.value
+
+                     if (value.length > MAX_LENGTH) {
+                        setError(`최대 ${MAX_LENGTH}자까지만 입력할 수 있습니다.`)
+                        return // ✅ 입력값을 강제로 변경하지 않고, 초과 입력 자체를 막음
                      }
+
+                     setInput(value)
+                     setError('') // ✅ 정상 입력이면 오류 제거
                   }}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddTodo()}
                />
@@ -105,6 +108,7 @@ const Container = styled.div`
    margin: auto;
    padding: 20px 20px 10px 20px;
    background: white;
+   border: 1px solid #eaeaea;
    box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.07);
    border-radius: 10px;
    text-align: center;
