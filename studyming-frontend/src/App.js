@@ -27,14 +27,14 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
-            <Route path="/find-id" element={<FindIdPage />} />
-            <Route path="/find-password" element={<FindPasswordPage />} />
+            <Route path="/find/id" element={<FindIdPage />} />
+            <Route path="/find/password" element={<FindPasswordPage />} />
             <Route path="/board" element={<BoardListPage />} />
             <Route path="/board/create" element={<BoardCreatePage />} />
             <Route path="/board/edit/:id" element={<BoardEditPage />} />
             <Route path="/board/detail/:id" element={<BoardDetailPage />} />
             <Route path="/mypage" element={<MyPage />} />
-            <Route path="/study-list" element={<StudyListPage />} />
+            <Route path="/study/list" element={<StudyListPage />} />
          </Routes>
          {/* <Sidebar/> */}
          <Footer />
