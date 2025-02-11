@@ -54,7 +54,7 @@ const PostDetail = ({ post, onBack }) => {
          {/* <Typography sx={{ marginTop: '20px', borderBottom: '2px solid #ff7a00' }}></Typography> */}
          <Paper sx={{ padding: '20px', margin: '20px auto', maxWidth: '100%', paddingLeft: '100px' }}>
             {/* 본문 내용 */}
-            <Typography variant="body1" sx={{ marginTop: '20px', height: '40px' }}>
+            <Typography variant="body1" sx={{ height: '40px' }}>
                {post.content}
             </Typography>
 
@@ -68,17 +68,41 @@ const PostDetail = ({ post, onBack }) => {
 
             {/* 댓글 목록 */}
             {comments.map((comment) => (
-               <Box key={comment.id} sx={{ marginTop: '15px', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
-                     {comment.author}
-                  </Typography>
-                  <Typography variant="body2">{comment.text}</Typography>
-                  <Typography variant="caption" color="textSecondary">
-                     {comment.date}
-                  </Typography>
-                  <Button size="small" color="error" onClick={() => handleDeleteComment(comment.id)}>
-                     삭제
-                  </Button>
+               <Box
+                  key={comment.id}
+                  sx={{
+                     marginTop: '15px',
+                     borderBottom: '1px solid #eee',
+                     paddingBottom: '10px',
+                     display: 'flex',
+                     justifyContent: 'space-between', // 내용과 버튼을 양쪽 정렬
+                     alignItems: 'center', // 수직 정렬
+                  }}
+               >
+                  {/* 왼쪽: 댓글 내용 */}
+                  <Box>
+                     <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '5px' }}>
+                        {comment.author}
+                     </Typography>
+                     <Typography variant="body2" sx={{ marginLeft: '20px' }}>
+                        {comment.text}
+                     </Typography>
+                     <Typography variant="caption" color="textSecondary" sx={{ marginLeft: '20px' }}>
+                        {comment.date}
+                     </Typography>
+                  </Box>
+
+                  {/* 오른쪽: 수정/삭제 버튼 */}
+                  <Box sx={{ display: 'flex', gap: '10px' }}>
+                     {' '}
+                     {/* 버튼 간격 최소화 */}
+                     <Button size="small" color="primary" sx={{ padding: '0', minWidth: 'auto' }}>
+                        수정
+                     </Button>
+                     <Button size="small" color="error" sx={{ padding: '0', minWidth: 'auto' }} onClick={() => handleDeleteComment(comment.id)}>
+                        삭제
+                     </Button>
+                  </Box>
                </Box>
             ))}
 

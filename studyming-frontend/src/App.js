@@ -15,7 +15,8 @@ import MyPage from './pages/MyPage'
 import FindIdPage from './pages/FindIdPage'
 import FindPasswordPage from './pages/FindPasswordPage'
 import StudyListPage from './pages/StudyListPage'
-
+import CreateMingShopPage from './pages/CreateMingShopPage'
+import AdminPage from './pages/AdminPage'
 // import Sidebar from './components/shared/Sidebar'
 
 function App() {
@@ -35,6 +36,8 @@ function App() {
             <Route path="/board/detail/:id" element={<BoardDetailPage />} />
             <Route path="/mypage" element={<MyPage />} />
             <Route path="/study-list" element={<StudyListPage />} />
+            <Route path="/mingshop/create" element={<CreateMingShopPage />} />
+            <Route path="/admin" element={<AdminPage />} />
          </Routes>
          {/* <Sidebar/> */}
          <Footer />
