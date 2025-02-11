@@ -61,7 +61,7 @@ const Nickname = styled.div`
    right: 10px;
    background: rgba(0, 0, 0, 0.6);
    color: #fff;
-   padding: 5px 10px;
+   padding: 10px 15px;
    border-radius: 5px;
    font-size: 14px;
 `
