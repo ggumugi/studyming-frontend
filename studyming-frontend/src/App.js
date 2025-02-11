@@ -16,6 +16,7 @@ import FindIdPage from './pages/FindIdPage'
 import FindPasswordPage from './pages/FindPasswordPage'
 import StudyListPage from './pages/StudyListPage'
 import StudyGroupPage from './pages/StudyGroupPage'
+import MingShopPage from './pages/MingShopPage'
 
 // import Sidebar from './components/shared/Sidebar'
 
@@ -37,6 +38,7 @@ function App() {
             <Route path="/mypage" element={<MyPage />} />
             <Route path="/study-list" element={<StudyListPage />} />
             <Route path="/studygroup/:id" element={<StudyGroupPage />} />
+            <Route path="/mingshop" element={<MingShopPage />} />
          </Routes>
          {/* <Sidebar/> */}
          <Footer />
