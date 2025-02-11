@@ -17,6 +17,11 @@ import FindPasswordPage from './pages/FindPasswordPage'
 import StudyListPage from './pages/StudyListPage'
 import StudyGroupPage from './pages/StudyGroupPage'
 import MingShopPage from './pages/MingShopPage'
+import CreateMingShopPage from './pages/CreateMingShopPage'
+import AdminPage from './pages/AdminPage'
+import StudyCreatePage from './pages/StudyCreatePage'
+import StudyDetailPage from './pages/StudyDetailPage'
+import StudyEditPage from './pages/StudyEditPage'
 
 // import Sidebar from './components/shared/Sidebar'
 
@@ -39,6 +44,11 @@ function App() {
             <Route path="/study-list" element={<StudyListPage />} />
             <Route path="/studygroup/:id" element={<StudyGroupPage />} />
             <Route path="/mingshop" element={<MingShopPage />} />
+            <Route path="/mingshop/create" element={<CreateMingShopPage />} />
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/study/create" element={<StudyCreatePage />} />
+            <Route path="/study/detail/:id" element={<StudyDetailPage />} />
+            <Route path="/study/edit/:id" element={<StudyEditPage />} />
          </Routes>
          {/* <Sidebar/> */}
          <Footer />
