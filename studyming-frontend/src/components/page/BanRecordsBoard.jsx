@@ -1,10 +1,9 @@
 import React, { useState } from 'react'
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TablePagination, TextField, Select, MenuItem, Button, Pagination } from '@mui/material'
 import FreePostDetail from './FreePostDetail'
-import Report from '../shared/Report'
 
 const initialPosts = [
-   { id: 4, title: '여기 돈내면 못돌려받나요?', author: '레몬라임', date: '2025-01-06', content: 'ㅅㅂ...' },
+   { id: 4, title: '정지내역게시판입니다', author: '레몬라임', date: '2025-01-06', content: 'ㅅㅂ...' },
    { id: 4, title: '충전했는데 포인트가 일주일뒤에 사라졌습니다', author: '식원강', date: '2025-01-06', content: '어캐하나요' },
    { id: 4, title: '장보기 리스트', author: '희경이', date: '2025-01-06', content: '뭘봐' },
    { id: 4, title: '1티어 과자는 초코하임이다', author: '우지박', date: '2025-01-06', content: '반박은 받지 않는다' },
@@ -20,7 +19,7 @@ const Board = () => {
    const [rowsPerPage, setRowsPerPage] = useState(10)
    const [searchQuery, setSearchQuery] = useState('')
    const [filter, setFilter] = useState('title')
-   const [isModalOpen, setIsModalOpen] = useState(false)
+
    const [selectedPost, setSelectedPost] = useState(null)
    // 페이지네이션 변경
    const handleChangePage = (event, newPage) => {
@@ -36,23 +35,8 @@ const Board = () => {
    const filteredPosts = posts.filter((post) => post[filter].toLowerCase().includes(searchQuery.toLowerCase()))
    const paginatedPosts = filteredPosts.slice((page - 1) * rowsPerPage, page * rowsPerPage)
 
-   const handleReportClick = () => {
-      setIsModalOpen(true) // 신고 버튼 클릭 시 모달 열기
-   }
-
-   const handleCloseModal = () => {
-      setIsModalOpen(false) // 모달 닫기
-   }
-
-   const handleReport = () => {
-      console.log('사용자를 신고했습니다.')
-      // 신고 로직 처리 (예: 서버로 신고 정보 전송)
-      setIsModalOpen(false) // 신고 후 모달 닫기
-   }
-
    return (
       <div style={{ width: '100%' }}>
-         {isModalOpen && <Report isOpen={isModalOpen} onClose={handleCloseModal} onReport={handleReport} />}
          {selectedPost ? ( // ✅ 게시글 클릭 시 상세 페이지 표시
             <FreePostDetail post={selectedPost} onBack={() => setSelectedPost(null)} />
          ) : (
@@ -83,9 +67,7 @@ const Board = () => {
                               <TableCell sx={{ width: '60%', textAlign: 'center' }} onClick={() => setSelectedPost(post)}>
                                  {post.title}
                               </TableCell>
-                              <TableCell sx={{ width: '15%', textAlign: 'center' }} onClick={handleReportClick}>
-                                 {post.author}
-                              </TableCell>
+                              <TableCell sx={{ width: '15%', textAlign: 'center' }}>{post.author}</TableCell>
                               <TableCell sx={{ width: '15%', textAlign: 'center' }}>{post.date}</TableCell>
                            </TableRow>
                         ))}
