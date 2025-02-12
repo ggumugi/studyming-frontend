@@ -22,7 +22,7 @@ import AdminPage from './pages/AdminPage'
 import StudyCreatePage from './pages/StudyCreatePage'
 import StudyDetailPage from './pages/StudyDetailPage'
 import StudyEditPage from './pages/StudyEditPage'
-import WelcomePage from './pages/WelcomePage'
+import InfoPage from './pages/InfoPage'
 
 // import Sidebar from './components/shared/Sidebar'
 
@@ -50,7 +50,7 @@ function App() {
             <Route path="/study/create" element={<StudyCreatePage />} />
             <Route path="/study/detail/:id" element={<StudyDetailPage />} />
             <Route path="/study/edit/:id" element={<StudyEditPage />} />
-            <Route path="/welcome" element={<WelcomePage />} />
+            <Route path="/info" element={<InfoPage />} />
          </Routes>
          {/* <Sidebar/> */}
          <Footer />
