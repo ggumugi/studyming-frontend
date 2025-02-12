@@ -4,9 +4,11 @@ import { Link as RouterLink } from 'react-router-dom' // ✅ React Router의 Lin
 
 const Footer = () => {
    return (
-      <FooterContainer>
+      <FooterContainer id="footer">
+         {' '}
+         {/* 👈 footer에 ID 추가 */}
          <FooterContent>
-            <FooterLink to="/about">소개 페이지</FooterLink> {/* ✅ Link 수정 */}
+            <FooterLink to="/about">소개 페이지</FooterLink>
             <FooterText>
                Lorem ipsum dolor sit amet consectetur. In volutpat amet lectus ultricies leo lectus arcu.
                <br />
