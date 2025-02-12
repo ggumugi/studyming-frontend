@@ -8,7 +8,7 @@ const Footer = () => {
          {' '}
          {/* 👈 footer에 ID 추가 */}
          <FooterContent>
-            <FooterLink to="/about">소개 페이지</FooterLink>
+            <FooterLink to="/info">소개 페이지</FooterLink>
             <FooterText>
                Lorem ipsum dolor sit amet consectetur. In volutpat amet lectus ultricies leo lectus arcu.
                <br />
