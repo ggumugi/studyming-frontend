@@ -2,7 +2,8 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { TextField, Button, Divider, Checkbox, FormControlLabel } from '@mui/material'
-import { Google } from '@mui/icons-material'
+import { FcGoogle } from 'react-icons/fc'
+import { RiKakaoTalkFill } from 'react-icons/ri'
 import { Link } from 'react-router-dom'
 
 //ui툴만 구현.
@@ -50,8 +51,14 @@ const Login = () => {
             </StyledDividerText>
 
             <SNSWrapper>
-               <KakaoButton>카카오 로그인</KakaoButton>
-               <SNSLogin startIcon={<Google />}>구글 로그인</SNSLogin>
+               <KakaoButton>
+                  <RiKakaoTalkFill style={{ fontSize: '32px', transform: 'translateX(-600%)' }} />
+                  카카오 로그인
+               </KakaoButton>
+               <SNSLogin>
+                  <FcGoogle style={{ fontSize: '32px', transform: 'translateX(-620%)' }} />
+                  구글 로그인
+               </SNSLogin>
             </SNSWrapper>
          </FormContainer>
       </Wrapper>
@@ -78,7 +85,7 @@ const FormContainer = styled.div`
 
 const Title = styled.h2`
    font-size: 32px;
-   margin-bottom: 30px;
+   margin-bottom: 8px;
    color: black; /* 검정색으로 변경 */
 `
 

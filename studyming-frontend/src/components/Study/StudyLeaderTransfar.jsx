@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+
 import styled from 'styled-components'
 
 const StudyLeaderTransfer = () => {
@@ -16,6 +18,8 @@ const StudyLeaderTransfer = () => {
       setSelectedLeader(e.target.value)
    }
 
+   const navigate = useNavigate() // ✅ 내비게이트 훅 사용
+
    const handleTransfer = () => {
       if (!selectedLeader) {
          alert('위임할 방장을 선택하세요.')
@@ -23,6 +27,8 @@ const StudyLeaderTransfer = () => {
       }
       alert(`${selectedLeader}님에게 방장을 위임합니다.`)
       // TODO: 백엔드 API 연결 (스터디 방장 위임 로직)
+      // ✅ 방장 위임 후 특정 페이지로 이동
+      navigate('/study/leader/exit')
    }
 
    if (!members.length) {
