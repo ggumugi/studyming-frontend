@@ -1,186 +1,112 @@
 import React, { useState } from 'react'
-import styled from 'styled-components'
 import { TextField, Button } from '@mui/material'
 import { Link } from 'react-router-dom'
+import '../../styles/authFind.css'
 
 const FindPassword = () => {
-   //ui 툴,아이디 입력->비밀번호 입력->인증코드 입력(임시 1234) -> 비밀번호 재설정하는 흐름 ui 구현
-   //비밀번호 재설정 시 두 입력필드에 입력한 값이 다르면 빨간글씨로 일치하지않습니다 뜨게 하기
-   //비밀번호 재설정하고 어디로 가는게 좋을까여 로그인창?
-
-   const [step, setStep] = useState(1) // 단계 관리
-   const [id, setId] = useState('') // 아이디 상태
-   const [email, setEmail] = useState('') // 이메일 상태
-   const [verificationCode, setVerificationCode] = useState('') // 인증번호 상태
-   const [inputCode, setInputCode] = useState('') // 입력한 인증번호 상태
-   const [newPassword, setNewPassword] = useState('') // 새 비밀번호 상태
-   const [confirmPassword, setConfirmPassword] = useState('') // 비밀번호 확인 상태
-   const [isPasswordMatch, setIsPasswordMatch] = useState(true) // 비밀번호 일치 여부
-
-   const handleIdChange = (e) => setId(e.target.value)
-
-   const handleEmailChange = (e) => setEmail(e.target.value)
-
-   const handleCodeChange = (e) => setInputCode(e.target.value)
-
-   const handlePasswordChange = (e) => setNewPassword(e.target.value)
-
-   const handleConfirmPasswordChange = (e) => {
-      setConfirmPassword(e.target.value)
-      setIsPasswordMatch(e.target.value === newPassword) // 비밀번호 일치 여부 확인
-   }
+   const [step, setStep] = useState(1)
+   const [id, setId] = useState('')
+   const [email, setEmail] = useState('')
+   const [verificationCode, setVerificationCode] = useState('')
+   const [inputCode, setInputCode] = useState('')
+   const [newPassword, setNewPassword] = useState('')
+   const [confirmPassword, setConfirmPassword] = useState('')
+   const [isPasswordMatch, setIsPasswordMatch] = useState(true)
 
    const handleSubmit = () => {
       if (step === 1) {
-         if (id) {
-            alert('가입하신 이메일을 입력해주세요.')
-            setStep(2)
-         } else {
+         if (!id) {
             alert('아이디를 입력해주세요.')
+         } else {
+            setStep(2)
+            alert('아이디 확인 완료.')
          }
       } else if (step === 2) {
-         if (email) {
-            alert('이메일로 인증번호가 전송되었습니다.')
+         if (!email) {
+            alert('이메일을 입력해주세요.')
+         } else {
             setVerificationCode('1234')
             setStep(3)
-         } else {
-            alert('이메일을 입력해주세요.')
+            alert('이메일로 인증번호가 전송되었습니다.')
          }
       } else if (step === 3) {
-         if (inputCode === verificationCode) {
-            alert('인증번호 확인 완료! 비밀번호를 재설정하세요.')
-            setStep(4)
-         } else {
+         if (inputCode !== verificationCode) {
             alert('인증번호가 일치하지 않습니다.')
+         } else {
+            setStep(4)
+            alert('인증 완료! 새로운 비밀번호를 설정해주세요.')
          }
       } else if (step === 4) {
-         if (newPassword && confirmPassword) {
-            if (isPasswordMatch) {
-               alert('비밀번호가 성공적으로 재설정되었습니다.')
-            } else {
-               alert('비밀번호가 일치하지 않습니다.')
-            }
-         } else {
+         if (!newPassword || !confirmPassword) {
             alert('새로운 비밀번호와 확인 비밀번호를 입력해주세요.')
+         } else if (newPassword !== confirmPassword) {
+            alert('비밀번호가 일치하지 않습니다.')
+         } else {
+            alert('비밀번호가 성공적으로 재설정되었습니다.')
          }
       }
    }
 
    return (
-      <Wrapper>
-         <FormContainer>
-            <Title>비밀번호 찾기</Title>
-            <StyledDivider />
-            {/* 아이디 입력 */}
+      <div className="wrapper">
+         <div className="form-container">
+            <h2 className="title">비밀번호 찾기</h2>
+            <div className="styled-divider"></div>
+
             {step === 1 && (
                <>
-                  <StyledTextField label="아이디" name="id" type="text" value={id} onChange={handleIdChange} />
-                  <SmallText>가입하신 아이디를 입력해주세요</SmallText>
-                  <StyledButton onClick={handleSubmit}>확인</StyledButton>
+                  <TextField className="styled-textfield" label="아이디" type="text" value={id} onChange={(e) => setId(e.target.value)} />
+                  <p className="small-text">가입하신 아이디를 입력해주세요</p>
+                  <Button className="styled-button" onClick={handleSubmit}>
+                     확인
+                  </Button>
                </>
             )}
-            {/* 이메일 입력 */}
+
             {step === 2 && (
                <>
-                  <StyledTextField label="이메일" name="email" type="email" value={email} onChange={handleEmailChange} />
-                  <SmallText>가입하신 이메일을 입력해주세요</SmallText>
-                  <StyledButton onClick={handleSubmit}>확인</StyledButton>
+                  <TextField className="styled-textfield" label="이메일" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                  <p className="small-text">가입하신 이메일을 입력해주세요</p>
+                  <Button className="styled-button" onClick={handleSubmit}>
+                     확인
+                  </Button>
                </>
             )}
-            {/* 인증번호 입력 */}
+
             {step === 3 && (
                <>
-                  <StyledTextField label="인증번호 입력" name="verificationCode" type="text" value={inputCode} onChange={handleCodeChange} />
-                  <SmallText>이메일로 발송하신 인증번호를 입력해주세요</SmallText>
-                  <StyledButton onClick={handleSubmit}>아이디 확인</StyledButton>
+                  <TextField className="styled-textfield" label="인증번호 입력" type="text" value={inputCode} onChange={(e) => setInputCode(e.target.value)} />
+                  <p className="small-text">이메일로 발송하신 인증번호를 입력해주세요</p>
+                  <Button className="styled-button" onClick={handleSubmit}>
+                     인증 완료
+                  </Button>
                </>
             )}
-            {/* 비밀번호 재설정 */}
+
             {step === 4 && (
                <>
-                  <StyledTextField label="새 비밀번호" name="newPassword" type="password" value={newPassword} onChange={handlePasswordChange} />
-                  <SmallText>비밀번호는 최소 8자 이상, 영어 / 숫자 / 특수문자(!@#$%^&*)를 포함해야 합니다.</SmallText>
+                  <TextField className="styled-textfield" label="새 비밀번호" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+                  <p className="small-text">비밀번호는 최소 8자 이상, 영어 / 숫자 / 특수문자(!@#$%^&*)를 포함해야 합니다.</p>
 
-                  <StyledTextField label="비밀번호 확인" name="PasswordCheck" type="password" value={confirmPassword} onChange={handleConfirmPasswordChange} />
-                  {!isPasswordMatch && <ErrorText>비밀번호가 일치하지 않습니다.</ErrorText>}
-                  <StyledButton onClick={handleSubmit} style={{ marginTop: '20px' }}>
+                  <TextField className="styled-textfield" label="비밀번호 확인" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+                  {!isPasswordMatch && <p className="error-text">비밀번호가 일치하지 않습니다.</p>}
+
+                  <Button className="styled-button" onClick={handleSubmit}>
                      비밀번호 재설정
-                  </StyledButton>
+                  </Button>
                </>
             )}
-            <LinkText>
+
+            <p className="link-text">
                <Link to="/login">로그인</Link> | <Link to="/signup">회원가입</Link>
-            </LinkText>
-         </FormContainer>
-      </Wrapper>
+            </p>
+         </div>
+      </div>
    )
 }
 
 export default FindPassword
 
-// Styled Components
-const Wrapper = styled.div`
-   display: flex;
-   justify-content: center;
-   align-items: center;
-   height: 100vh;
-   background-color: transparent;
-`
-
-const FormContainer = styled.div`
-   width: 650px;
-   padding: 40px;
-   text-align: center;
-   background-color: transparent;
-`
-
-const Title = styled.h2`
-   font-size: 32px;
-   margin-bottom: 10px;
-   color: black;
-   text-align: left;
-`
-
-const StyledDivider = styled.div`
-   border-top: 2px solid #ff7a00;
-   margin: 15px 0;
-`
-
-const StyledTextField = styled(TextField)`
-   width: 100%;
-   margin-bottom: 30px;
-`
-
-const SmallText = styled.p`
-   font-size: 12px;
-   color: gray;
-   margin: 10px 0;
-   text-align: left;
-`
-
-const ErrorText = styled.p`
-   font-size: 12px;
-   color: red;
-   margin-top: 10px;
-   text-align: left;
-`
-
-const StyledButton = styled(Button)`
-   width: 100%;
-   height: 60px;
-   background-color: #ff7a00 !important;
-   border-radius: 10px !important;
-   text-align: left;
-   color: white !important;
-   font-size: 16px;
-   padding: 10px;
-   margin: 40px 0;
-`
-
-const LinkText = styled.p`
-   font-size: 14px;
-   margin-top: 20px;
-   text-align: center;
-   color: gray;
-   margin-bottom: 20px;
-`
+/* 아이디찾기 비밀번호찾기 스타일 중복되어서
+외부 css파일에 저장해뒀어요
+*/

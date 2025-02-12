@@ -121,7 +121,7 @@ const MenuItem = styled.li`
    font-size: 20px;
    font-weight: ${(props) => (props.isActive ? '500' : '300')};
    color: ${(props) => (props.isActive ? '#FF7A00' : '#000')};
-   cursor: pointer;
+   cursor: pointer !important;
 `
 
 const StyledButton = styled.button`
