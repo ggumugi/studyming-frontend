@@ -1,8 +1,11 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+
 import styled from 'styled-components'
 import { TextField, Button } from '@mui/material'
-import { Google } from '@mui/icons-material'
-import { useNavigate } from 'react-router-dom'
+
+import { RiKakaoTalkFill } from 'react-icons/ri'
+import { FcGoogle } from 'react-icons/fc'
 
 //ui 툴 구상
 //이메일 형식 검사(이상하게 입력 시 작성해달라고 글씨가 뜸),비밀번호확인과 비밀번호 입력필드 서로 다르면 안내문자 뜨기 구현
@@ -66,13 +69,22 @@ const Signup = () => {
                <StyledTextField label="비밀번호" name="password" type="password" value={formData.password} onChange={handleChange} helperText="비밀번호는 최소 8자 이상, 영문/숫자/특수문자를 포함해야 합니다." />
                <StyledTextField label="비밀번호 확인" name="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleChange} error={!!errors.confirmPassword} helperText={errors.confirmPassword || ''} />
             </InputWrapper>
-            <StyledButton onClick={handleSubmit}>회원가입</StyledButton>
+            <StyledButton onClick={handleSubmit} style={{ marginTop: '30px' }}>
+               회원가입
+            </StyledButton>
+            {/* SNS 로그인 */}
+            <StyledDividerText>
+               <Line /> SNS 로그인 <Line />
+            </StyledDividerText>
             <SNSWrapper>
-               <StyledDividerText>
-                  <Line /> SNS로 시작하기 <Line />
-               </StyledDividerText>
-               <SNSLogin startIcon={<Google />}>구글로 시작하기</SNSLogin>
-               <KakaoButton>카카오로 시작하기</KakaoButton>
+               <KakaoButton>
+                  <RiKakaoTalkFill style={{ fontSize: '32px', transform: 'translateX(-600%)' }} />
+                  카카오 로그인
+               </KakaoButton>
+               <SNSLogin>
+                  <FcGoogle style={{ fontSize: '32px', transform: 'translateX(-620%)' }} />
+                  구글 로그인
+               </SNSLogin>
             </SNSWrapper>
          </FormContainer>
       </Wrapper>
@@ -86,7 +98,7 @@ const Wrapper = styled.div`
    display: flex;
    align-items: center;
    justify-content: center;
-   height: 100vh;
+   height: 100%;
 `
 
 const FormContainer = styled.div`
@@ -124,37 +136,41 @@ const StyledTextField = styled(TextField)`
 const StyledButton = styled(Button)`
    width: 100%;
    background-color: #ff7a00 !important;
-   height: 60px;
+   height: 50px;
    color: white !important;
    font-size: 16px;
    padding: 10px;
    border-radius: 10px !important;
-   margin-top: 20px; /* ✅ 비밀번호 확인 필드와 회원가입 버튼 사이 margin 추가 */
+   margin-top: 30px; /* ✅ 비밀번호 확인 필드와 회원가입 버튼 사이 margin 추가 */
 `
 
 const SNSWrapper = styled.div`
    display: flex;
    flex-direction: column;
    gap: 10px;
-   margin-top: 40px;
+   margin-top: 20px;
+   margin-bottom: 170px;
 `
 
 const StyledDividerText = styled.div`
    display: flex;
    align-items: center;
    justify-content: center;
-   gap: 10px;
+   width: 100%;
+   max-width: 650px;
+   margin: 40px 0 0px; /* SNS 로그인 선 간격 조정 */
    color: gray;
    font-size: 14px;
-   margin: 20px 0;
+   font-weight: 500;
+   position: relative;
 `
 
 const Line = styled.div`
-   flex: 1;
+   flex-grow: 1;
    height: 1px;
-   background-color: lightgray;
+   background-color: #ddd;
+   margin: 0 15px;
 `
-
 const SNSLogin = styled(Button)`
    width: 100%;
    border: 1px solid #ddd !important;
