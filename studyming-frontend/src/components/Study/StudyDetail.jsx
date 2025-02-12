@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
+import { useNavigate } from 'react-router-dom'
 
 const StudyDetail = () => {
    //조건부렌더링으로 가입전,가입후(일반회원),방장에게 보이는 버튼 화면만 구현!
@@ -7,9 +8,15 @@ const StudyDetail = () => {
    // 더미 데이터로 가입 상태 설정 (나중에 백엔드에서 받아올 데이터)
    //api 받아온 후 axios로 하면 됨 아마.
 
-   const [userStatus, setUserStatus] = useState('guest')
+   const [userStatus, setUserStatus] = useState('leader')
    // guest = 가입 전, member = 가입 후, leader = 방장
 
+   // 스터디 수정(방장일 때 나타남)버튼 클릭 시 호출되는 함수
+   const navigate = useNavigate() // useNavigate 훅을 사용하여 페이지 이동 함수 생성
+
+   const handleStudyCreateClick = () => {
+      navigate('/study/edit/id') // '/study-create' 페이지로 이동
+   }
    return (
       <Wrapper>
          <TitleContainer>
@@ -70,9 +77,10 @@ const StudyDetail = () => {
 
          {/* 조건부 렌더링: 가입 상태에 따라 다른 버튼 표시 */}
          {userStatus === 'guest' && <SubmitButton>스터디 가입하기</SubmitButton>}
-         {userStatus === 'member' && <SubmitButton>스터디 탈퇴하기</SubmitButton>}
+         {userStatus === 'member' && <SubmitButton2>스터디 탈퇴하기</SubmitButton2>}
          {/*수정버튼 누를 때 study/edit/:id로 이어지게 하기 */}
-         {userStatus === 'leader' && <SubmitButton>스터디 정보수정하기</SubmitButton>}
+         {userStatus === 'leader' && <SubmitButton onClick={handleStudyCreateClick}>스터디 정보 수정하기</SubmitButton>}
+         {userStatus === 'leader' && <SubmitButton2>스터디 탈퇴하기</SubmitButton2>}
       </Wrapper>
    )
 }
@@ -181,9 +189,26 @@ const SubmitButton = styled.button`
    border-radius: 5px;
    cursor: pointer;
    margin-top: 30px; /* 버튼과 마지막 항목 사이 간격 추가 */
-   width: 100%;
+   width: 70%;
 
    &:hover {
       background-color: #e66e00;
+   }
+`
+
+const SubmitButton2 = styled.button`
+   font-size: 14px;
+   color: #ff7a00;
+   text-decoraiton: under;
+   background-color: transparent;
+   border: 1px solid transparent;
+   border-radius: 4px;
+   margin-top: 20px;
+   padding: 8px 16px;
+   cursor: pointer;
+
+   &:hover {
+      background-color: #f0f0f0;
+      border-color: #ccc;
    }
 `

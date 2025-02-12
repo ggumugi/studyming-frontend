@@ -13,6 +13,26 @@ const StudyListPage = () => {
    const [searchQuery, setSearchQuery] = useState('')
    const [searchOption, setSearchOption] = useState('title') // 'title' or 'hashtag'
 
+   // ✅ 상태관리
+   const [searchType, setSearchType] = useState('title') // 검색 기준 (제목 or 해시태그)
+   const [searchTerm, setSearchTerm] = useState('') // 검색어
+   const [filteredStudies2, setFilteredStudies2] = useState([]) // 검색 결과
+
+   // ✅ 검색 실행 함수
+   const handleSearch = () => {
+      let filteredResults = []
+
+      if (searchType === 'title') {
+         // 제목으로 검색
+         filteredResults = studies.filter((study) => study.name.includes(searchTerm))
+      } else if (searchType === 'hashtag') {
+         // 해시태그로 검색
+         filteredResults = studies.filter((study) => study.tags.some((tag) => tag.includes(searchTerm)))
+      }
+
+      setFilteredStudies2(filteredResults)
+   }
+
    const studies = [
       { name: '고시고시 휘팅', participants: '인원 3/4', tags: ['#고시', '#공무원'], type: 'my' },
       { name: '취업캠프', participants: '인원 2/5', tags: ['#취업', '#공무원'], type: 'my' },
@@ -20,6 +40,10 @@ const StudyListPage = () => {
       { name: '중급반 내신', participants: '인원 4/5', tags: ['#수학', '#내신'], type: 'all' },
       { name: '2026 수능', participants: '인원 2/4', tags: ['#수능', '#영어'], type: 'all' },
       { name: '고등학교 내신', participants: '인원 5/5', tags: ['#내신', '#영어'], type: 'all' },
+      { name: '중학교 내신', participants: '인원 5/5', tags: ['#내신', '#영어'], type: 'all' },
+      { name: '간호사 국가고시', participants: '인원 5/5', tags: ['#간호사', '#국가고시'], type: 'all' },
+      { name: '중간고사 죽겠다', participants: '인원 5/5', tags: ['#중간고사', '#a학점'], type: 'all' },
+      { name: '한식조리기능사', participants: '인원 5/5', tags: ['#요리', '#배고파요'], type: 'all' },
    ]
 
    // 필터링 함수
@@ -35,6 +59,14 @@ const StudyListPage = () => {
    // 스터디 등록 버튼 클릭 시 호출되는 함수
    const handleStudyCreateClick = () => {
       navigate('/study/create') // '/study-create' 페이지로 이동
+   }
+
+   //페이지네이션 함수(백엔드 구현 후  api 호출해와 실제로 페이지네이션 구현 가능)
+   const [currentPage, setCurrentPage] = useState(1)
+
+   const handlePageClick = (pageNumber) => {
+      setCurrentPage(pageNumber)
+      console.log(`현재 페이지: ${pageNumber}`)
    }
 
    return (
@@ -103,19 +135,19 @@ const StudyListPage = () => {
          </StudyContainer2>
 
          <StyledPagination>
-            <Button>1</Button>
-            <Button>2</Button>
-            <Button>3</Button>
-            <Button>4</Button>
+            <Button onClick={() => handlePageClick(1)}>1</Button>
+            <Button onClick={() => handlePageClick(2)}>2</Button>
+            <Button onClick={() => handlePageClick(3)}>3</Button>
+            <Button onClick={() => handlePageClick(4)}>4</Button>
          </StyledPagination>
 
          <SearchContainer>
-            <Dropdown>
+            <Dropdown value={searchType} onChange={(e) => setSearchType(e.target.value)}>
                <option value="title">제목</option>
                <option value="hashtag">해시태그</option>
             </Dropdown>
-            <SearchInput type="text" placeholder="검색어를 입력하세요" />
-            <SearchButton>검색</SearchButton>
+            <SearchInput type="text" placeholder="검색어를 입력하세요" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+            <SearchButton onClick={handleSearch}>검색</SearchButton>
          </SearchContainer>
       </Wrapper>
    )
@@ -178,7 +210,7 @@ const StudyContainer = styled.div`
    margin-bottom: 40px;
 
    @media (max-width: 1200px) {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
    }
 
    @media (max-width: 900px) {
@@ -192,10 +224,21 @@ const StudyContainer = styled.div`
 
 const StudyContainer2 = styled.div`
    display: grid;
-   grid-template-columns: repeat(4, 1fr);
+   grid-template-columns: repeat(4, 2fr);
    gap: 20px;
    width: 100%;
    margin-bottom: 40px;
+   @media (max-width: 1200px) {
+      grid-template-columns: repeat(2, 1fr);
+   }
+
+   @media (max-width: 900px) {
+      grid-template-columns: repeat(2, 1fr);
+   }
+
+   @media (max-width: 600px) {
+      grid-template-columns: 1fr;
+   }
 `
 
 const StyledCard = styled(Card)`
@@ -301,6 +344,19 @@ const SearchButton = styled.button`
    &:hover {
       background-color: #ff7a00;
    }
+`
+const ResultsContainer = styled.div`
+   display: flex;
+   flex-direction: column;
+   gap: 15px;
+   width: 100%;
+   max-width: 600px;
+`
+
+const NoResults = styled.p`
+   font-size: 16px;
+   color: gray;
+   text-align: center;
 `
 
 const StyledPagination = styled.div`

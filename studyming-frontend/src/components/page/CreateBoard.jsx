@@ -36,16 +36,14 @@ const CreateBoard = ({ setIsWriting }) => {
       <Container>
          {/* 제목 */}
          <FormGroup>
-            <Label>제목</Label>
+            <Label style={{ marginTop: '16.5px' }}>제목</Label>
             <StyledTextField variant="outlined" placeholder="제목을 입력해주세요." value={title} onChange={(e) => setTitle(e.target.value)} />
          </FormGroup>
-
          {/* 내용 */}
          <FormGroup>
-            <Label>내용</Label>
+            <Label style={{ marginTop: '16.5px' }}>내용</Label>
             <StyledTextField variant="outlined" placeholder="내용을 입력해주세요." multiline rows={15} value={content} onChange={(e) => setContent(e.target.value)} />
          </FormGroup>
-
          {/* 이미지 업로드 */}
          <ButtonContainer>
             <UploadContainer>
@@ -58,7 +56,7 @@ const CreateBoard = ({ setIsWriting }) => {
             {/* 글쓰기 버튼 */}
             <SubmitButton onClick={handleSubmit}>글쓰기</SubmitButton>
          </ButtonContainer>
-         <Button onClick={() => setIsWriting(false)}>← 뒤로가기</Button>
+         <Button onClick={() => setIsWriting(false)}>← 뒤로가기</Button> {/*뒤로가기는 지워도됨*/}
       </Container>
    )
 }

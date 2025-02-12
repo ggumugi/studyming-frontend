@@ -68,6 +68,7 @@ const AccountDelete = () => {
    )
 }
 export default AccountDelete
+
 // Styled Components
 const Container = styled.div`
    padding: 50px;

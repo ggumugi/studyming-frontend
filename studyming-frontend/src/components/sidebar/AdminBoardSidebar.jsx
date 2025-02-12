@@ -6,6 +6,7 @@ import BanRecordsBoard from '../page/BanRecordsBoard'
 import ReportsBoard from '../page/ReportsBoard'
 import { Paper, Typography, Button, TextField, Box } from '@mui/material'
 import { useEffect } from 'react'
+import MemberRecordsBoard from '../page/MemberRecordsBoard'
 
 import CreateBoard from '../page/CreateBoard'
 
@@ -14,14 +15,9 @@ import CreateBoard from '../page/CreateBoard'
 
 const AdminBoardSidebar = () => {
    const [isWriting, setIsWriting] = useState(false)
-   const [selectedMenu, setSelectedMenu] = useState('신고내역') // 기본 선택된 메뉴
+   const [selectedMenu, setSelectedMenu] = useState('회원정보') // 기본 선택된 메뉴
 
    // 🔥 메뉴에 따른 더미 데이터 설정
-   const menuContent = {
-      //   채팅: <ChatPage />,
-      화면공유: '화면공유 관련 내용이 표시됩니다.',
-      카메라: '카메라 관련 내용이 표시됩니다.',
-   }
 
    useEffect(() => {
       if (isWriting) {
@@ -30,6 +26,7 @@ const AdminBoardSidebar = () => {
    }, [isWriting]) // ✅ isWriting이 변경될 때 실행
 
    const boardContent = {
+      회원정보: <MemberRecordsBoard category="회원정보" />, // 회원내역 게시판
       신고내역: <ReportsBoard category="신고내역" />, // 신고내역 게시판
       처리내역: <ActionsTakenBoard category="처리내역" />, // 처리내역 게시판
       정지내역: <BanRecordsBoard category="정지내역" />, // 정지내역 게시판
@@ -39,7 +36,7 @@ const AdminBoardSidebar = () => {
       <Container>
          <SidebarContainer>
             <MenuList>
-               {['신고내역', '처리내역', '정지내역'].map((item) => (
+               {['회원정보', '신고내역', '처리내역', '정지내역'].map((item) => (
                   <MenuItem key={item} isActive={selectedMenu === item} onClick={() => setSelectedMenu(item)}>
                      <StyledButton to={`/${item}`}>{item}</StyledButton>
                      {selectedMenu === item && <ActiveIndicator />} {/* ✅ 활성화된 메뉴에 동그라미 표시 */}

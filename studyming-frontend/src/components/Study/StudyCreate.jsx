@@ -15,7 +15,10 @@ const StudyCreate = () => {
          <Form>
             <Label>
                <LabelText>스터디 이름</LabelText>
-               <Input type="text" placeholder="스터디 이름을 입력하세요" />
+               <NameLabel>
+                  <Input type="text" placeholder="스터디 이름을 입력하세요" />
+                  <SmallText>영문/한글로만 작성가능</SmallText>
+               </NameLabel>
             </Label>
 
             <Label>
@@ -30,7 +33,10 @@ const StudyCreate = () => {
                      </label>
                   </RadioGroup>
                   <LabelText2>참여시간</LabelText2>
-                  <SmallInput type="text" placeholder="숫자 6자리" />
+                  <NameLabel>
+                     <SmallInput type="text" placeholder="숫자 6자리" />
+                     <SmallText>참여 가능한 코드입니다</SmallText>
+                  </NameLabel>
                </FlexContainer>
             </Label>
 
@@ -127,12 +133,24 @@ const Title = styled.h2`
    text-align: center;
 `
 
+const SmallText = styled.span`
+   font-size: 10px;
+   color: #999; /* 작은 글씨 색상 */
+`
+
 const StyledDivider = styled.div`
    width: 100%;
    max-width: 800px;
    height: 3px;
    background-color: #ff7a00;
    margin-bottom: 20px;
+`
+const NameLabel = styled.label`
+   display: flex;
+   flex-direction: column; /* 수직 배치 */
+   align-items: flex-start; /* 왼쪽 정렬 */
+   justify-content: 5px;
+   gap: 5px;
 `
 
 const Form = styled.form`

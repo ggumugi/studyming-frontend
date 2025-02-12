@@ -1,250 +1,170 @@
-//위임변경 신청 후 탈퇴 보류하는 컴포넌트
-import React from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components'
 
-//ui 툴 구현 //반응형 수정해야함(다 깨짐;;)
-//제목 반대편에 위임신청처리중 텍스트 하기(내일^^)
-
-const StudyEdit = () => {
+const StudyLeaderExitPending = () => {
    return (
       <Wrapper>
          <TitleContainer>
-            <Title>스터디 상세(탈퇴보류)</Title>
+            <Title>스터디 상세(탈퇴 보류)</Title>
+            <SmallText>위임 신청 처리중</SmallText>
             <StyledDivider />
          </TitleContainer>
 
-         <Form>
-            <Label>
+         <Content>
+            <DetailRow>
                <LabelText>스터디 이름</LabelText>
-               <Studyname>스터디 빡쟁이</Studyname>
-            </Label>
+               <DetailText>스페셜 빡쟁이들</DetailText>
+            </DetailRow>
 
-            <Label>
+            <DetailRow>
                <LabelText>공개여부</LabelText>
-               <FlexContainer>
-                  <RadioGroup>
-                     <label>
-                        <input type="radio" name="visibility" value="공개" /> 공개
-                     </label>
-                     <label>
-                        <input type="radio" name="visibility" value="비공개" /> 비공개
-                     </label>
-                  </RadioGroup>
-                  <LabelText2>참여시간</LabelText2>
-                  <SmallInput type="text" placeholder="숫자 6자리" />
-               </FlexContainer>
-            </Label>
+               <DetailText>공개</DetailText>
+            </DetailRow>
 
-            <Label>
+            <DetailRow>
                <LabelText>해시태그</LabelText>
-               <Input type="text" placeholder="해시태그를 입력하세요" />
-            </Label>
+               <TagContainer>
+                  <Tag># 태그</Tag>
+                  <Tag># 해시태그</Tag>
+               </TagContainer>
+            </DetailRow>
 
-            <Label>
+            <DetailRow>
                <LabelText>기간</LabelText>
-               <FlexContainer>
-                  <MediumInput type="text" placeholder="25.01.30" />
-                  <Spacer>~</Spacer>
-                  <MediumInput type="text" placeholder="25.02.30" />
-               </FlexContainer>
-            </Label>
+               <DetailText>25.01.30 ~ 25.02.30</DetailText>
+            </DetailRow>
 
-            <Label>
+            <DetailRow>
                <LabelText>목표 시간</LabelText>
-               <FlexContainer>
-                  <SmallSelect>
-                     <option>적용</option>
-                     <option>미적용</option>
-                  </SmallSelect>
-                  <MediumInput type="text" placeholder="1시간" />
-               </FlexContainer>
-            </Label>
+               <DetailText>1시간</DetailText>
+            </DetailRow>
 
-            <Label>
+            <DetailRow>
                <LabelText>접속 시간대</LabelText>
-               <FlexContainer>
-                  <SmallSelect>
-                     <option>적용</option>
-                     <option>미적용</option>
-                  </SmallSelect>
-                  <CustomTimeInput type="text" placeholder="09:00" />
-                  <Spacer>~</Spacer>
-                  <CustomTimeInput type="text" placeholder="20:00" />
-               </FlexContainer>
-            </Label>
+               <DetailText>09:00 ~ 20:00</DetailText>
+            </DetailRow>
 
-            <Label>
+            <DetailRow>
                <LabelText>상벌점 기능</LabelText>
-               <RadioGroup>
-                  <label>
-                     <input type="radio" name="punishment" value="적용" /> 적용
-                  </label>
-                  <label>
-                     <input type="radio" name="punishment" value="미적용" /> 미적용
-                  </label>
-               </RadioGroup>
-            </Label>
+               <DetailText>미적용</DetailText>
+            </DetailRow>
 
-            <Label>
-               <LabelText>스터디 설명</LabelText>
-               <TextArea placeholder="스터디 설명을 입력하세요" />
-            </Label>
+            <DetailRow>
+               <LabelText>스터디 에티켓</LabelText>
+               <EtiquetteText>
+                  공무원 자율 스터디입니다.
+                  <br />
+                  누구나 함께 공부하며 스터디 친구를 사귈 수 있어요^^
+                  <br />
+                  해당 스터디룸은 스터디밍에서 개설한 스터디로, 입장한 지 3일 이상 경과된 상태에서 카메라 출석이 되고 있지 않다면 발견되는 즉시 무통보 강제 퇴장 조치를 진행할 수 있습니다.
+               </EtiquetteText>
+            </DetailRow>
+         </Content>
 
-            <SubmitButton>스터디 탈퇴취소</SubmitButton>
-         </Form>
+         <SubmitButton>스터디 탈퇴취소</SubmitButton>
       </Wrapper>
    )
 }
 
-export default StudyEdit
-
+export default StudyLeaderExitPending
 const Wrapper = styled.div`
    display: flex;
    flex-direction: column;
-   justify-content: center; /* 화면 중앙 정렬 */
+   justify-content: center; /* 중앙 정렬 */
    align-items: center;
-   min-height: 100vh; /* 화면 높이 전체 사용하여 중앙 배치 */
+   min-height: 100vh;
    padding: 40px;
-   width: 100%; /* 화면 크기에 따라 자연스럽게 조정 */
+   width: 100%;
+   max-width: 800px; /* 적절한 최대 너비 유지 */
+   margin: 0 auto; /* 좌우 중앙 정렬 */
 
    @media (max-width: 768px) {
-      padding: 20px; /* 모바일에서는 여백을 줄여서 가독성 확보 */
-      width: 95%; /* 더 좁은 화면에서는 비율 맞춰 조정 */
+      padding: 20px;
+      width: 95%;
    }
 `
 
 const TitleContainer = styled.div`
    width: 100%;
-   max-width: 800px;
    display: flex;
    flex-direction: column;
-   align-items: flex-start; /* 제목 가운데 정렬 */
-   text-align: center;
+   justify-content: space-between; /* 양 끝으로 정렬 */
+   align-items: flex-start;
+   margin-bottom: 30px; /* 제목과 내용 사이 간격 추가 */
 `
 
 const Title = styled.h2`
    font-size: 32px;
    margin-bottom: 10px;
-   text-align: center;
+`
+const SmallText = styled.span`
+   font-size: 14px;
+   color: #999; /* 작은 글씨 색상 */
+   align-items: flex-end;
 `
 
 const StyledDivider = styled.div`
    width: 100%;
-   max-width: 800px;
    height: 3px;
    background-color: #ff7a00;
    margin-bottom: 20px;
 `
 
-const Form = styled.form`
+const Content = styled.div`
+   width: 100%;
    display: flex;
    flex-direction: column;
    gap: 20px;
-   width: 100%;
-   max-width: 800px; /* 입력 필드가 너무 넓어지지 않도록 제한 */
-   align-items: center; /* 폼 요소도 가운데 정렬 */
-   text-align: center; /* 내부 요소도 가운데 정렬 */
 `
 
-const Label = styled.label`
+const DetailRow = styled.div`
    display: flex;
+   justify-content: flex-start; /* 기존 space-between에서 변경 */
    align-items: center;
    gap: 20px;
-   font-size: 16px;
-   font-weight: bold;
-   margin-bottom: 10px;
    width: 100%;
-   justify-content: flex-start;
+   margin-bottom: 20px; /* 항목 간 간격 추가 */
+
+   @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+   }
 `
 
 const LabelText = styled.span`
-   flex: 0 0 150px; /* 고정 너비 설정 */
-   text-align: left; /* 왼쪽 정렬 */
-`
-
-const LabelText2 = styled.span`
-   flex: 0 0 150px; /* 고정 너비 설정 */
-   text-align: right; /* 왼쪽 정렬 */
-`
-
-const FlexContainer = styled.div`
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   gap: 10px;
-   flex: 1;
-   width: 100%;
-   max-width: 800px;
-`
-const Studyname = styled.text`
-   padding: 12px;
-   font-size: 16px;
-   flex: 1; /* 남은 공간을 모두 차지 */
-   min-width: 300px; /* 최소 너비 설정 */
-   text-align: left;
-`
-
-const Input = styled.input`
-   padding: 12px;
-   font-size: 16px;
-   border-radius: 4px;
-   border: 1px solid #ccc;
-   flex: 1; /* 남은 공간을 모두 차지 */
-   min-width: 300px; /* 최소 너비 설정 */
-   text-align: left;
-`
-
-const SmallInput = styled(Input)`
-   padding: 8px;
-   font-size: 14px;
-   border-radius: 4px;
-   border: 1px solid #ccc;
-   width: 150px; /* 입력 필드 크기 고정 */
-`
-
-const MediumInput = styled(Input)`
-   flex: 1;
-   min-width: 120px;
-   text-align: center;
-`
-
-const CustomTimeInput = styled(Input)`
-   width: 120px;
-   min-width: 100px;
-   text-align: center;
-`
-
-const TextArea = styled.textarea`
-   padding: 12px;
-   font-size: 16px;
-   border-radius: 4px;
-   border: 1px solid #ccc;
-   resize: vertical;
-   min-height: 100px;
-   width: 100%;
-   max-width: 800px;
-`
-
-const SmallSelect = styled.select`
-   padding: 12px;
-   font-size: 16px;
-   border-radius: 4px;
-   border: 1px solid #ccc;
-   width: 180px;
-`
-
-const RadioGroup = styled.div`
-   display: flex;
-   justify-content: flex-start; /* 라디오 버튼을 왼쪽 정렬 */
-   gap: 20px;
-   flex-wrap: wrap;
-`
-
-const Spacer = styled.span`
+   flex: 0 0 150px;
    font-size: 16px;
    font-weight: bold;
-   text-align: center;
-   min-width: 20px;
+   text-align: left;
+`
+
+const DetailText = styled.span`
+   font-size: 16px;
+   color: #333;
+   text-align: left;
+   flex: 1;
+`
+
+const TagContainer = styled.div`
+   display: flex;
+   gap: 10px;
+`
+
+const Tag = styled.span`
+   background-color: #f3f3f3;
+   padding: 5px 10px;
+   border-radius: 5px;
+   font-size: 14px;
+   color: #555;
+`
+
+const EtiquetteText = styled.p`
+   font-size: 14px;
+   line-height: 1.5;
+   color: #666;
+
+   padding: 10px;
+   border-radius: 5px;
 `
 
 const SubmitButton = styled.button`
@@ -255,8 +175,7 @@ const SubmitButton = styled.button`
    border: none;
    border-radius: 5px;
    cursor: pointer;
-   margin-top: 20px;
-   align-self: center;
+   margin-top: 30px; /* 버튼과 마지막 항목 사이 간격 추가 */
    width: 70%;
 
    &:hover {
