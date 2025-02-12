@@ -1,10 +1,9 @@
 import React, { useState } from 'react'
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TablePagination, TextField, Select, MenuItem, Button, Pagination } from '@mui/material'
-import FreePostDetail from './FreePostDetail'
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Select, MenuItem, Button, Pagination } from '@mui/material'
 
 const reportsData = [
    { id: 1, reportedUser: '현수박박박박', reporter: '희경이이이', reason: '명예훼손 또는 저작권이 침해되었습니다.', banPeriod: '없음' },
-   { id: 2, reportedUser: '강원식', reporter: '이경희', reason: '불쾨한 표현이 있습니다', banPeriod: '없음' },
+   { id: 2, reportedUser: '강원식', reporter: '이경희', reason: '불쾌한 표현이 있습니다', banPeriod: '없음' },
    { id: 3, reportedUser: '박현수', reporter: '이경희', reason: '음란물입니다', banPeriod: '없음' },
    { id: 4, reportedUser: '식원강', reporter: '박지우', reason: '스팸홍보/도배입니다', banPeriod: '없음' },
    { id: 5, reportedUser: '수현박', reporter: '박지우', reason: '욕설/생명경시/혐오/차별적 표현입니다', banPeriod: '없음' },
@@ -21,7 +20,6 @@ const ReportsBoard = () => {
    const [searchQuery, setSearchQuery] = useState('')
    const [filter, setFilter] = useState('reportedUser')
 
-   const [selectedPost, setSelectedPost] = useState(null)
    // 페이지네이션 변경
 
    // 정지 기간 변경
@@ -67,7 +65,7 @@ const ReportsBoard = () => {
                <TableBody>
                   {paginatedReports.map((row) => (
                      <TableRow key={row.id}>
-                        <TableCell sx={{ width: '10%', textAlign: 'center' }}>{row.id}</TableCell>
+                        <TableCell sx={{ width: '10%', textAlign: 'center', height: '64px' }}>{row.id}</TableCell>
                         <TableCell sx={{ width: '15%', textAlign: 'center' }}>{row.reportedUser}</TableCell>
                         <TableCell sx={{ width: '15%', textAlign: 'center' }}>{row.reporter}</TableCell>
                         <TableCell sx={{ width: '40%', textAlign: 'center' }}>{row.reason}</TableCell>

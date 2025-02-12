@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TablePagination, TextField, Select, MenuItem, Button, Pagination } from '@mui/material'
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Select, MenuItem, Button, Pagination } from '@mui/material'
 import QaBoardDetail from './QaBoardDetail'
 
 const initialPosts = [
@@ -24,11 +24,6 @@ const Board = () => {
    // 페이지네이션 변경
    const handleChangePage = (event, newPage) => {
       setPage(newPage)
-   }
-
-   const handleChangeRowsPerPage = (event) => {
-      setRowsPerPage(parseInt(event.target.value, 10))
-      setPage(0)
    }
 
    // 검색 기능
