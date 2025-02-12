@@ -1,10 +1,18 @@
 import React from 'react'
 import styled from 'styled-components'
+import { useState } from 'react'
 
 //ui 툴 구현 //반응형 수정해야함(다 깨짐;;)
-//중복된이름,사용가능한 참여코드는....데이터베이스랑 비교해야하니 백엔드 구현 후 구현?
+//비공개
 
 const StudyCreate = () => {
+   // ✅ 공개여부 상태 (기본값: 공개)
+   const [isPublic, setIsPublic] = useState(true)
+   // ✅ 접속 시간대 상태 (기본값: 적용)
+   const [timeEnabled, setTimeEnabled] = useState(true)
+   // ✅ 접속 시간대 상태 (기본값: 적용)
+   const [timeEnabled2, setTimeEnabled2] = useState(true)
+
    return (
       <Wrapper>
          <TitleContainer>
@@ -26,15 +34,17 @@ const StudyCreate = () => {
                <FlexContainer>
                   <RadioGroup>
                      <label>
-                        <input type="radio" name="visibility" value="공개" /> 공개
+                        <input type="radio" name="visibility" value="공개" checked={isPublic} onChange={() => setIsPublic(true)} /> 공개
                      </label>
                      <label>
-                        <input type="radio" name="visibility" value="비공개" /> 비공개
+                        <input type="radio" name="visibility" value="비공개" checked={!isPublic} onChange={() => setIsPublic(false)} /> 비공개
                      </label>
                   </RadioGroup>
-                  <LabelText2>참여시간</LabelText2>
+                  {/* ✅ 참여시간 입력 필드 (공개 시 비활성화) */}
+                  <LabelText2>참여코드</LabelText2>
                   <NameLabel>
-                     <SmallInput type="text" placeholder="숫자 6자리" />
+                     <SmallInput type="text" placeholder="숫자 6자리" disabled={isPublic} />
+                     {/* ✅ 상시적으로 뜨는게 아니라 글자입력 시 데이터베이스랑 비교해서 참여가능한 코드입니다 뜨게하게 수정할예정 */}
                      <SmallText>참여 가능한 코드입니다</SmallText>
                   </NameLabel>
                </FlexContainer>
@@ -57,24 +67,24 @@ const StudyCreate = () => {
             <Label>
                <LabelText>목표 시간</LabelText>
                <FlexContainer>
-                  <SmallSelect>
+                  <SmallSelect value={timeEnabled2 ? '적용' : '미적용'} onChange={(e) => setTimeEnabled2(e.target.value === '적용')}>
                      <option>적용</option>
                      <option>미적용</option>
                   </SmallSelect>
-                  <MediumInput type="text" placeholder="1시간" />
+                  <MediumInput type="text" placeholder="1시간" disabled={!timeEnabled2} />
                </FlexContainer>
             </Label>
 
             <Label>
                <LabelText>접속 시간대</LabelText>
                <FlexContainer>
-                  <SmallSelect>
+                  <SmallSelect value={timeEnabled ? '적용' : '미적용'} onChange={(e) => setTimeEnabled(e.target.value === '적용')}>
                      <option>적용</option>
                      <option>미적용</option>
                   </SmallSelect>
-                  <CustomTimeInput type="text" placeholder="09:00" />
+                  <CustomTimeInput type="text" placeholder="09:00" disabled={!timeEnabled} />
                   <Spacer>~</Spacer>
-                  <CustomTimeInput type="text" placeholder="20:00" />
+                  <CustomTimeInput type="text" placeholder="20:00" disabled={!timeEnabled} />
                </FlexContainer>
             </Label>
 
@@ -111,10 +121,14 @@ const Wrapper = styled.div`
    min-height: 100vh; /* 화면 높이 전체 사용하여 중앙 배치 */
    padding: 40px;
    width: 100%; /* 화면 크기에 따라 자연스럽게 조정 */
+   media (max-width: 768px) {
+      width: 90%; /* 태블릿에서는 조금 줄이기 */
+      padding: 15px;
+   }
 
-   @media (max-width: 768px) {
-      padding: 20px; /* 모바일에서는 여백을 줄여서 가독성 확보 */
-      width: 95%; /* 더 좁은 화면에서는 비율 맞춰 조정 */
+   @media (max-width: 480px) {
+      width: 100%; /* 모바일에서는 전체 너비 사용 */
+      padding: 10px;
    }
 `
 
@@ -158,14 +172,17 @@ const Form = styled.form`
    flex-direction: column;
    gap: 20px;
    width: 100%;
-   max-width: 800px; /* 입력 필드가 너무 넓어지지 않도록 제한 */
+   max-width: 600px; /* 입력 필드가 너무 넓어지지 않도록 제한 */
    align-items: center; /* 폼 요소도 가운데 정렬 */
-   text-align: center; /* 내부 요소도 가운데 정렬 */
+   text-align: left; /* 내부 요소도 가운데 정렬 */
+   max-width: 800px; /* 🔹 폼 너비 제한 */
+   align-items: flex-start; /* 🔹 좌측 정렬 */
 `
 
 const Label = styled.label`
    display: flex;
    align-items: center;
+
    gap: 20px;
    font-size: 16px;
    font-weight: bold;
@@ -210,18 +227,27 @@ const SmallInput = styled(Input)`
    border-radius: 4px;
    border: 1px solid #ccc;
    width: 150px; /* 입력 필드 크기 고정 */
+   background-color: ${(props) => (props.disabled ? '#e0e0e0' : 'white')}; // 🔹 비활성화 시 회색 배경
+   color: ${(props) => (props.disabled ? '#808080' : 'black')}; // 🔹 비활성화 시 글자 색 변경
+   cursor: ${(props) => (props.disabled ? 'not-allowed' : 'text')}; // 🔹 입력 불가능 상태 마우스 변경
 `
 
 const MediumInput = styled(Input)`
    flex: 1;
    min-width: 120px;
    text-align: center;
+   background-color: ${(props) => (props.disabled ? '#e0e0e0' : 'white')}; // 🔹 비활성화 시 회색 배경
+   color: ${(props) => (props.disabled ? '#808080' : 'black')}; // 🔹 비활성화 시 흐린 글씨
+   cursor: ${(props) => (props.disabled ? 'not-allowed' : 'text')}; // 🔹 비활성화 시 마우스 변경
 `
 
 const CustomTimeInput = styled(Input)`
    width: 120px;
    min-width: 100px;
    text-align: center;
+   background-color: ${(props) => (props.disabled ? '#e0e0e0' : 'white')}; // 🔹 비활성화 시 회색 배경
+   color: ${(props) => (props.disabled ? '#808080' : 'black')}; // 🔹 비활성화 시 흐린 글씨
+   cursor: ${(props) => (props.disabled ? 'not-allowed' : 'text')}; // 🔹 비활성화 시 마우스 변경
 `
 
 const TextArea = styled.textarea`

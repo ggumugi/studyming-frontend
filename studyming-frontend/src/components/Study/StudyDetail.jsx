@@ -8,7 +8,7 @@ const StudyDetail = () => {
    // 더미 데이터로 가입 상태 설정 (나중에 백엔드에서 받아올 데이터)
    //api 받아온 후 axios로 하면 됨 아마.
 
-   const [userStatus, setUserStatus] = useState('leader')
+   const [userStatus, setUserStatus] = useState('guest')
    // guest = 가입 전, member = 가입 후, leader = 방장
 
    // 스터디 수정(방장일 때 나타남)버튼 클릭 시 호출되는 함수

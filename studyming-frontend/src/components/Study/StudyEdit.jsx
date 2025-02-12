@@ -1,9 +1,17 @@
 import React from 'react'
 import styled from 'styled-components'
+import { useState } from 'react'
 
 //ui 툴 구현 //반응형 수정해야함(다 깨짐;;)
 
 const StudyEdit = () => {
+   // ✅ 공개여부 상태 (기본값: 공개)
+   const [isPublic, setIsPublic] = useState(true)
+   // ✅ 접속 시간대 상태 (기본값: 적용)
+   const [timeEnabled, setTimeEnabled] = useState(true)
+   // ✅ 접속 시간대 상태 (기본값: 적용)
+   const [timeEnabled2, setTimeEnabled2] = useState(true)
+
    return (
       <Wrapper>
          <TitleContainer>
@@ -22,10 +30,10 @@ const StudyEdit = () => {
                <FlexContainer>
                   <RadioGroup>
                      <label>
-                        <input type="radio" name="visibility" value="공개" /> 공개
+                        <input type="radio" name="visibility" value="공개" checked={isPublic} onChange={() => setIsPublic(true)} /> 공개
                      </label>
                      <label>
-                        <input type="radio" name="visibility" value="비공개" /> 비공개
+                        <input type="radio" name="visibility" value="비공개" checked={!isPublic} onChange={() => setIsPublic(false)} /> 비공개
                      </label>
                   </RadioGroup>
                   <LabelText2>참여시간</LabelText2>
@@ -50,24 +58,24 @@ const StudyEdit = () => {
             <Label>
                <LabelText>목표 시간</LabelText>
                <FlexContainer>
-                  <SmallSelect>
+                  <SmallSelect value={timeEnabled2 ? '적용' : '미적용'} onChange={(e) => setTimeEnabled2(e.target.value === '적용')}>
                      <option>적용</option>
                      <option>미적용</option>
                   </SmallSelect>
-                  <MediumInput type="text" placeholder="1시간" />
+                  <MediumInput type="text" placeholder="1시간" disabled={!timeEnabled2} />
                </FlexContainer>
             </Label>
 
             <Label>
                <LabelText>접속 시간대</LabelText>
                <FlexContainer>
-                  <SmallSelect>
+                  <SmallSelect value={timeEnabled ? '적용' : '미적용'} onChange={(e) => setTimeEnabled(e.target.value === '적용')}>
                      <option>적용</option>
                      <option>미적용</option>
                   </SmallSelect>
-                  <CustomTimeInput type="text" placeholder="09:00" />
+                  <CustomTimeInput type="text" placeholder="09:00" disabled={!timeEnabled} />
                   <Spacer>~</Spacer>
-                  <CustomTimeInput type="text" placeholder="20:00" />
+                  <CustomTimeInput type="text" placeholder="20:00" disabled={!timeEnabled} />
                </FlexContainer>
             </Label>
 
@@ -198,18 +206,27 @@ const SmallInput = styled(Input)`
    border-radius: 4px;
    border: 1px solid #ccc;
    width: 150px; /* 입력 필드 크기 고정 */
+   background-color: ${(props) => (props.disabled ? '#e0e0e0' : 'white')}; // 🔹 비활성화 시 회색 배경
+   color: ${(props) => (props.disabled ? '#808080' : 'black')}; // 🔹 비활성화 시 글자 색 변경
+   cursor: ${(props) => (props.disabled ? 'not-allowed' : 'text')}; // 🔹 입력 불가능 상태 마우스 변경
 `
 
 const MediumInput = styled(Input)`
    flex: 1;
    min-width: 120px;
    text-align: center;
+   background-color: ${(props) => (props.disabled ? '#e0e0e0' : 'white')}; // 🔹 비활성화 시 회색 배경
+   color: ${(props) => (props.disabled ? '#808080' : 'black')}; // 🔹 비활성화 시 흐린 글씨
+   cursor: ${(props) => (props.disabled ? 'not-allowed' : 'text')}; // 🔹 비활성화 시 마우스 변경
 `
 
 const CustomTimeInput = styled(Input)`
    width: 120px;
    min-width: 100px;
    text-align: center;
+   background-color: ${(props) => (props.disabled ? '#e0e0e0' : 'white')}; // 🔹 비활성화 시 회색 배경
+   color: ${(props) => (props.disabled ? '#808080' : 'black')}; // 🔹 비활성화 시 흐린 글씨
+   cursor: ${(props) => (props.disabled ? 'not-allowed' : 'text')}; // 🔹 비활성화 시 마우스 변경
 `
 
 const TextArea = styled.textarea`
