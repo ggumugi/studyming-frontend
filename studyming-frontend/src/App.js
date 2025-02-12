@@ -37,6 +37,7 @@ function App() {
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/find/id" element={<FindIdPage />} />
             <Route path="/find/password" element={<FindPasswordPage />} />
+            git
             <Route path="/board" element={<BoardListPage />} />
             <Route path="/board/create" element={<BoardCreatePage />} />
             <Route path="/board/edit/:id" element={<BoardEditPage />} />

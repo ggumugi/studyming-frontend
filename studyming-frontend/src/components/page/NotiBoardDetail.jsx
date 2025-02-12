@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Paper, Typography, Button, TextField, Box, Container } from '@mui/material'
+import { Paper, Typography, Button, TextField, Box } from '@mui/material'
 
 const PostDetail = ({ post, onBack }) => {
    console.log('PostDetail에서 받은 post 데이터:', post)

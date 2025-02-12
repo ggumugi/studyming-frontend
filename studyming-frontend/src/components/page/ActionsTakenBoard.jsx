@@ -4,14 +4,14 @@ import moment from 'moment'
 
 const reportsData = [
    { id: 1, reportedUser: '현수박박박박', reporter: '희경이이이', reason: '명예훼손 또는 저작권이 침해되었습니다.', banPeriod: '2025-02-20' },
-   { id: 2, reportedUser: '강원식', reporter: '이경희', reason: '불쾌한 표현이 있습니다', banPeriod: '2025-05-20' },
-   { id: 3, reportedUser: '박현수', reporter: '이경희', reason: '음란물입니다', banPeriod: '2025-03-20' },
-   { id: 4, reportedUser: '식원강', reporter: '박지우', reason: '스팸홍보/도배입니다', banPeriod: '2025-02-28' },
-   { id: 5, reportedUser: '수현박', reporter: '박지우', reason: '욕설/생명경시/혐오/차별적 표현입니다', banPeriod: '2025-02-28' },
-   { id: 6, reportedUser: '강원식', reporter: '이경희', reason: '그냥', banPeriod: '2025-12-31' },
-   { id: 7, reportedUser: '박현수', reporter: '이경희', reason: '그냥', banPeriod: '2025-12-31' },
-   { id: 8, reportedUser: '강원식', reporter: '박지우', reason: '담배충임', banPeriod: '2025-12-31' },
-   { id: 9, reportedUser: '박현수', reporter: '박지우', reason: '아재개그충임', banPeriod: '2025-12-31' },
+   { id: 2, reportedUser: '강원식', reporter: '이경희', reason: '불쾌한 표현이 있습니다', banPeriod: '2025-02-20' },
+   { id: 3, reportedUser: '박현수', reporter: '이경희', reason: '음란물입니다', banPeriod: '2025-02-20' },
+   { id: 4, reportedUser: '식원강', reporter: '박지우', reason: '스팸홍보/도배입니다', banPeriod: '2025-02-20' },
+   { id: 5, reportedUser: '수현박', reporter: '박지우', reason: '욕설/생명경시/혐오/차별적 표현입니다', banPeriod: '2025-02-20' },
+   { id: 6, reportedUser: '강원식', reporter: '이경희', reason: '그냥', banPeriod: '2025-02-20' },
+   { id: 7, reportedUser: '박현수', reporter: '이경희', reason: '그냥', banPeriod: '2025-02-20' },
+   { id: 8, reportedUser: '강원식', reporter: '박지우', reason: '담배충임', banPeriod: '2025-02-20' },
+   { id: 9, reportedUser: '박현수', reporter: '박지우', reason: '아재개그충임', banPeriod: '2025-02-20' },
 ]
 
 const ActionsTakenBoard = () => {
@@ -69,7 +69,7 @@ const ActionsTakenBoard = () => {
                <TableBody>
                   {paginatedReports.map((row) => (
                      <TableRow key={row.id}>
-                        <TableCell sx={{ width: '10%', textAlign: 'center' }}>{row.id}</TableCell>
+                        <TableCell sx={{ width: '10%', textAlign: 'center', height: '64px' }}>{row.id}</TableCell>
                         <TableCell sx={{ width: '15%', textAlign: 'center' }}>{row.reportedUser}</TableCell>
                         <TableCell sx={{ width: '15%', textAlign: 'center' }}>{row.reporter}</TableCell>
                         <TableCell sx={{ width: '40%', textAlign: 'center' }}>{row.reason}</TableCell>
@@ -91,7 +91,7 @@ const ActionsTakenBoard = () => {
                                           fontSize: '14px', // 글자 크기 조정 (선택 사항)
                                        },
                                     }}
-                                    inputProps={{ style: { height: '30px', padding: '0 5px', lineHeight: '30px' } }} // 내부 input 스타일 강제 적용
+                                    // inputProps={{ style: { height: '30px', padding: '0 5px', lineHeight: '30px' } }} // 내부 input 스타일 강제 적용
                                  />
                                  <Button variant="contained" color="warning" sx={{ height: '30px', marginLeft: '10px' }} onClick={() => handleApply(row.id)}>
                                     적용
