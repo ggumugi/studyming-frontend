@@ -36,11 +36,13 @@ const StudyEdit = () => {
                         <input type="radio" name="visibility" value="비공개" checked={!isPublic} onChange={() => setIsPublic(false)} /> 비공개
                      </label>
                   </RadioGroup>
-                  <LabelText2>참여시간</LabelText2>
-                  <SmallInput type="text" placeholder="숫자 6자리" />
                </FlexContainer>
             </Label>
 
+            <Label>
+               <LabelText></LabelText>
+               <SmallInput type="text" placeholder="숫자 6자리" disabled={isPublic} />
+            </Label>
             <Label>
                <LabelText>해시태그</LabelText>
                <Input type="text" placeholder="해시태그를 입력하세요" />
