@@ -14,6 +14,7 @@ import BoardDetailPage from './pages/BoardDetailPage'
 import MyPage from './pages/MyPage'
 import FindIdPage from './pages/FindIdPage'
 import FindPasswordPage from './pages/FindPasswordPage'
+import FindPwquestionPage from './pages/FindPwquestionPage'
 import StudyListPage from './pages/StudyListPage'
 import StudyGroupPage from './pages/StudyGroupPage'
 import MingShopPage from './pages/MingShopPage'
@@ -53,6 +54,7 @@ function App() {
             <Route path="/study/edit/:id" element={<StudyEditPage />} />
             <Route path="/study/leader/exit" element={<StudyLeaderExitPendingPage />} />
             <Route path="/study/leader/transfar" element={<StudyLeaderTransfarPage />} />
+            <Route path="/study/find/pwquesiton" element={<FindPwquestionPage />} />
          </Routes>
          {/* <Sidebar/> */}
          <Footer />
