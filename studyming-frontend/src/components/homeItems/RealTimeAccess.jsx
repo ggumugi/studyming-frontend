@@ -11,11 +11,11 @@ const RealTimeAccess = () => {
 
    // ✅ 현재 접속 중인 멤버 (임시 데이터)
    const users = [
-      { id: 1, nickname: 'lorem', isOnline: true },
-      { id: 2, nickname: 'lorem', isOnline: false },
-      { id: 3, nickname: 'lorem', isOnline: false },
-      { id: 4, nickname: 'lorem', isOnline: true },
-      { id: 5, nickname: 'lorem', isOnline: true },
+      { id: 1, nickname: 'User1', isOnline: true },
+      { id: 2, nickname: 'User2', isOnline: false },
+      { id: 3, nickname: 'User3', isOnline: false },
+      { id: 4, nickname: 'User4', isOnline: true },
+      { id: 5, nickname: 'User5', isOnline: true },
    ]
 
    const [selectedStudy, setSelectedStudy] = useState(studyList[0]) // 기본 선택된 스터디
@@ -31,7 +31,7 @@ const RealTimeAccess = () => {
             <VisitButton>{selectedStudy.name} 바로가기 →</VisitButton>
          </Header>
 
-         {/* 🔹 스터디 드롭다운 (외부에 "현재 -명 접속 중" 표시) */}
+         {/* 🔹 스터디 드롭다운 */}
          <DropdownSection>
             <DropdownContainer>
                <SelectBox onClick={() => setDropdownOpen(!dropdownOpen)}>
@@ -66,7 +66,7 @@ const RealTimeAccess = () => {
          {/* 🔹 접속 중인 멤버 리스트 */}
          <UserList>
             {users.map((user) => (
-               <UserIcon key={user.id} isOnline={user.isOnline}>
+               <UserIcon key={user.id} $isOnline={user.isOnline}>
                   <UserImage src={`${process.env.PUBLIC_URL}/img/${user.isOnline ? 'happyMing.png' : 'cryingMing.png'}`} alt="user" />
                   <p>{user.nickname}</p>
                </UserIcon>
@@ -224,7 +224,7 @@ const UserIcon = styled.div`
    flex-direction: column;
    align-items: center;
    font-size: 14px;
-   color: ${({ isOnline }) => (isOnline ? 'orange' : 'black')};
+   color: ${({ $isOnline }) => ($isOnline ? 'orange' : 'black')};
    p {
       margin-top: 5px;
       padding-right: 14px;
@@ -237,4 +237,3 @@ const UserImage = styled.img`
 `
 
 export default RealTimeAccess
-/* lorem 위치 수정 ,  메모장 첫줄 오류 고치기 , 메모장,*/

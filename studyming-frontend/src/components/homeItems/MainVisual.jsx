@@ -16,14 +16,14 @@ const carouselData = [
 
 // ✅ 커스텀 화살표 (왼쪽)
 const PrevArrow = ({ onClick }) => (
-   <ArrowButton onClick={onClick} left>
+   <ArrowButton onClick={onClick} $left>
       <AiOutlineLeft />
    </ArrowButton>
 )
 
 // ✅ 커스텀 화살표 (오른쪽)
 const NextArrow = ({ onClick }) => (
-   <ArrowButton onClick={onClick} right>
+   <ArrowButton onClick={onClick} $right>
       <AiOutlineRight />
    </ArrowButton>
 )
@@ -114,8 +114,8 @@ const ArrowButton = styled.button`
    position: absolute;
    top: 50%;
    transform: translateY(-50%);
-   ${({ left }) => left && 'left: -50px;'}
-   ${({ right }) => right && 'right: -50px;'}
+   ${({ $left }) => $left && 'left: -50px;'}
+   ${({ $right }) => $right && 'right: -50px;'}
    background: transparent;
    color: white;
    border: none;

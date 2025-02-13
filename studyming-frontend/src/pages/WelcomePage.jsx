@@ -20,12 +20,12 @@ const HeroSection = () => {
          {/* 📌 배경 텍스트 (두 번째 줄 - 오른쪽 이동) */}
          <Marquee style={{ top: '370px' }}>
             <MarqueeInnerReverse>
-               <Text isOutline>STUDYMING</Text>
-               <Text isOutline>STUDYMING</Text>
-               <Text isOutline>STUDYMING</Text>
-               <Text isOutline>STUDYMING</Text>
-               <Text isOutline>STUDYMING</Text>
-               <Text isOutline>STUDYMING</Text>
+               <Text $isOutline>STUDYMING</Text>
+               <Text $isOutline>STUDYMING</Text>
+               <Text $isOutline>STUDYMING</Text>
+               <Text $isOutline>STUDYMING</Text>
+               <Text $isOutline>STUDYMING</Text>
+               <Text $isOutline>STUDYMING</Text>
             </MarqueeInnerReverse>
          </Marquee>
 
@@ -120,8 +120,8 @@ const Text = styled.div`
    font-size: 200px;
    font-weight: 800;
    text-transform: uppercase;
-   color: ${({ isOutline }) => (isOutline ? 'transparent' : 'white')}; /* 내부 색상 제거 */
-   -webkit-text-stroke: ${({ isOutline }) => (isOutline ? '4px white' : 'none')}; /* 테두리 적용 */
+   color: ${({ $isOutline }) => ($isOutline ? 'transparent' : 'white')}; /* 내부 색상 제거 */
+   -webkit-text-stroke: ${({ $isOutline }) => ($isOutline ? '4px white' : 'none')}; /* 테두리 적용 */
 `
 
 // 📌 중앙 카드 (앞에 배치되도록 absolute 설정)

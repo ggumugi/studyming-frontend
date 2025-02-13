@@ -36,11 +36,13 @@ const StudyEdit = () => {
                         <input type="radio" name="visibility" value="비공개" checked={!isPublic} onChange={() => setIsPublic(false)} /> 비공개
                      </label>
                   </RadioGroup>
-                  <LabelText2>참여시간</LabelText2>
-                  <SmallInput type="text" placeholder="숫자 6자리" />
                </FlexContainer>
             </Label>
 
+            <Label>
+               <LabelText></LabelText>
+               <SmallInput type="text" placeholder="숫자 6자리" disabled={isPublic} />
+            </Label>
             <Label>
                <LabelText>해시태그</LabelText>
                <Input type="text" placeholder="해시태그를 입력하세요" />
@@ -112,11 +114,6 @@ const Wrapper = styled.div`
    min-height: 100vh; /* 화면 높이 전체 사용하여 중앙 배치 */
    padding: 40px;
    width: 100%; /* 화면 크기에 따라 자연스럽게 조정 */
-
-   @media (max-width: 768px) {
-      padding: 20px; /* 모바일에서는 여백을 줄여서 가독성 확보 */
-      width: 95%; /* 더 좁은 화면에서는 비율 맞춰 조정 */
-   }
 `
 
 const TitleContainer = styled.div`
@@ -161,6 +158,10 @@ const Label = styled.label`
    margin-bottom: 10px;
    width: 100%;
    justify-content: flex-start;
+   @media (max-width: 768px) {
+      flex-direction: column; /* 모바일에서는 세로 정렬 */
+      align-items: flex-start;
+   }
 `
 
 const LabelText = styled.span`
@@ -176,11 +177,15 @@ const LabelText2 = styled.span`
 const FlexContainer = styled.div`
    display: flex;
    align-items: center;
-   justify-content: center;
+   justify-content: flex-start; /* 좌측 정렬 */
    gap: 10px;
    flex: 1;
    width: 100%;
    max-width: 800px;
+   @media (max-width: 768px) {
+      flex-direction: column; /* 모바일에서는 세로 정렬 */
+      align-items: flex-start;
+   }
 `
 const Studyname = styled.text`
    padding: 12px;

@@ -14,6 +14,7 @@ import BoardDetailPage from './pages/BoardDetailPage'
 import MyPage from './pages/MyPage'
 import FindIdPage from './pages/FindIdPage'
 import FindPasswordPage from './pages/FindPasswordPage'
+import FindPwquestionPage from './pages/FindPwquestionPage'
 import StudyListPage from './pages/StudyListPage'
 import StudyGroupPage from './pages/StudyGroupPage'
 import MingShopPage from './pages/MingShopPage'
@@ -23,7 +24,7 @@ import StudyCreatePage from './pages/StudyCreatePage'
 import StudyDetailPage from './pages/StudyDetailPage'
 import StudyEditPage from './pages/StudyEditPage'
 import StudyLeaderExitPendingPage from './pages/StudyLeaderExitPendingPage'
-import StudyLeaderTransfarPage from './pages/StudyLeaderTransfarPage'
+import StudyLeaderTransferPage from './pages/StudyLeaderTransferPage'
 // import Sidebar from './components/shared/Sidebar'
 
 function App() {
@@ -37,7 +38,6 @@ function App() {
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/find/id" element={<FindIdPage />} />
             <Route path="/find/password" element={<FindPasswordPage />} />
-            git
             <Route path="/board" element={<BoardListPage />} />
             <Route path="/board/create" element={<BoardCreatePage />} />
             <Route path="/board/edit/:id" element={<BoardEditPage />} />
@@ -52,7 +52,8 @@ function App() {
             <Route path="/study/detail/:id" element={<StudyDetailPage />} />
             <Route path="/study/edit/:id" element={<StudyEditPage />} />
             <Route path="/study/leader/exit" element={<StudyLeaderExitPendingPage />} />
-            <Route path="/study/leader/transfar" element={<StudyLeaderTransfarPage />} />
+            <Route path="/study/leader/transfer" element={<StudyLeaderTransferPage />} />
+            <Route path="/study/find/pwquestion" element={<FindPwquestionPage />} />
          </Routes>
          {/* <Sidebar/> */}
          <Footer />
