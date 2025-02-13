@@ -47,7 +47,7 @@ const TeamList = () => {
    }, [])
 
    return (
-      <TeamListWrapper isFixed={isFixed} position={position} id="team-list">
+      <TeamListWrapper $isFixed={isFixed} $position={position} id="team-list">
          <TitleWrapper>
             <Title>스터디원 목록</Title>
          </TitleWrapper>
@@ -59,7 +59,7 @@ const TeamList = () => {
                      <ProfileWrapper>
                         <ProfileIcon src={member.isOnline ? '/img/happyMing.png' : '/img/cryingMing.png'} />
                      </ProfileWrapper>
-                     <MemberName isOnline={member.isOnline}>{member.name}</MemberName>
+                     <MemberName $isOnline={member.isOnline}>{member.name}</MemberName>
                   </MemberGrid>
                </Member>
             ))}
@@ -76,10 +76,10 @@ const TeamListWrapper = styled.div`
    width: 100%;
    max-width: 250px;
    padding: 0;
-   position: ${(props) => (props.isFixed ? 'fixed' : 'absolute')};
-   top: ${(props) => (props.isFixed ? 'auto' : `${props.position.top}px`)};
-   bottom: ${(props) => (props.isFixed ? '0' : 'auto')};
-   transition: position 0.3s ease;
+   position: ${(props) => (props.$isFixed ? 'fixed' : 'absolute')};
+   top: ${(props) => (props.$isFixed ? 'auto' : `${props.$position.top}px`)};
+   bottom: ${(props) => (props.$isFixed ? '0' : 'auto')};
+   transition: top 0.3s ease, bottom 0.3s ease;
 `
 
 const TitleWrapper = styled.div`
@@ -139,6 +139,6 @@ const ProfileIcon = styled.img`
 
 const MemberName = styled.span`
    width: 100%;
-   color: ${(props) => (props.isOnline ? '#FF7A00' : '#333')};
+   color: ${(props) => (props.$isOnline ? '#FF7A00' : '#333')};
    text-align: left;
 `
