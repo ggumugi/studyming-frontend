@@ -24,7 +24,7 @@ import StudyCreatePage from './pages/StudyCreatePage'
 import StudyDetailPage from './pages/StudyDetailPage'
 import StudyEditPage from './pages/StudyEditPage'
 import StudyLeaderExitPendingPage from './pages/StudyLeaderExitPendingPage'
-import StudyLeaderTransfarPage from './pages/StudyLeaderTransfarPage'
+import StudyLeaderTransferPage from './pages/StudyLeaderTransferPage'
 // import Sidebar from './components/shared/Sidebar'
 
 function App() {

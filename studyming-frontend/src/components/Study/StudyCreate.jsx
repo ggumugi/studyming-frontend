@@ -31,21 +31,23 @@ const StudyCreate = () => {
 
             <Label>
                <LabelText>공개여부</LabelText>
-               <FlexContainer>
-                  <RadioGroup>
-                     <label>
-                        <input type="radio" name="visibility" value="공개" checked={isPublic} onChange={() => setIsPublic(true)} /> 공개
-                     </label>
-                     <label>
-                        <input type="radio" name="visibility" value="비공개" checked={!isPublic} onChange={() => setIsPublic(false)} /> 비공개
-                     </label>
-                  </RadioGroup>
-                  <LabelText2>참여코드</LabelText2>
-                  <NameLabel>
-                     <SmallInput type="text" placeholder="숫자 6자리" disabled={isPublic} />
-                     <SmallText>참여 가능한 코드입니다</SmallText>
-                  </NameLabel>
-               </FlexContainer>
+               <RadioGroup>
+                  <label>
+                     <input type="radio" name="visibility" value="공개" checked={isPublic} onChange={() => setIsPublic(true)} /> 공개
+                  </label>
+                  <label>
+                     <input type="radio" name="visibility" value="비공개" checked={!isPublic} onChange={() => setIsPublic(false)} /> 비공개
+                  </label>
+               </RadioGroup>
+            </Label>
+
+            {/* ✅ 참여코드를 공개/비공개 밑으로 이동 */}
+            <Label>
+               <LabelText></LabelText>
+               <NameLabel>
+                  <SmallInput type="text" placeholder="참여코드 6자리" disabled={isPublic} />
+                  <SmallText>참여 가능한 코드입니다</SmallText>
+               </NameLabel>
             </Label>
 
             <Label>
@@ -148,12 +150,11 @@ const StyledDivider = styled.div`
    background-color: #ff7a00;
    margin-bottom: 20px;
 `
-const NameLabel = styled.label`
+const NameLabel = styled.div`
    display: flex;
-   flex-direction: column; /* 수직 배치 */
-   align-items: flex-start; /* 왼쪽 정렬 */
-   justify-content: 5px;
+   flex-direction: column;
    gap: 5px;
+   align-items: flex-start;
 `
 
 const Form = styled.form`
@@ -199,13 +200,20 @@ const FlexContainer = styled.div`
    align-items: center;
    justify-content: flex-start; /* ✅ 왼쪽 정렬 */
    gap: 10px;
-   flex-wrap: wrap; /* ✅ 태블릿에서는 한 줄 유지 */
+   flex-wrap: nowrap; /* ✅ 태블릿에서는 한 줄 유지 */
    width: 100%;
    max-width: 800px;
+   overflow-x: auto; /* ✅ 너무 좁아지면 가로 스크롤 허용 */
 
    @media (max-width: 768px) {
-      flex-direction: column; /* ✅ 모바일에서는 세로 배치 */
-      align-items: flex-start;
+      flex-wrap: wrap; /* ✅ 태블릿에서는 자동 줄바꿈 */
+      flex-direction: row; /* ✅ 태블릿에서도 가로 유지 */
+      justify-content: space-between;
+   }
+
+   @media (max-width: 480px) {
+      flex-wrap: nowrap; /* ✅ 모바일에서도 줄바꿈 방지 */
+      overflow-x: auto; /* ✅ 모바일에서도 가로 스크롤 허용 */
    }
 `
 
@@ -269,11 +277,16 @@ const SmallSelect = styled.select`
 
 const RadioGroup = styled.div`
    display: flex;
-   flex-direction: row; /* ✅ 강제로 가로 정렬 유지 */
-   justify-content: flex-start;
-   align-items: center;
-   gap: 10px;
-   flex-wrap: nowrap; /* ✅ 줄바꿈 방지 */
+   flex-direction: row; /* ✅ 기본적으로 가로 정렬 */
+   gap: 20px;
+
+   @media (max-width: 768px) {
+      flex-direction: row; /* 태블릿에서도 가로 정렬 유지 */
+   }
+
+   @media (max-width: 480px) {
+      flex-direction: column; /* 모바일에서는 세로 정렬 */
+   }
 `
 
 const Spacer = styled.span`
