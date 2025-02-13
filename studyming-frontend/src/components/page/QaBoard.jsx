@@ -19,8 +19,8 @@ const Board = () => {
    const [rowsPerPage, setRowsPerPage] = useState(10)
    const [searchQuery, setSearchQuery] = useState('')
    const [filter, setFilter] = useState('title')
-
    const [selectedPost, setSelectedPost] = useState(null)
+
    // 페이지네이션 변경
    const handleChangePage = (event, newPage) => {
       setPage(newPage)
@@ -32,7 +32,7 @@ const Board = () => {
 
    return (
       <div style={{ width: '100%' }}>
-         {selectedPost ? ( // ✅ 게시글 클릭 시 상세 페이지 표시
+         {selectedPost ? (
             <QaBoardDetail post={selectedPost} onBack={() => setSelectedPost(null)} />
          ) : (
             <>
@@ -40,30 +40,42 @@ const Board = () => {
                   <Table>
                      <TableHead>
                         <TableRow>
-                           <TableCell sx={{ width: '10%' }} style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                              NO
-                           </TableCell>
-                           <TableCell sx={{ width: '60%' }} style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                              제목
-                           </TableCell>{' '}
-                           {/* ✅ 제목을 넓게 */}
-                           <TableCell sx={{ width: '15%' }} style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                              작성자
-                           </TableCell>
-                           <TableCell sx={{ width: '15%' }} style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                              작성일
-                           </TableCell>
+                           <TableCell sx={{ width: '10%', fontWeight: 'bold', textAlign: 'center' }}>NO</TableCell>
+                           <TableCell sx={{ width: '60%', fontWeight: 'bold', textAlign: 'center' }}>제목</TableCell>
+                           <TableCell sx={{ width: '15%', fontWeight: 'bold', textAlign: 'center' }}>작성자</TableCell>
+                           <TableCell sx={{ width: '15%', fontWeight: 'bold', textAlign: 'center' }}>작성일</TableCell>
                         </TableRow>
                      </TableHead>
                      <TableBody>
                         {paginatedPosts.map((post) => (
                            <TableRow key={post.id}>
-                              <TableCell sx={{ width: '10%', textAlign: 'center' }}>{post.id}</TableCell>
-                              <TableCell sx={{ width: '60%', textAlign: 'center' }} onClick={() => setSelectedPost(post)}>
-                                 {post.title}
+                              {/* 🔥 NO(게시글 ID)에도 클릭 가능하도록 추가 */}
+                              <TableCell sx={{ width: '10%', textAlign: 'center' }}>
+                                 <span style={{ cursor: 'pointer', display: 'inline' }} onClick={() => setSelectedPost(post)}>
+                                    {post.id}
+                                 </span>
                               </TableCell>
-                              <TableCell sx={{ width: '15%', textAlign: 'center' }}>{post.author}</TableCell>
-                              <TableCell sx={{ width: '15%', textAlign: 'center' }}>{post.date}</TableCell>
+
+                              {/* 🔥 제목의 글자 부분만 커서 변경 */}
+                              <TableCell sx={{ width: '60%', textAlign: 'center' }}>
+                                 <span style={{ cursor: 'pointer', display: 'inline' }} onClick={() => setSelectedPost(post)}>
+                                    {post.title}
+                                 </span>
+                              </TableCell>
+
+                              {/* 🔥 작성자의 글자 부분만 커서 변경 */}
+                              <TableCell sx={{ width: '15%', textAlign: 'center' }}>
+                                 <span style={{ cursor: 'pointer', display: 'inline' }} onClick={() => console.log(`작성자 클릭: ${post.author}`)}>
+                                    {post.author}
+                                 </span>
+                              </TableCell>
+
+                              {/* 🔥 작성일의 글자 부분만 커서 변경 */}
+                              <TableCell sx={{ width: '15%', textAlign: 'center' }}>
+                                 <span style={{ cursor: 'pointer', display: 'inline' }} onClick={() => console.log(`작성일 클릭: ${post.date}`)}>
+                                    {post.date}
+                                 </span>
+                              </TableCell>
                            </TableRow>
                         ))}
                      </TableBody>
@@ -72,25 +84,43 @@ const Board = () => {
 
                {/* 페이지네이션 */}
                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-                  <Pagination
-                     count={Math.ceil(filteredPosts.length / rowsPerPage)} // 총 페이지 수
-                     page={page}
-                     onChange={handleChangePage}
-                     color="warning"
-                     shape="rounded"
-                  />
+                  <Pagination count={Math.ceil(filteredPosts.length / rowsPerPage)} page={page} onChange={handleChangePage} color="warning" shape="rounded" />
                </div>
             </>
          )}
 
          {/* 검색 필터 */}
          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-            <Select value={filter} onChange={(e) => setFilter(e.target.value)} sx={{ width: '165px' }}>
+            <Select value={filter} onChange={(e) => setFilter(e.target.value)} sx={{ height: '45px' }}>
                <MenuItem value="title">제목</MenuItem>
                <MenuItem value="author">작성자</MenuItem>
             </Select>
-            <TextField value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="검색어 입력" sx={{ marginLeft: '10px', width: '600px', height: '40px' }} />
-            <Button variant="contained" color="warning" sx={{ marginLeft: '10px', width: '100px' }}>
+
+            <TextField
+               value={searchQuery}
+               onChange={(e) => setSearchQuery(e.target.value)}
+               placeholder="검색어 입력"
+               sx={{
+                  maxWidth: '700px', // ✅ 가로 크기 확장
+                  width: '100%', // 반응형 조정
+                  marginLeft: '10px',
+                  '& .MuiInputBase-root': {
+                     height: '45px', // ✅ 외부 컨테이너 높이 설정
+                     display: 'flex',
+                     alignItems: 'center', // ✅ 세로 정렬
+                  },
+                  '& .MuiInputBase-input': {
+                     height: '100%', // ✅ 내부 input이 부모 높이에 맞게 조정
+                     padding: '10px', // ✅ 기본 padding 설정 (안쪽 여백)
+                  },
+               }}
+            />
+
+            <Button
+               variant="contained"
+               color="warning"
+               sx={{ marginLeft: '10px', height: '45px' }} // ✅ 버튼 높이 맞춤
+            >
                검색
             </Button>
          </div>

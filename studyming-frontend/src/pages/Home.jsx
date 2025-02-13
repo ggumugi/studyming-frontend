@@ -6,6 +6,8 @@ import YesterdayTimeCard from '../components/homeItems/YesterdayTimeCard'
 import TotalTimeCard from '../components/homeItems/TotalTimeCard'
 import WeeklyCalendar from '../components/homeItems/WeeklyCalendar'
 import RealTimeAccess from '../components/homeItems/RealTimeAccess'
+import DdayLine from '../components/homeItems/Dday' // ✅ D-day 추가
+import Mindset from '../components/homeItems/Mindset' // ✅ 다짐 추가
 
 const Home = () => {
    return (
@@ -25,6 +27,14 @@ const Home = () => {
          <StudyTimeWrapper>
             <TotalTimeCard title="총 공부시간" />
          </StudyTimeWrapper>
+
+         {/* 다짐 & D-day (새로운 배치) */}
+         <MindsetWrapper>
+            <Mindset />
+         </MindsetWrapper>
+         <DdayWrapper>
+            <DdayLine />
+         </DdayWrapper>
 
          {/* 목표 영역 */}
          <CalendarTodoWrapper>
@@ -52,6 +62,7 @@ const HomeContainer = styled.div`
    gap: 16px;
    padding: 16px;
 `
+
 const MainVisualWrapper = styled.div`
    grid-column: span 3; /* 전체 3칸을 차지하도록 설정 */
    display: flex;
@@ -62,6 +73,17 @@ const MainVisualWrapper = styled.div`
 
 const StudyTimeWrapper = styled.div`
    grid-column: span 1;
+`
+
+/* ✅ 다짐 (Mindset)과 D-day 배치 조정 */
+const MindsetWrapper = styled.div`
+   margin-top: 50px;
+   grid-column: span 2; /* 다짐은 공부 시간 2칸과 같은 너비 */
+`
+
+const DdayWrapper = styled.div`
+   margin-top: 50px;
+   grid-column: span 1; /* D-day는 한 칸 */
 `
 
 const CalendarTodoWrapper = styled.div`

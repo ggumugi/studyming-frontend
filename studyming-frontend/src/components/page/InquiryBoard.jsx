@@ -85,12 +85,36 @@ const Board = () => {
 
          {/* 검색 필터 */}
          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-            <Select value={filter} onChange={(e) => setFilter(e.target.value)} sx={{ width: '165px' }}>
+            <Select value={filter} onChange={(e) => setFilter(e.target.value)} sx={{ height: '45px' }}>
                <MenuItem value="title">제목</MenuItem>
                <MenuItem value="author">작성자</MenuItem>
             </Select>
-            <TextField value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="검색어 입력" sx={{ marginLeft: '10px', width: '600px', height: '40px' }} />
-            <Button variant="contained" color="warning" sx={{ marginLeft: '10px', width: '100px' }}>
+
+            <TextField
+               value={searchQuery}
+               onChange={(e) => setSearchQuery(e.target.value)}
+               placeholder="검색어 입력"
+               sx={{
+                  maxWidth: '700px', // ✅ 가로 크기 확장
+                  width: '100%', // 반응형 조정
+                  marginLeft: '10px',
+                  '& .MuiInputBase-root': {
+                     height: '45px', // ✅ 외부 컨테이너 높이 설정
+                     display: 'flex',
+                     alignItems: 'center', // ✅ 세로 정렬
+                  },
+                  '& .MuiInputBase-input': {
+                     height: '100%', // ✅ 내부 input이 부모 높이에 맞게 조정
+                     padding: '10px', // ✅ 기본 padding 설정 (안쪽 여백)
+                  },
+               }}
+            />
+
+            <Button
+               variant="contained"
+               color="warning"
+               sx={{ marginLeft: '10px', height: '45px' }} // ✅ 버튼 높이 맞춤
+            >
                검색
             </Button>
          </div>
