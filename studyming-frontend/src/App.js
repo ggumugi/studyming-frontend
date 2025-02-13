@@ -38,7 +38,6 @@ function App() {
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/find/id" element={<FindIdPage />} />
             <Route path="/find/password" element={<FindPasswordPage />} />
-            git
             <Route path="/board" element={<BoardListPage />} />
             <Route path="/board/create" element={<BoardCreatePage />} />
             <Route path="/board/edit/:id" element={<BoardEditPage />} />
@@ -53,8 +52,8 @@ function App() {
             <Route path="/study/detail/:id" element={<StudyDetailPage />} />
             <Route path="/study/edit/:id" element={<StudyEditPage />} />
             <Route path="/study/leader/exit" element={<StudyLeaderExitPendingPage />} />
-            <Route path="/study/leader/transfar" element={<StudyLeaderTransfarPage />} />
-            <Route path="/study/find/pwquesiton" element={<FindPwquestionPage />} />
+            <Route path="/study/leader/transfer" element={<StudyLeaderTransferPage />} />
+            <Route path="/study/find/pwquestion" element={<FindPwquestionPage />} />
          </Routes>
          {/* <Sidebar/> */}
          <Footer />
