@@ -7,8 +7,8 @@ const Dday = () => {
    const [ddayTitle, setDdayTitle] = useState('')
    const [ddayDate, setDdayDate] = useState('')
    const [isDdayModalOpen, setIsDdayModalOpen] = useState(false)
-   const [editingIndex, setEditingIndex] = useState(null) // 🔥 현재 수정 중인 항목
-   const [tempValue, setTempValue] = useState('') // 🔥 입력값 유지
+   const [editingIndex, setEditingIndex] = useState(null)
+   const [tempValue, setTempValue] = useState('')
 
    const handleAddDday = () => {
       if (!ddayTitle.trim() || !ddayDate) {
@@ -16,12 +16,15 @@ const Dday = () => {
          return
       }
 
-      if (ddays.length < 5) {
-         setDdays([...ddays, { title: ddayTitle, date: ddayDate, text: calculateDday(ddayDate) }])
-         setDdayTitle('')
-         setDdayDate('')
-         setIsDdayModalOpen(false)
+      if (ddays.length >= 5) {
+         alert('D-day는 최대 5개까지 입력 가능합니다.') // ✅ 5개 초과 시 알림
+         return
       }
+
+      setDdays([...ddays, { title: ddayTitle, date: ddayDate, text: calculateDday(ddayDate) }])
+      setDdayTitle('')
+      setDdayDate('')
+      setIsDdayModalOpen(false)
    }
 
    // 🔥 D-day 계산 함수
@@ -35,17 +38,55 @@ const Dday = () => {
       return `D`
    }
 
+   // 🔥 수정 시작 (제목 또는 날짜 클릭 시)
+   const handleEditStart = (index, field, value) => {
+      setEditingIndex(`${index}-${field}`)
+      setTempValue(value)
+   }
+
+   // 🔥 수정 완료
+   const handleEditSave = (index, field) => {
+      if (tempValue.trim() === '') {
+         // 빈 값이면 삭제
+         setDdays(ddays.filter((_, i) => i !== index))
+      } else {
+         const updatedDdays = [...ddays]
+         updatedDdays[index][field] = tempValue
+
+         // 🔥 날짜 변경 시 D-day 값도 업데이트
+         if (field === 'date') {
+            updatedDdays[index].text = calculateDday(tempValue)
+         }
+
+         setDdays(updatedDdays)
+      }
+      setEditingIndex(null) // 수정 종료
+   }
+
    return (
       <Box>
          <Title>
-            D-day <AddButton onClick={() => setIsDdayModalOpen(true)}>+</AddButton>
+            D-day <AddButton onClick={() => (ddays.length < 5 ? setIsDdayModalOpen(true) : alert('D-day는 최대 5개까지 입력 가능합니다.'))}>+</AddButton>
          </Title>
          <Line />
          <List>
             {ddays.map((dday, index) => (
                <Item key={index}>
-                  <DdayLeft>{dday.title}</DdayLeft>
-                  <DdayMiddle>{dday.date}</DdayMiddle>
+                  {/* 🔥 제목 수정 가능 */}
+                  {editingIndex === `${index}-title` ? (
+                     <EditInput type="text" value={tempValue} onChange={(e) => setTempValue(e.target.value)} onBlur={() => handleEditSave(index, 'title')} onKeyDown={(e) => e.key === 'Enter' && handleEditSave(index, 'title')} autoFocus />
+                  ) : (
+                     <DdayLeft onClick={() => handleEditStart(index, 'title', dday.title)}>{dday.title}</DdayLeft>
+                  )}
+
+                  {/* 🔥 날짜 수정 가능 */}
+                  {editingIndex === `${index}-date` ? (
+                     <EditInput type="date" value={tempValue} onChange={(e) => setTempValue(e.target.value)} onBlur={() => handleEditSave(index, 'date')} onKeyDown={(e) => e.key === 'Enter' && handleEditSave(index, 'date')} autoFocus />
+                  ) : (
+                     <DdayMiddle onClick={() => handleEditStart(index, 'date', dday.date)}>{dday.date}</DdayMiddle>
+                  )}
+
+                  {/* ❌ D-day 값은 수정 불가능, 클릭 이벤트 제거 */}
                   <DdayRight>{dday.text}</DdayRight>
                </Item>
             ))}
@@ -58,9 +99,8 @@ const Dday = () => {
                   <Input type="text" placeholder="D-day 제목 입력" value={ddayTitle} onChange={(e) => setDdayTitle(e.target.value)} />
                   <Input type="date" value={ddayDate} onChange={(e) => setDdayDate(e.target.value)} />
 
-                  {/* ✅ 버튼을 모달 너비에 맞게 정렬 */}
                   <ModalButtonWrapper>
-                     <ModalButton onClick={() => setIsDdayModalOpen(false)} cancel>
+                     <ModalButton onClick={() => setIsDdayModalOpen(false)} $cancel>
                         취소
                      </ModalButton>
                      <ModalButton onClick={handleAddDday}>추가</ModalButton>
@@ -122,20 +162,46 @@ const Item = styled.li`
 
 const DdayLeft = styled.div`
    text-align: left;
-   white-space: nowrap;
-   overflow: hidden;
-   text-overflow: ellipsis;
+   cursor: pointer;
 `
 
 const DdayMiddle = styled.div`
    text-align: center;
    font-weight: bold;
+   cursor: pointer;
 `
 
 const DdayRight = styled.div`
    text-align: right;
    color: orange;
    font-weight: bold;
+   cursor: default;
+`
+
+const EditInput = styled.input`
+   width: 100%;
+   padding: 5px;
+   font-size: 14px;
+   border: 1px solid #ddd;
+   border-radius: 5px;
+   text-align: center;
+   outline: none;
+   &:focus {
+      border-color: orange;
+   }
+`
+const Modal = styled.div`
+   position: fixed;
+   top: 0;
+   left: 0;
+   width: 100%;
+   height: 100%;
+   background: rgba(0, 0, 0, 0.3);
+   backdrop-filter: blur(2px);
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   z-index: 1000;
 `
 
 const ModalContent = styled.div`
@@ -169,26 +235,12 @@ const ModalButton = styled.button`
    font-size: 16px;
    font-weight: bold;
    cursor: pointer;
-   background-color: ${(props) => (props.cancel ? '#888' : 'orange')};
+   background-color: ${(props) => (props.$cancel ? '#888' : 'orange')};
    color: white;
 
    &:hover {
-      background-color: ${(props) => (props.cancel ? '#666' : 'darkorange')};
+      background-color: ${(props) => (props.$cancel ? '#666' : 'darkorange')};
    }
-`
-
-const Modal = styled.div`
-   position: fixed;
-   top: 0;
-   left: 0;
-   width: 100%;
-   height: 100%;
-   background: rgba(0, 0, 0, 0.3); /* ✅ 배경 어둡게 */
-   backdrop-filter: blur(2px); /* ✅ 흐림 효과 추가 */
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   z-index: 1000;
 `
 
 const Input = styled.input`
@@ -197,13 +249,13 @@ const Input = styled.input`
    border: 1px solid #ddd;
    border-radius: 5px;
    font-size: 14px;
-   background-color: white !important; /* ✅ 배경색 강제 적용 */
-   color: black !important; /* ✅ 글씨 색상 강제 적용 */
-   pointer-events: auto; /* ✅ 모달이 떠도 입력 가능 */
+   background-color: white !important;
+   color: black !important;
+   pointer-events: auto;
    &:focus {
       border-color: orange;
-      background-color: white; /* ✅ 포커스 시 배경 유지 */
+      background-color: white;
    }
 `
-
+/* 글자수 제한걸기 */
 export default Dday

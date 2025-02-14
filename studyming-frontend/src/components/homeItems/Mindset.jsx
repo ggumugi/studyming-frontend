@@ -5,36 +5,72 @@ const Mindset = () => {
    const [promises, setPromises] = useState([])
    const [promiseInput, setPromiseInput] = useState('')
    const [isPromiseModalOpen, setIsPromiseModalOpen] = useState(false)
+   const [editingIndex, setEditingIndex] = useState(null) // ✅ 수정 중인 항목 저장
+   const [tempValue, setTempValue] = useState('') // ✅ 임시 저장 값
    const [errorMessage, setErrorMessage] = useState('') // ✅ 초과 글자수 경고 메시지
 
    const handleAddPromise = () => {
       if (promiseInput.trim() === '') {
-         setErrorMessage('다짐을 입력하세요!') // ✅ 빈 입력 경고
+         setErrorMessage('다짐을 입력하세요!')
          return
       }
 
       if (promiseInput.length > 100) {
-         setErrorMessage('다짐은 최대 100자까지 입력 가능합니다.') // ✅ 100자 초과 경고
+         setErrorMessage('다짐은 최대 100자까지 입력 가능합니다.')
          return
       }
 
       if (promises.length < 3) {
          setPromises([...promises, promiseInput])
          setPromiseInput('')
-         setErrorMessage('') // ✅ 정상 입력 시 경고 제거
+         setErrorMessage('')
          setIsPromiseModalOpen(false)
       }
+   }
+
+   // ✅ 3개 입력 후 추가 버튼 클릭 시 알림 표시
+   const handleOpenModal = () => {
+      if (promises.length >= 3) {
+         alert('다짐은 최대 3개까지 입력 가능합니다.') // ✅ 알림창 표시
+         return
+      }
+      setIsPromiseModalOpen(true)
+   }
+
+   // ✅ 수정 시작
+   const handleEditStart = (index) => {
+      setEditingIndex(index)
+      setTempValue(promises[index]) // 기존 값 저장
+   }
+
+   // ✅ 수정 완료
+   const handleEditSave = (index) => {
+      if (tempValue.trim() === '') {
+         // ✅ 빈 값이면 삭제
+         setPromises(promises.filter((_, i) => i !== index))
+      } else {
+         const updatedPromises = [...promises]
+         updatedPromises[index] = tempValue
+         setPromises(updatedPromises)
+      }
+      setEditingIndex(null) // 수정 종료
    }
 
    return (
       <Box>
          <Title>
-            다짐 <AddButton onClick={() => setIsPromiseModalOpen(true)}>+</AddButton>
+            다짐 <AddButton onClick={handleOpenModal}>+</AddButton> {/* ✅ 3개 초과 시 알림 기능 추가 */}
          </Title>
          <Line />
          <List>
             {promises.map((promise, index) => (
-               <Item key={index}>{promise}</Item>
+               <Item key={index}>
+                  {editingIndex === index ? (
+                     <EditInput type="text" value={tempValue} onChange={(e) => setTempValue(e.target.value)} onBlur={() => handleEditSave(index)} onKeyDown={(e) => e.key === 'Enter' && handleEditSave(index)} autoFocus />
+                  ) : (
+                     <Text onClick={() => handleEditStart(index)}>{promise}</Text>
+                  )}
+               </Item>
             ))}
          </List>
 
@@ -49,14 +85,14 @@ const Mindset = () => {
                         onChange={(e) => {
                            const inputText = e.target.value
                            if (inputText.length > 100) {
-                              setErrorMessage('다짐은 최대 100자까지 입력 가능합니다.') // ✅ 초과 경고
+                              setErrorMessage('다짐은 최대 100자까지 입력 가능합니다.')
                            } else {
                               setErrorMessage('')
                            }
-                           setPromiseInput(inputText.slice(0, 100)) // ✅ 초과 입력 방지
+                           setPromiseInput(inputText.slice(0, 100))
                         }}
                      />
-                     {errorMessage && <ErrorText>{errorMessage}</ErrorText>} {/* ✅ 경고 메시지 표시 */}
+                     {errorMessage && <ErrorText>{errorMessage}</ErrorText>}
                   </TextAreaWrapper>
                   <ButtonWrapper>
                      <ModalButton onClick={() => setIsPromiseModalOpen(false)} style={{ backgroundColor: '#888' }}>
@@ -71,7 +107,7 @@ const Mindset = () => {
    )
 }
 
-// ✅ Styled Components
+// ✅ Styled Components (기존 코드 유지)
 const Box = styled.div`
    margin: auto;
    width: 88%;
@@ -114,9 +150,31 @@ const List = styled.ul`
 const Item = styled.li`
    font-size: 14px;
    padding: 5px 0;
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   cursor: pointer;
 `
 
-/* ✅ 모달창 스타일 */
+const Text = styled.span`
+   cursor: pointer;
+   &:hover {
+      text-decoration: underline;
+   }
+`
+
+const EditInput = styled.input`
+   width: 100%;
+   padding: 5px;
+   font-size: 14px;
+   border: 1px solid #ddd;
+   border-radius: 5px;
+   text-align: left;
+   outline: none;
+   &:focus {
+      border-color: orange;
+   }
+`
 
 const ModalContent = styled.div`
    background: white;
@@ -126,7 +184,6 @@ const ModalContent = styled.div`
    width: 300px;
 `
 
-/* ✅ 입력창과 오류 메시지를 감싸는 컨테이너 */
 const TextAreaWrapper = styled.div`
    display: flex;
    flex-direction: column;
@@ -134,10 +191,9 @@ const TextAreaWrapper = styled.div`
    width: 100%;
 `
 
-/* ✅ 입력창 높이 증가 (스크롤바 없이) */
 const TextArea = styled.textarea`
    width: 100%;
-   height: 120px; /* ✅ 높이 증가 */
+   height: 120px;
    padding: 10px;
    margin-top: 10px;
    border: 1px solid #ddd;
@@ -145,10 +201,9 @@ const TextArea = styled.textarea`
    resize: none;
    font-size: 14px;
    font-family: inherit;
-   overflow-y: hidden; /* ✅ 스크롤바 제거 */
+   overflow-y: hidden;
 `
 
-/* ✅ 초과 입력 시 빨간색 메시지 표시 */
 const ErrorText = styled.p`
    color: red;
    font-size: 12px;
@@ -174,33 +229,19 @@ const ModalButton = styled.button`
       background-color: darkorange;
    }
 `
+
 const Modal = styled.div`
    position: fixed;
    top: 0;
    left: 0;
    width: 100%;
    height: 100%;
-   background: rgba(0, 0, 0, 0.3); /* ✅ 배경 어둡게 */
-   backdrop-filter: blur(2px); /* ✅ 흐림 효과 추가 */
+   background: rgba(0, 0, 0, 0.3);
+   backdrop-filter: blur(2px);
    display: flex;
    align-items: center;
    justify-content: center;
    z-index: 1000;
 `
-
-const Input = styled.input`
-   width: 90%;
-   padding: 10px;
-   border: 1px solid #ddd;
-   border-radius: 5px;
-   font-size: 14px;
-   background-color: white !important; /* ✅ 배경색 강제 적용 */
-   color: black !important; /* ✅ 글씨 색상 강제 적용 */
-   pointer-events: auto; /* ✅ 모달이 떠도 입력 가능 */
-   &:focus {
-      border-color: orange;
-      background-color: white; /* ✅ 포커스 시 배경 유지 */
-   }
-`
-
+/* 수정 시 글자수 제한 걸기 */
 export default Mindset
