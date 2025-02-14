@@ -4,21 +4,24 @@ import { Link } from 'react-router-dom'
 import { Menu, MenuItem } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
-import { FaRegBell } from 'react-icons/fa' // 🔹 react-icons에서 종 아이콘 추가
+import { FaRegBell } from 'react-icons/fa'
 
 const Header = () => {
-   const [anchorEl, setAnchorEl] = useState(null)
-   const open = Boolean(anchorEl)
+   // 📌 게시판 드롭다운 상태
+   const [boardAnchor, setBoardAnchor] = useState(null)
+   const boardOpen = Boolean(boardAnchor)
 
-   // 드롭다운 메뉴 열기
-   const handleClick = (event) => {
-      setAnchorEl(event.currentTarget)
-   }
+   // 📌 유저 드롭다운 상태
+   const [userAnchor, setUserAnchor] = useState(null)
+   const userOpen = Boolean(userAnchor)
 
-   // 드롭다운 메뉴 닫기
-   const handleClose = () => {
-      setAnchorEl(null)
-   }
+   // 📌 게시판 메뉴 열기/닫기
+   const handleBoardClick = (event) => setBoardAnchor(event.currentTarget)
+   const handleBoardClose = () => setBoardAnchor(null)
+
+   // 📌 유저 메뉴 열기/닫기
+   const handleUserClick = (event) => setUserAnchor(event.currentTarget)
+   const handleUserClose = () => setUserAnchor(null)
 
    return (
       <HeaderContainer>
@@ -35,31 +38,37 @@ const Header = () => {
                      <NavItem>밍샵</NavItem>
                   </Link>
 
-                  <NavItem onClick={handleClick} $isOpen={open}>
-                     게시판 {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                  {/* 📌 게시판 드롭다운 버튼 */}
+                  <NavItem onClick={handleBoardClick} $isOpen={boardOpen}>
+                     게시판 {boardOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
                   </NavItem>
 
-                  <Menu anchorEl={anchorEl} open={open} onClose={handleClose} anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }} transformOrigin={{ vertical: 'top', horizontal: 'left' }}>
-                     <MenuItem onClick={handleClose}>
-                        <Link to="/board/general" style={{ textDecoration: 'none', color: 'inherit' }}>
-                           자유 게시판
+                  {/* 📌 게시판 드롭다운 메뉴 */}
+                  <Menu anchorEl={boardAnchor} open={boardOpen} onClose={handleBoardClose} anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }} transformOrigin={{ vertical: 'top', horizontal: 'left' }}>
+                     <CustomMenuItem onClick={handleBoardClose}>
+                        <Link to="/board/general">
+                           자유
+                           <br /> <span>유저간의 자유로운 소통</span>
                         </Link>
-                     </MenuItem>
-                     <MenuItem onClick={handleClose}>
-                        <Link to="/board/study" style={{ textDecoration: 'none', color: 'inherit' }}>
-                           정보 게시판
+                     </CustomMenuItem>
+                     <CustomMenuItem onClick={handleBoardClose}>
+                        <Link to="/board/qna">
+                           질문
+                           <br /> <span>유저간의 Q & A</span>
                         </Link>
-                     </MenuItem>
-                     <MenuItem onClick={handleClose}>
-                        <Link to="/board/qna" style={{ textDecoration: 'none', color: 'inherit' }}>
-                           질문 게시판
+                     </CustomMenuItem>
+                     <CustomMenuItem onClick={handleBoardClose}>
+                        <Link to="/board/study">
+                           정보
+                           <br /> <span>시험 정보 안내</span>
                         </Link>
-                     </MenuItem>
-                     <MenuItem onClick={handleClose}>
-                        <Link to="/board/inquiry" style={{ textDecoration: 'none', color: 'inherit' }}>
-                           문의 게시판
+                     </CustomMenuItem>
+                     <CustomMenuItem onClick={handleBoardClose}>
+                        <Link to="/board/inquiry">
+                           문의
+                           <br /> <span>관리자와 Q & A</span>
                         </Link>
-                     </MenuItem>
+                     </CustomMenuItem>
                   </Menu>
 
                   <Link to="/admin">
@@ -69,9 +78,33 @@ const Header = () => {
             </LeftSection>
             <RightSection>
                <NotificationIcon />
-               <UserMenu>
-                  Lee 님 <KeyboardArrowDownIcon />
+
+               {/* 📌 사용자 드롭다운 버튼 */}
+               <UserMenu onClick={handleUserClick} $isOpen={userOpen}>
+                  Lee 님 {userOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
                </UserMenu>
+
+               {/* 📌 사용자 드롭다운 메뉴 */}
+               <Menu anchorEl={userAnchor} open={userOpen} onClose={handleUserClose} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} transformOrigin={{ vertical: 'top', horizontal: 'right' }}>
+                  <CustomMenuItem onClick={handleUserClose}>
+                     <span style={{ color: '#ff7f00' }}>0 밍</span>
+                  </CustomMenuItem>
+                  <CustomMenuItem onClick={handleUserClose}>
+                     <Link to="/profile">내 프로필</Link>
+                  </CustomMenuItem>
+                  <CustomMenuItem onClick={handleUserClose}>
+                     <Link to="/info">내 정보</Link>
+                  </CustomMenuItem>
+                  <CustomMenuItem onClick={handleUserClose}>
+                     <Link to="/items">내 아이템</Link>
+                  </CustomMenuItem>
+                  <CustomMenuItem onClick={handleUserClose}>
+                     <Link to="/payment">결제 및 밍 내역</Link>
+                  </CustomMenuItem>
+                  <CustomMenuItem onClick={handleUserClose}>
+                     <span style={{ color: 'red' }}>회원 탈퇴</span>
+                  </CustomMenuItem>
+               </Menu>
             </RightSection>
          </HeaderContent>
       </HeaderContainer>
@@ -80,7 +113,7 @@ const Header = () => {
 
 export default Header
 
-// :별: Styled Components
+// 🎨 Styled Components
 const HeaderContainer = styled.header`
    width: 100%;
    height: 60px;
@@ -132,7 +165,6 @@ const RightSection = styled.div`
    gap: 30px;
 `
 
-// 🔹 FaBell 아이콘을 스타일링하여 적용
 const NotificationIcon = styled(FaRegBell)`
    font-size: 22px;
    color: #ff7f00;
@@ -145,12 +177,32 @@ const NotificationIcon = styled(FaRegBell)`
 const UserMenu = styled.div`
    font-size: 16px;
    font-weight: 600;
-   color: #000;
+   color: ${(props) => (props.$isOpen ? '#ff7f00' : '#000')};
    display: flex;
    align-items: center;
    gap: 5px;
    cursor: pointer;
    &:hover {
       color: #ff7f00;
+   }
+`
+
+const CustomMenuItem = styled(MenuItem)`
+   width: 150px;
+   text-align: center;
+   display: flex;
+   justify-content: center;
+   & a {
+      text-decoration: none;
+      color: inherit;
+      width: 100%;
+      text-align: center;
+   }
+   &:hover {
+      background-color: #fff5e1;
+   }
+   span {
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.6);
    }
 `
