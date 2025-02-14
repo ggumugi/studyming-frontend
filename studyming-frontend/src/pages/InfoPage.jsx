@@ -1,4 +1,10 @@
+import { useEffect } from 'react'
+
 const InfoPage = () => {
+   useEffect(() => {
+      window.scrollTo(0, 0) // 페이지가 로드될 때 맨 위로 이동
+   }, [])
+
    return (
       <div style={{ width: '100%', overflowX: 'hidden', textAlign: 'center' }}>
          <div>

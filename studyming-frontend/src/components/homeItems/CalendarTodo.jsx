@@ -87,7 +87,7 @@ const CalendarTodo = () => {
          <List>
             {(todos[dateKey] || []).map((todo, index) => (
                <TodoItem key={index}>
-                  <TodoText onClick={() => handleToggleTodo(index)} completed={todo.completed}>
+                  <TodoText onClick={() => handleToggleTodo(index)} $completed={todo.completed}>
                      {todo.text}
                   </TodoText>
                   <DeleteButton onClick={() => handleDeleteTodo(index)}>
@@ -200,8 +200,8 @@ const TodoItem = styled.li`
 
 const TodoText = styled.span`
    cursor: pointer;
-   text-decoration: ${({ completed }) => (completed ? 'line-through' : 'none')};
-   color: ${({ completed }) => (completed ? '#888' : '#333')};
+   text-decoration: ${({ $completed }) => ($completed ? 'line-through' : 'none')};
+   color: ${({ $completed }) => ($completed ? '#888' : '#333')};
    transition: all 0.2s ease-in-out;
 `
 
