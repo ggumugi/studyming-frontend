@@ -34,7 +34,7 @@ const MyPay = () => {
                      </TableCell>
                      <TableCell sx={{ width: '30%' }} style={{ fontWeight: 'bold', textAlign: 'center' }}>
                         내역
-                     </TableCell>{' '}
+                     </TableCell>
                      {/* ✅ 제목을 넓게 */}
                      <TableCell sx={{ width: '15%' }} style={{ fontWeight: 'bold', textAlign: 'center' }}>
                         포인트
