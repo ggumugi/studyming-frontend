@@ -53,7 +53,7 @@ const ActionsTakenBoard = () => {
                      </TableCell>
                      <TableCell sx={{ width: '15%' }} style={{ fontWeight: 'bold', textAlign: 'center' }}>
                         신고된 회원
-                     </TableCell>{' '}
+                     </TableCell>
                      {/* ✅ 제목을 넓게 */}
                      <TableCell sx={{ width: '15%' }} style={{ fontWeight: 'bold', textAlign: 'center' }}>
                         신고한회원

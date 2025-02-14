@@ -40,8 +40,8 @@ function App() {
             <Route path="/find/password" element={<FindPasswordPage />} />
             <Route path="/board" element={<BoardListPage />} />
             <Route path="/board/create" element={<BoardCreatePage />} />
-            <Route path="/board/edit/:id" element={<BoardEditPage />} />
-            <Route path="/board/detail/:id" element={<BoardDetailPage />} />
+            {/* <Route path="/board/edit/:id" element={<BoardEditPage />} /> */}
+            {/* <Route path="/board/detail/:id" element={<BoardDetailPage />} /> */}
             <Route path="/mypage" element={<MyPage />} />
             <Route path="/studygroup/:id" element={<StudyGroupPage />} />
             <Route path="/mingshop" element={<MingShopPage />} />
