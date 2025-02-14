@@ -76,7 +76,9 @@ const Dday = () => {
                   {editingIndex === `${index}-title` ? (
                      <EditInput type="text" value={tempValue} onChange={(e) => setTempValue(e.target.value)} onBlur={() => handleEditSave(index, 'title')} onKeyDown={(e) => e.key === 'Enter' && handleEditSave(index, 'title')} autoFocus />
                   ) : (
-                     <DdayLeft onClick={() => handleEditStart(index, 'title', dday.title)}>{dday.title}</DdayLeft>
+                     <DdayLeft onClick={() => handleEditStart(index, 'title', dday.title)} title={dday.title}>
+                        {dday.title}
+                     </DdayLeft>
                   )}
 
                   {/* 🔥 날짜 수정 가능 */}
@@ -163,6 +165,10 @@ const Item = styled.li`
 const DdayLeft = styled.div`
    text-align: left;
    cursor: pointer;
+   white-space: nowrap;
+   overflow: hidden;
+   text-overflow: ellipsis;
+   max-width: 150px; /* 🔥 말줄임표가 적용될 최대 너비 설정 */
 `
 
 const DdayMiddle = styled.div`
