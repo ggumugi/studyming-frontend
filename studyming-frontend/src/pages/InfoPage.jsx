@@ -1,4 +1,4 @@
-const TeamList = () => {
+const InfoPage = () => {
    return (
       <div style={{ width: '100%', overflowX: 'hidden', textAlign: 'center' }}>
          <div>
@@ -17,4 +17,4 @@ const TeamList = () => {
    )
 }
 
-export default TeamList
+export default InfoPage

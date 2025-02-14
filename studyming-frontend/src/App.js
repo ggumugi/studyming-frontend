@@ -25,6 +25,7 @@ import StudyDetailPage from './pages/StudyDetailPage'
 import StudyEditPage from './pages/StudyEditPage'
 import StudyLeaderExitPendingPage from './pages/StudyLeaderExitPendingPage'
 import StudyLeaderTransferPage from './pages/StudyLeaderTransferPage'
+import InfoPage from './pages/InfoPage'
 // import Sidebar from './components/shared/Sidebar'
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
          <Routes>
             <Route path="/" element={<WelcomePage />} />
             <Route path="/home" element={<Home />} />
+            <Route path="/info" element={<InfoPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/find/id" element={<FindIdPage />} />
