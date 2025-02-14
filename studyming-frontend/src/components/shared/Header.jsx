@@ -87,7 +87,7 @@ const Header = () => {
                {/* 📌 사용자 드롭다운 메뉴 */}
                <Menu anchorEl={userAnchor} open={userOpen} onClose={handleUserClose} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} transformOrigin={{ vertical: 'top', horizontal: 'right' }}>
                   <CustomMenuItem onClick={handleUserClose}>
-                     <span style={{ color: '#ff7f00' }}>0 밍</span>
+                     <span style={{ color: '#FF7A00', fontSize: '16px', fontWeight: 300 }}>0 밍</span>
                   </CustomMenuItem>
                   <CustomMenuItem onClick={handleUserClose}>
                      <Link to="/profile">내 프로필</Link>
@@ -102,7 +102,7 @@ const Header = () => {
                      <Link to="/payment">결제 및 밍 내역</Link>
                   </CustomMenuItem>
                   <CustomMenuItem onClick={handleUserClose}>
-                     <span style={{ color: 'red' }}>회원 탈퇴</span>
+                     <span style={{ color: 'red', fontSize: '16px', fontWeight: 300 }}>회원 탈퇴</span>
                   </CustomMenuItem>
                </Menu>
             </RightSection>
@@ -192,17 +192,27 @@ const CustomMenuItem = styled(MenuItem)`
    text-align: center;
    display: flex;
    justify-content: center;
+   align-items: center; /* ✅ 세로 중앙 정렬 */
+   flex-direction: column; /* ✅ 내부 요소 세로 배치 */
+
    & a {
       text-decoration: none;
       color: inherit;
       width: 100%;
       text-align: center;
+      font-weight: 300;
+      font-size: 16px;
    }
+
    &:hover {
       background-color: #fff5e1;
    }
+
    span {
-      font-size: 14px;
+      font-size: 13px;
       color: rgba(0, 0, 0, 0.6);
+      display: block;
+      width: 100%;
+      text-align: center;
    }
 `
