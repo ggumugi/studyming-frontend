@@ -2,9 +2,10 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { TextField, Button, Divider, Checkbox, FormControlLabel } from '@mui/material'
-import { FcGoogle } from 'react-icons/fc'
 import { RiKakaoTalkFill } from 'react-icons/ri'
 import { Link } from 'react-router-dom'
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google'
+import { jwtDecode } from 'jwt-decode'
 
 //ui툴만 구현.
 
@@ -13,6 +14,7 @@ const Login = () => {
       id: '',
       password: '',
    })
+   const [userInfo, setUserInfo] = useState(null)
 
    const handleChange = (e) => {
       setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -21,6 +23,11 @@ const Login = () => {
    const handleSubmit = (e) => {
       e.preventDefault()
       console.log('로그인 데이터:', formData)
+   }
+   const handleGoogleLogin = (credentialResponse) => {
+      const decoded = jwtDecode(credentialResponse.credential)
+      console.log('구글 로그인 성공:', decoded)
+      setUserInfo(decoded)
    }
 
    return (
@@ -52,14 +59,20 @@ const Login = () => {
 
             <SNSWrapper>
                <KakaoButton>
-                  <RiKakaoTalkFill style={{ fontSize: '32px', transform: 'translateX(-600%)' }} />
+                  <KakaoIcon />
                   카카오 로그인
                </KakaoButton>
-               <SNSLogin>
-                  <FcGoogle style={{ fontSize: '32px', transform: 'translateX(-620%)' }} />
-                  구글 로그인
-               </SNSLogin>
+               <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+                  <GoogleLogin onSuccess={handleGoogleLogin} onError={() => console.log('구글 로그인 실패')} />
+               </GoogleOAuthProvider>
             </SNSWrapper>
+            {userInfo && (
+               <UserInfo>
+                  <p>이름: {userInfo.name}</p>
+                  <p>이메일: {userInfo.email}</p>
+                  <img src={userInfo.picture} alt="프로필" width={50} height={50} />
+               </UserInfo>
+            )}
          </FormContainer>
       </Wrapper>
    )
@@ -183,24 +196,30 @@ const SNSWrapper = styled.div`
 const KakaoButton = styled(Button)`
    width: 100%;
    max-width: 650px;
-   height: 60px;
+   height: 40px; /* 구글 버튼과 동일한 높이 */
    background-color: #fee500 !important;
    color: black !important;
    font-weight: bold;
-   border-radius: 50px !important;
-`
-
-const SNSLogin = styled(Button)`
-   width: 100%;
-   max-width: 650px;
-   height: 60px;
+   border-radius: 4px !important; /* 구글 버튼과 동일한 테두리 반경 */
+   border: 1px solid #ddd !important;
    display: flex;
    align-items: center;
-   justify-content: flex-start;
-   padding-left: 20px;
-   border: 1px solid #ddd !important;
-   border-radius: 50px !important;
-   color: #000 !important;
-   background: white !important;
-   font-weight: bold;
+   justify-content: center; /* 텍스트를 중앙에 배치 */
+   position: relative;
+   padding: 0; /* 패딩 제거 */
+`
+
+const KakaoIcon = styled(RiKakaoTalkFill)`
+   font-size: 28px;
+   position: absolute;
+   left: 8px; /* 아이콘을 왼쪽에 배치 */
+`
+
+const UserInfo = styled.div`
+   margin-top: 20px;
+   padding: 10px;
+   border: 1px solid #ddd;
+   border-radius: 10px;
+   text-align: center;
+   background-color: #f9f9f9;
 `
