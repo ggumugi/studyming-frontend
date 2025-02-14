@@ -39,9 +39,10 @@ const StudyEdit = () => {
                </FlexContainer>
             </Label>
 
+            {/* ✅ 참여코드를 공개/비공개 밑으로 이동 */}
             <Label>
                <LabelText></LabelText>
-               <SmallInput type="text" placeholder="숫자 6자리" disabled={isPublic} />
+               <SmallInput type="text" placeholder="참여코드 6자리" disabled={isPublic} />
             </Label>
             <Label>
                <LabelText>해시태그</LabelText>
@@ -144,24 +145,27 @@ const Form = styled.form`
    flex-direction: column;
    gap: 20px;
    width: 100%;
-   max-width: 800px; /* 입력 필드가 너무 넓어지지 않도록 제한 */
+   max-width: 600px; /* 입력 필드가 너무 넓어지지 않도록 제한 */
    align-items: center; /* 폼 요소도 가운데 정렬 */
-   text-align: center; /* 내부 요소도 가운데 정렬 */
+   text-align: left; /* 내부 요소도 가운데 정렬 */
+   max-width: 800px; /* 🔹 폼 너비 제한 */
+   align-items: flex-start; /* 🔹 좌측 정렬 */
+   @media (max-width: 768px) {
+      width: 100%;
+      max-width: 600px;
+   }
 `
 
 const Label = styled.label`
    display: flex;
    align-items: center;
+
    gap: 20px;
    font-size: 16px;
    font-weight: bold;
    margin-bottom: 10px;
    width: 100%;
    justify-content: flex-start;
-   @media (max-width: 768px) {
-      flex-direction: column; /* 모바일에서는 세로 정렬 */
-      align-items: flex-start;
-   }
 `
 
 const LabelText = styled.span`
@@ -169,22 +173,27 @@ const LabelText = styled.span`
    text-align: left; /* 왼쪽 정렬 */
 `
 
-const LabelText2 = styled.span`
-   flex: 0 0 150px; /* 고정 너비 설정 */
-   text-align: right; /* 왼쪽 정렬 */
-`
-
 const FlexContainer = styled.div`
    display: flex;
    align-items: center;
+
    justify-content: flex-start; /* 좌측 정렬 */
    gap: 10px;
+   flex-wrap: nowrap; /* ✅ 태블릿에서는 한 줄 유지 */
    flex: 1;
    width: 100%;
    max-width: 800px;
+   overflow-x: auto; /* ✅ 너무 좁아지면 가로 스크롤 허용 */
+
    @media (max-width: 768px) {
-      flex-direction: column; /* 모바일에서는 세로 정렬 */
-      align-items: flex-start;
+      flex-wrap: wrap; /* ✅ 태블릿에서는 자동 줄바꿈 */
+      flex-direction: row; /* ✅ 태블릿에서도 가로 유지 */
+      justify-content: space-between;
+   }
+
+   @media (max-width: 480px) {
+      flex-wrap: nowrap; /* ✅ 모바일에서도 줄바꿈 방지 */
+      overflow-x: auto; /* ✅ 모바일에서도 가로 스크롤 허용 */
    }
 `
 const Studyname = styled.div`
@@ -210,10 +219,19 @@ const SmallInput = styled(Input)`
    font-size: 14px;
    border-radius: 4px;
    border: 1px solid #ccc;
-   width: 150px; /* 입력 필드 크기 고정 */
-   background-color: ${(props) => (props.disabled ? '#e0e0e0' : 'white')}; // 🔹 비활성화 시 회색 배경
-   color: ${(props) => (props.disabled ? '#808080' : 'black')}; // 🔹 비활성화 시 글자 색 변경
-   cursor: ${(props) => (props.disabled ? 'not-allowed' : 'text')}; // 🔹 입력 불가능 상태 마우스 변경
+   width: 150px; /* 기본 너비 */
+   max-width: 150px; /* 최대 너비 */
+   background-color: ${(props) => (props.disabled ? '#e0e0e0' : 'white')};
+   color: ${(props) => (props.disabled ? '#808080' : 'black')};
+   cursor: ${(props) => (props.disabled ? 'not-allowed' : 'text')};
+
+   @media (max-width: 768px) {
+      width: 100px; /* 태블릿에서는 더 작게 */
+   }
+
+   @media (max-width: 480px) {
+      width: 90px; /* 모바일에서는 더 작게 */
+   }
 `
 
 const MediumInput = styled(Input)`
@@ -255,9 +273,16 @@ const SmallSelect = styled.select`
 
 const RadioGroup = styled.div`
    display: flex;
-   justify-content: flex-start; /* 라디오 버튼을 왼쪽 정렬 */
+   flex-direction: row; /* ✅ 기본적으로 가로 정렬 */
    gap: 20px;
-   flex-wrap: wrap;
+
+   @media (max-width: 768px) {
+      flex-direction: row; /* 태블릿에서도 가로 정렬 유지 */
+   }
+
+   @media (max-width: 480px) {
+      flex-direction: column; /* 모바일에서는 세로 정렬 */
+   }
 `
 
 const Spacer = styled.span`

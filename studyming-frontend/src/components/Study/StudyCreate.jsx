@@ -190,11 +190,6 @@ const LabelText = styled.span`
    text-align: left; /* 왼쪽 정렬 */
 `
 
-const LabelText2 = styled.span`
-   flex: 0 0 150px; /* 고정 너비 설정 */
-   text-align: right; /* 왼쪽 정렬 */
-`
-
 const FlexContainer = styled.div`
    display: flex;
    align-items: center;
