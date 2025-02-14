@@ -34,7 +34,7 @@ const Header = () => {
                   <Link to="/study">
                      <NavItem>스터디</NavItem>
                   </Link>
-                  <Link to="/shop">
+                  <Link to="/mingshop">
                      <NavItem>밍샵</NavItem>
                   </Link>
 
