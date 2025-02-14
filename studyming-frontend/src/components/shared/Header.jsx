@@ -8,16 +8,28 @@ import { FaRegBell } from 'react-icons/fa' // 🔹 react-icons에서 종 아이�
 
 const Header = () => {
    const [anchorEl, setAnchorEl] = useState(null)
+   const [userMenuEl, setUserMenuEl] = useState(null) // 유저 메뉴 상태 추가
    const open = Boolean(anchorEl)
+   const userMenuOpen = Boolean(userMenuEl) // 유저 메뉴 상태 확인
 
-   // 드롭다운 메뉴 열기
+   // 게시판 드롭다운 메뉴 열기
    const handleClick = (event) => {
       setAnchorEl(event.currentTarget)
    }
 
-   // 드롭다운 메뉴 닫기
+   // 게시판 드롭다운 메뉴 닫기
    const handleClose = () => {
       setAnchorEl(null)
+   }
+
+   // 유저 메뉴 드롭다운 열기
+   const handleUserMenuClick = (event) => {
+      setUserMenuEl(event.currentTarget)
+   }
+
+   // 유저 메뉴 드롭다운 닫기
+   const handleUserMenuClose = () => {
+      setUserMenuEl(null)
    }
 
    return (
@@ -31,7 +43,7 @@ const Header = () => {
                   <Link to="/study">
                      <NavItem>스터디</NavItem>
                   </Link>
-                  <Link to="/shop">
+                  <Link to="/mingshop">
                      <NavItem>밍샵</NavItem>
                   </Link>
 
@@ -69,9 +81,39 @@ const Header = () => {
             </LeftSection>
             <RightSection>
                <NotificationIcon />
-               <UserMenu>
-                  Lee 님 <KeyboardArrowDownIcon />
-               </UserMenu>
+               <UserMenu onClick={handleUserMenuClick}>Lee 님 {userMenuOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}</UserMenu>
+
+               {/* 🔹 유저 드롭다운 메뉴 추가 */}
+               <Menu anchorEl={userMenuEl} open={userMenuOpen} onClose={handleUserMenuClose} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} transformOrigin={{ vertical: 'top', horizontal: 'right' }}>
+                  <MenuItem disabled style={{ color: '#ff7f00', fontWeight: 'bold' }}>
+                     0 밍
+                  </MenuItem>
+                  <MenuItem onClick={handleUserMenuClose}>
+                     <Link to="/profile" style={{ textDecoration: 'none', color: 'inherit' }}>
+                        내 프로필
+                     </Link>
+                  </MenuItem>
+                  <MenuItem onClick={handleUserMenuClose}>
+                     <Link to="/info" style={{ textDecoration: 'none', color: 'inherit' }}>
+                        내 정보
+                     </Link>
+                  </MenuItem>
+                  <MenuItem onClick={handleUserMenuClose}>
+                     <Link to="/items" style={{ textDecoration: 'none', color: 'inherit' }}>
+                        내 아이템
+                     </Link>
+                  </MenuItem>
+                  <MenuItem onClick={handleUserMenuClose}>
+                     <Link to="/payment" style={{ textDecoration: 'none', color: 'inherit' }}>
+                        결제 및 밍 내역
+                     </Link>
+                  </MenuItem>
+                  <MenuItem onClick={handleUserMenuClose} style={{ color: 'red' }}>
+                     <Link to="/delete-account" style={{ textDecoration: 'none', color: 'red' }}>
+                        회원 탈퇴
+                     </Link>
+                  </MenuItem>
+               </Menu>
             </RightSection>
          </HeaderContent>
       </HeaderContainer>
@@ -80,7 +122,6 @@ const Header = () => {
 
 export default Header
 
-// :별: Styled Components
 const HeaderContainer = styled.header`
    width: 100%;
    height: 60px;
