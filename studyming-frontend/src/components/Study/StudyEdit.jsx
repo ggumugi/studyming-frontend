@@ -187,7 +187,7 @@ const FlexContainer = styled.div`
       align-items: flex-start;
    }
 `
-const Studyname = styled.text`
+const Studyname = styled.div`
    padding: 12px;
    font-size: 16px;
    flex: 1; /* 남은 공간을 모두 차지 */

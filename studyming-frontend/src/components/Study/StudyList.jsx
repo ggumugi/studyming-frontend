@@ -105,7 +105,7 @@ const StudyListPage = () => {
                      </CardTop>
 
                      {/* ✅ 좋아요 버튼 */}
-                     <HeartIcon liked={study.liked} onClick={() => toggleLike(index)}>
+                     <HeartIcon $liked={study.liked} onClick={() => toggleLike(index)}>
                         <FaHeart />
                      </HeartIcon>
 
@@ -143,7 +143,7 @@ const StudyListPage = () => {
                         </CardTop>
 
                         {/* ✅ 좋아요 버튼 */}
-                        <HeartIcon liked={study.liked} onClick={() => toggleLike(index)}>
+                        <HeartIcon $liked={study.liked} onClick={() => toggleLike(index)}>
                            <FaHeart />
                         </HeartIcon>
 
@@ -297,7 +297,7 @@ const HeartIcon = styled.div`
    top: 10px;
    right: 10px;
    font-size: 20px;
-   color: ${(props) => (props.liked ? 'red' : '#ccc')}; /* ❤️ 좋아요 상태에 따라 색 변경 */
+   color: ${(props) => (props.$liked ? 'red' : '#ccc')}; /* ❤️ 좋아요 상태에 따라 색 변경 */
    &:hover {
       color: red; /* 마우스 올리면 빨간색 */
    }
