@@ -15,7 +15,7 @@ function MyPage() {
          <SidebarContainer>
             <MenuList>
                {menuList.map((item) => (
-                  <MenuItem key={item} isActive={selectedMenu === item} onClick={() => setSelectedMenu(item)}>
+                  <MenuItem key={item} $isActive={selectedMenu === item} onClick={() => setSelectedMenu(item)}>
                      <StyledButton to={`/${item}`}>{item}</StyledButton>
                      {selectedMenu === item && <ActiveIndicator />} {/* ✅ 활성화된 메뉴에 동그라미 표시 */}
                   </MenuItem>
@@ -69,8 +69,8 @@ const MenuItem = styled.li`
    margin-right: 20px;
    justify-content: center;
    font-size: 20px;
-   font-weight: ${(props) => (props.isActive ? '500' : '300')};
-   color: ${(props) => (props.isActive ? '#FF7A00' : '#000')};
+   font-weight: ${(props) => (props.$isActive ? '500' : '300')};
+   color: ${(props) => (props.$isActive ? '#FF7A00' : '#000')};
    cursor: pointer;
 `
 const StyledButton = styled.button`

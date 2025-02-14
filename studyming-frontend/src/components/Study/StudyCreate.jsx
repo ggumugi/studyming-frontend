@@ -113,6 +113,8 @@ const StudyCreate = () => {
 
 export default StudyCreate
 
+//Studyedit랑 대부분 겹치는데 edit에 없는 부분 스타일도 있어서 오류날까봐 따로 파일은 안만들고 일단 컴포넌트 내에 스타일 작성했어용
+
 const Wrapper = styled.div`
    display: flex;
    flex-direction: column;
@@ -188,11 +190,6 @@ const Label = styled.label`
 const LabelText = styled.span`
    flex: 0 0 150px; /* 고정 너비 설정 */
    text-align: left; /* 왼쪽 정렬 */
-`
-
-const LabelText2 = styled.span`
-   flex: 0 0 150px; /* 고정 너비 설정 */
-   text-align: right; /* 왼쪽 정렬 */
 `
 
 const FlexContainer = styled.div`
