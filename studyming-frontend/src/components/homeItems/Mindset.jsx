@@ -5,9 +5,9 @@ const Mindset = () => {
    const [promises, setPromises] = useState([])
    const [promiseInput, setPromiseInput] = useState('')
    const [isPromiseModalOpen, setIsPromiseModalOpen] = useState(false)
-   const [editingIndex, setEditingIndex] = useState(null) // ✅ 수정 중인 항목 저장
-   const [tempValue, setTempValue] = useState('') // ✅ 임시 저장 값
-   const [errorMessage, setErrorMessage] = useState('') // ✅ 초과 글자수 경고 메시지
+   const [editingIndex, setEditingIndex] = useState(null)
+   const [tempValue, setTempValue] = useState('')
+   const [errorMessage, setErrorMessage] = useState('')
 
    const handleAddPromise = () => {
       if (promiseInput.trim() === '') {
@@ -28,45 +28,55 @@ const Mindset = () => {
       }
    }
 
-   // ✅ 3개 입력 후 추가 버튼 클릭 시 알림 표시
    const handleOpenModal = () => {
       if (promises.length >= 3) {
-         alert('다짐은 최대 3개까지 입력 가능합니다.') // ✅ 알림창 표시
+         alert('다짐은 최대 3개까지 입력 가능합니다.')
          return
       }
       setIsPromiseModalOpen(true)
    }
 
-   // ✅ 수정 시작
    const handleEditStart = (index) => {
       setEditingIndex(index)
-      setTempValue(promises[index]) // 기존 값 저장
+      setTempValue(promises[index])
    }
 
-   // ✅ 수정 완료
+   const handleEditChange = (e) => {
+      const value = e.target.value
+      if (value.length <= 100) {
+         setTempValue(value)
+         setErrorMessage('')
+      } else {
+         setErrorMessage('다짐은 최대 100자까지 입력 가능합니다.')
+      }
+   }
+
    const handleEditSave = (index) => {
       if (tempValue.trim() === '') {
-         // ✅ 빈 값이면 삭제
          setPromises(promises.filter((_, i) => i !== index))
       } else {
          const updatedPromises = [...promises]
          updatedPromises[index] = tempValue
          setPromises(updatedPromises)
       }
-      setEditingIndex(null) // 수정 종료
+      setEditingIndex(null)
+      setErrorMessage('')
    }
 
    return (
       <Box>
          <Title>
-            다짐 <AddButton onClick={handleOpenModal}>+</AddButton> {/* ✅ 3개 초과 시 알림 기능 추가 */}
+            다짐 <AddButton onClick={handleOpenModal}>+</AddButton>
          </Title>
          <Line />
          <List>
             {promises.map((promise, index) => (
                <Item key={index}>
                   {editingIndex === index ? (
-                     <EditInput type="text" value={tempValue} onChange={(e) => setTempValue(e.target.value)} onBlur={() => handleEditSave(index)} onKeyDown={(e) => e.key === 'Enter' && handleEditSave(index)} autoFocus />
+                     <InputWrapper>
+                        <EditInput type="text" value={tempValue} onChange={handleEditChange} onBlur={() => handleEditSave(index)} onKeyDown={(e) => e.key === 'Enter' && handleEditSave(index)} autoFocus />
+                        {errorMessage && <ErrorText>{errorMessage}</ErrorText>}
+                     </InputWrapper>
                   ) : (
                      <Text onClick={() => handleEditStart(index)}>{promise}</Text>
                   )}
@@ -107,7 +117,7 @@ const Mindset = () => {
    )
 }
 
-// ✅ Styled Components (기존 코드 유지)
+// ✅ Styled Components
 const Box = styled.div`
    margin: auto;
    width: 88%;
@@ -163,6 +173,13 @@ const Text = styled.span`
    }
 `
 
+const InputWrapper = styled.div`
+   display: flex;
+   flex-direction: column;
+   width: 100%;
+   gap: 5px; /* 입력창과 에러 메시지 간격 */
+`
+
 const EditInput = styled.input`
    width: 100%;
    padding: 5px;
@@ -207,7 +224,8 @@ const TextArea = styled.textarea`
 const ErrorText = styled.p`
    color: red;
    font-size: 12px;
-   margin-top: 5px;
+   margin: 5px 0 0 0;
+   text-align: left;
 `
 
 const ButtonWrapper = styled.div`
@@ -243,5 +261,5 @@ const Modal = styled.div`
    justify-content: center;
    z-index: 1000;
 `
-/* 수정 시 글자수 제한 걸기 */
+
 export default Mindset
