@@ -1,30 +1,61 @@
-import React, { useState } from 'react'
+/* 경희 */
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import dayjs from 'dayjs'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchDdays, addDdayAsync, updateDdayAsync, deleteDdayAsync } from '../../features/ddaySlice'
 
 const Dday = () => {
-   const [ddays, setDdays] = useState([])
+   const dispatch = useDispatch()
+   const { ddays, loading } = useSelector((state) => state.dday) // Redux에서 D-day 목록 가져오기
+
    const [ddayTitle, setDdayTitle] = useState('')
    const [ddayDate, setDdayDate] = useState('')
    const [isDdayModalOpen, setIsDdayModalOpen] = useState(false)
    const [editingIndex, setEditingIndex] = useState(null)
    const [tempValue, setTempValue] = useState('')
 
-   const handleAddDday = () => {
+   // ✅ D-day 목록 가져오기 (Redux 사용)
+   useEffect(() => {
+      dispatch(fetchDdays())
+   }, [dispatch])
+
+   // ✅ D-day 추가
+   const handleAddDday = async () => {
       if (!ddayTitle.trim() || !ddayDate) {
          alert('모든 입력 필드를 채워주세요!')
          return
       }
 
       if (ddays.length >= 5) {
-         alert('D-day는 최대 5개까지 입력 가능합니다.') // ✅ 5개 초과 시 알림
+         alert('D-day는 최대 5개까지 입력 가능합니다.')
          return
       }
 
-      setDdays([...ddays, { title: ddayTitle, date: ddayDate, text: calculateDday(ddayDate) }])
+      dispatch(addDdayAsync({ dName: ddayTitle, dDay: ddayDate }))
       setDdayTitle('')
       setDdayDate('')
       setIsDdayModalOpen(false)
+   }
+
+   // ✅ D-day 수정 및 삭제 (Redux 사용)
+   const handleEditSave = async (index, field) => {
+      const ddayId = ddays[index].id // ✅ ID 가져오기
+
+      if (tempValue.trim() === '') {
+         dispatch(deleteDdayAsync(ddayId)) // ✅ Redux에서 삭제
+      } else {
+         // ✅ 수정되지 않은 값도 포함하여 기존 데이터를 유지
+         const updatedDday = {
+            id: ddayId,
+            dName: field === 'title' ? tempValue : ddays[index].dName, // ✅ 제목 유지
+            dDay: field === 'date' ? tempValue : ddays[index].dDay, // ✅ 날짜 유지
+         }
+
+         dispatch(updateDdayAsync({ id: ddayId, updatedDday })) // ✅ Redux에서 수정
+      }
+
+      setEditingIndex(null) // ✅ 수정 종료
    }
 
    // 🔥 D-day 계산 함수
@@ -44,25 +75,6 @@ const Dday = () => {
       setTempValue(value)
    }
 
-   // 🔥 수정 완료
-   const handleEditSave = (index, field) => {
-      if (tempValue.trim() === '') {
-         // 빈 값이면 삭제
-         setDdays(ddays.filter((_, i) => i !== index))
-      } else {
-         const updatedDdays = [...ddays]
-         updatedDdays[index][field] = tempValue
-
-         // 🔥 날짜 변경 시 D-day 값도 업데이트
-         if (field === 'date') {
-            updatedDdays[index].text = calculateDday(tempValue)
-         }
-
-         setDdays(updatedDdays)
-      }
-      setEditingIndex(null) // 수정 종료
-   }
-
    return (
       <Box>
          <Title>
@@ -70,28 +82,32 @@ const Dday = () => {
          </Title>
          <Line />
          <List>
-            {ddays.map((dday, index) => (
-               <Item key={index}>
-                  {/* 🔥 제목 수정 가능 */}
-                  {editingIndex === `${index}-title` ? (
-                     <EditInput type="text" value={tempValue} onChange={(e) => setTempValue(e.target.value)} onBlur={() => handleEditSave(index, 'title')} onKeyDown={(e) => e.key === 'Enter' && handleEditSave(index, 'title')} autoFocus />
-                  ) : (
-                     <DdayLeft onClick={() => handleEditStart(index, 'title', dday.title)} title={dday.title}>
-                        {dday.title}
-                     </DdayLeft>
-                  )}
+            {loading ? (
+               <p>로딩 중...</p>
+            ) : (
+               ddays.map((dday, index) => (
+                  <Item key={index}>
+                     {/* 🔥 제목 수정 가능 */}
+                     {editingIndex === `${index}-title` ? (
+                        <EditInput type="text" value={tempValue} onChange={(e) => setTempValue(e.target.value)} onBlur={() => handleEditSave(index, 'title')} onKeyDown={(e) => e.key === 'Enter' && handleEditSave(index, 'title')} autoFocus />
+                     ) : (
+                        <DdayLeft onClick={() => handleEditStart(index, 'title', dday.dName)} title={dday.dName}>
+                           {dday.dName}
+                        </DdayLeft>
+                     )}
 
-                  {/* 🔥 날짜 수정 가능 */}
-                  {editingIndex === `${index}-date` ? (
-                     <EditInput type="date" value={tempValue} onChange={(e) => setTempValue(e.target.value)} onBlur={() => handleEditSave(index, 'date')} onKeyDown={(e) => e.key === 'Enter' && handleEditSave(index, 'date')} autoFocus />
-                  ) : (
-                     <DdayMiddle onClick={() => handleEditStart(index, 'date', dday.date)}>{dday.date}</DdayMiddle>
-                  )}
+                     {/* 🔥 날짜 수정 가능 */}
+                     {editingIndex === `${index}-date` ? (
+                        <EditInput type="date" value={tempValue} onChange={(e) => setTempValue(e.target.value)} onBlur={() => handleEditSave(index, 'date')} onKeyDown={(e) => e.key === 'Enter' && handleEditSave(index, 'date')} autoFocus />
+                     ) : (
+                        <DdayMiddle onClick={() => handleEditStart(index, 'date', dday.dDay)}>{dday.dDay}</DdayMiddle>
+                     )}
 
-                  {/* ❌ D-day 값은 수정 불가능, 클릭 이벤트 제거 */}
-                  <DdayRight>{dday.text}</DdayRight>
-               </Item>
-            ))}
+                     {/* ✅ D-day 값 계산 후 출력 */}
+                     <DdayRight>{calculateDday(dday.dDay)}</DdayRight>
+                  </Item>
+               ))
+            )}
          </List>
 
          {isDdayModalOpen && (
@@ -113,7 +129,6 @@ const Dday = () => {
       </Box>
    )
 }
-
 // ✅ Styled Components
 const Box = styled.div`
    width: 87.5%;
@@ -263,5 +278,5 @@ const Input = styled.input`
       background-color: white;
    }
 `
-/* 글자수 제한걸기 */
+
 export default Dday

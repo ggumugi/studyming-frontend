@@ -225,5 +225,6 @@ const ErrorText = styled.p`
    bottom: -18px; /* 입력창 바로 아래에 표시 */
    left: 5px;
 `
+/* 글자수 초과 오류문구 가끔 안뜨는데 계속 그러면 코드 수정하겟음다.LEE  */
 
 export default CalendarTodo
