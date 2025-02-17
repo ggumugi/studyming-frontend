@@ -5,6 +5,7 @@ import GroupSidebar from '../components/sidebar/GroupSidebar'
 import Chat from '../components/studyGroup/Chat'
 import ScreenShare from '../components/studyGroup/ScreenShare'
 import Cam from '../components/studyGroup/Cam'
+import Timer from '../components/shared/Timer'
 
 // Mock 데이터
 const mockStudyGroups = {
@@ -50,6 +51,7 @@ const StudyGroupPage = () => {
                <p>존재하지 않는 스터디 그룹입니다.</p>
             )}
          </ContentArea>
+         <Timer />
       </Container>
    )
 }
