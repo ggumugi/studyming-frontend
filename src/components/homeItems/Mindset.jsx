@@ -261,5 +261,5 @@ const Modal = styled.div`
    justify-content: center;
    z-index: 1000;
 `
-
+/* vw 변동시 글자수가 박스 넘치는 문제  */
 export default Mindset

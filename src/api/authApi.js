@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8002'
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000'
 
 // 회원가입
 export const signupUser = async (userData) => {
@@ -14,30 +14,12 @@ export const signupUser = async (userData) => {
    }
 }
 
-// 아이디 중복 확인 API
-export const checkIdDuplicate = async (login_id) => {
-   try {
-      const response = await axios.post(`${API_URL}/auth/check-id`, { login_id })
-      return response.data
-   } catch (error) {
-      throw error.response?.data?.message || '아이디 중복 확인 실패'
-   }
-}
-
-// 닉네임 중복 확인 API
-export const checkNicknameDuplicate = async (nickname) => {
-   try {
-      const response = await axios.post(`${API_URL}/auth/check-nickname`, { nickname })
-      return response.data
-   } catch (error) {
-      throw error.response?.data?.message || '닉네임 중복 확인 실패'
-   }
-}
-
 // 로그인
 export const loginUser = async (credentials) => {
    try {
+      console.log('📡 로그인 요청 데이터:', credentials)
       const response = await axios.post(`${API_URL}/auth/login`, credentials, { withCredentials: true })
+      console.log('✅ 로그인 응답 데이터:', response.data)
       return response.data
    } catch (error) {
       console.error('Login failed', error)

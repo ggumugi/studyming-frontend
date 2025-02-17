@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { signupUser, checkIdDuplicate, checkNicknameDuplicate, loginUser, logoutUser, checkAuthStatus, googleLoginApi } from '../api/authApi' // ✅ 수정된 API
+import { signupUser, loginUser, logoutUser, checkAuthStatus, googleLoginApi } from '../api/authApi' // ✅ 수정된 API
 
 // 회원가입
 export const signupUserThunk = createAsyncThunk('auth/signupUser', async (userData, { rejectWithValue }) => {
@@ -8,24 +8,6 @@ export const signupUserThunk = createAsyncThunk('auth/signupUser', async (userDa
       return response.user
    } catch (err) {
       return rejectWithValue(err.response?.data?.message || '회원가입 실패')
-   }
-})
-
-// 아이디 중복 확인
-export const checkIdDuplicateThunk = createAsyncThunk('auth/checkId', async (login_id, { rejectWithValue }) => {
-   try {
-      return await checkIdDuplicate(login_id)
-   } catch (err) {
-      return rejectWithValue(err)
-   }
-})
-
-// 닉네임 중복 확인
-export const checkNicknameDuplicateThunk = createAsyncThunk('auth/checkNickname', async (nickname, { rejectWithValue }) => {
-   try {
-      return await checkNicknameDuplicate(nickname)
-   } catch (err) {
-      return rejectWithValue(err)
    }
 })
 
@@ -74,7 +56,7 @@ const authSlice = createSlice({
    initialState: {
       user: null,
       isAuthenticated: false, // 로그인 상태: 로그인이 되어 있으면 true, 그렇지 않으면 false
-      loading: true,
+      loading: false,
       error: null,
    },
    reducers: {},
@@ -94,49 +76,21 @@ const authSlice = createSlice({
             state.error = action.payload
          })
 
-         // ✅ 아이디 중복 확인 Thunk
-         .addCase(checkIdDuplicateThunk.pending, (state) => {
-            state.loading = true
-            state.idCheckMessage = null
-            state.error = null
-         })
-         .addCase(checkIdDuplicateThunk.fulfilled, (state, action) => {
-            state.loading = false
-            state.idCheckMessage = action.payload.success ? '사용 가능한 아이디입니다.' : '이미 사용 중인 아이디입니다.'
-         })
-         .addCase(checkIdDuplicateThunk.rejected, (state, action) => {
-            state.loading = false
-            state.idCheckMessage = '아이디 중복 확인 실패'
-            state.error = action.payload
-         })
-
-         // ✅ 닉네임 중복 확인 Thunk
-         .addCase(checkNicknameDuplicateThunk.pending, (state) => {
-            state.loading = true
-            state.nicknameCheckMessage = null
-            state.error = null
-         })
-         .addCase(checkNicknameDuplicateThunk.fulfilled, (state, action) => {
-            state.loading = false
-            state.nicknameCheckMessage = action.payload.success ? '사용 가능한 닉네임입니다.' : '이미 사용 중인 닉네임입니다.'
-         })
-         .addCase(checkNicknameDuplicateThunk.rejected, (state, action) => {
-            state.loading = false
-            state.nicknameCheckMessage = '닉네임 중복 확인 실패'
-            state.error = action.payload
-         })
       // 로그인
       builder
          .addCase(loginUserThunk.pending, (state) => {
+            console.log('🔄 로그인 요청 중...')
             state.loading = true
             state.error = null
          })
          .addCase(loginUserThunk.fulfilled, (state, action) => {
+            console.log('✅ 로그인 성공:', action.payload)
             state.loading = false
             state.isAuthenticated = true
             state.user = action.payload
          })
          .addCase(loginUserThunk.rejected, (state, action) => {
+            console.log('❌ 로그인 실패:', action.payload)
             state.loading = false
             state.error = action.payload
          })

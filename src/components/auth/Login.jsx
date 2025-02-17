@@ -6,23 +6,64 @@ import { RiKakaoTalkFill } from 'react-icons/ri'
 import { Link } from 'react-router-dom'
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google'
 import { jwtDecode } from 'jwt-decode'
+import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import { loginUserThunk } from '../../features/authSlice'
 
 //ui툴만 구현.
 
 const Login = () => {
+   const dispatch = useDispatch()
+   const navigate = useNavigate()
+   const { loading, error } = useSelector((state) => state.auth)
+
    const [formData, setFormData] = useState({
-      id: '',
+      login_id: '',
       password: '',
    })
+   //아이디 저장
+   const [rememberMe, setRememberMe] = useState(false)
+
+   //컴포넌트 마운트 시 localStorage에서 아이디 가져오기
+   useEffect(() => {
+      const savedLoginId = localStorage.getItem('savedLoginId')
+      if (savedLoginId) {
+         setFormData((prev) => ({ ...prev, login_id: savedLoginId }))
+         setRememberMe(true)
+      }
+   }, [])
+
    const [userInfo, setUserInfo] = useState(null)
 
    const handleChange = (e) => {
       setFormData({ ...formData, [e.target.name]: e.target.value })
    }
+   //아이디 저장 체크박스 핸들러
+   const handleCheckboxChange = (e) => {
+      setRememberMe(e.target.checked)
+      if (!e.target.checked) {
+         localStorage.removeItem('savedLoginId') // 체크 해제 시 저장된 아이디 삭제
+      }
+   }
 
    const handleSubmit = (e) => {
       e.preventDefault()
-      console.log('로그인 데이터:', formData)
+      if (rememberMe) {
+         localStorage.setItem('savedLoginId', formData.login_id) //체크 시 아이디 저장
+      } else {
+         localStorage.removeItem('savedLoginId') //체크 해제 시 삭제
+      }
+
+      dispatch(loginUserThunk(formData))
+         .unwrap()
+         .then((user) => {
+            alert(`로그인 성공하였습니다! ${user.nickname}님 환영합니다!`)
+            navigate('/home') // ✅ 로그인 성공 후 메인 페이지 이동
+         })
+         .catch((err) => {
+            console.error('❌ 로그인 실패:', err)
+         })
    }
    const handleGoogleLogin = (credentialResponse) => {
       const decoded = jwtDecode(credentialResponse.credential)
@@ -36,16 +77,20 @@ const Login = () => {
             <Title>로그인</Title>
             <StyledDivider />
 
-            <InputWrapper>
-               <StyledTextField label="아이디" name="id" value={formData.id} onChange={handleChange} />
-               <StyledTextField label="비밀번호" name="password" type="password" value={formData.password} onChange={handleChange} />
-            </InputWrapper>
+            <form onSubmit={handleSubmit}>
+               <InputWrapper>
+                  <StyledTextField label="아이디" name="login_id" value={formData.login_id} onChange={handleChange} error={!!error} helperText={error || ''} />
+                  <StyledTextField label="비밀번호" name="password" type="password" value={formData.password} onChange={handleChange} error={!!error} helperText={error || ''} />
+               </InputWrapper>
 
-            <RememberMeWrapper>
-               <FormControlLabel control={<Checkbox />} label="아이디 저장" />
-            </RememberMeWrapper>
+               <RememberMeWrapper>
+                  <FormControlLabel control={<Checkbox checked={rememberMe} onChange={handleCheckboxChange} />} label="아이디 저장" />
+               </RememberMeWrapper>
 
-            <StyledButton onClick={handleSubmit}>로그인</StyledButton>
+               <StyledButton type="submit" disabled={loading}>
+                  {loading ? '로그인 중...' : '로그인'}
+               </StyledButton>
+            </form>
 
             {/* 아이디 찾기, 비밀번호 찾기, 회원가입 */}
             <FindLinks>
@@ -66,13 +111,6 @@ const Login = () => {
                   <GoogleLogin onSuccess={handleGoogleLogin} onError={() => console.log('구글 로그인 실패')} />
                </GoogleOAuthProvider>
             </SNSWrapper>
-            {userInfo && (
-               <UserInfo>
-                  <p>이름: {userInfo.name}</p>
-                  <p>이메일: {userInfo.email}</p>
-                  <img src={userInfo.picture} alt="프로필" width={50} height={50} />
-               </UserInfo>
-            )}
          </FormContainer>
       </Wrapper>
    )
