@@ -1,7 +1,28 @@
 import React from 'react'
 import styled from 'styled-components'
+import { useDispatch, useSelector } from 'react-redux'
+import { pointsForItemThunk, fetchUserPoints } from '../../features/pointSlice'
 
 const ItemList = ({ items }) => {
+   const dispatch = useDispatch()
+   const userPoints = useSelector((state) => state.points.points)
+
+   const handlePurchase = (item) => {
+      if (item.type === 'cash') {
+         alert('포인트 충전은 결제 페이지에서 진행해주세요!')
+         return
+      }
+
+      if (userPoints < item.price) {
+         alert('포인트가 부족합니다!')
+         return
+      }
+
+      dispatch(pointsForItemThunk(item.id)) // ✅ useDispatch()로 실행
+         .then(() => {
+            dispatch(fetchUserPoints()) // ✅ 포인트 정보 갱신
+         })
+   }
    return (
       <Container>
          <Grid>
@@ -17,7 +38,7 @@ const ItemList = ({ items }) => {
                      <ItemPrice>
                         {item.price} {item.type === 'cash' ? '원' : '밍'}
                      </ItemPrice>
-                     <BuyButton>구매하기</BuyButton>
+                     <BuyButton onClick={() => handlePurchase(item)}>구매하기</BuyButton>
                   </PriceContainer>
                </ItemCard>
             ))}
