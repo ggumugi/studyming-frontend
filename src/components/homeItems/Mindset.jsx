@@ -68,7 +68,7 @@ const Mindset = () => {
 
    const handleEditStart = (index) => {
       setEditingIndex(index)
-      setTempValue(mindsets[index].content)
+      setTempValue(mindsets[index].mindset)
    }
 
    const handleEditChange = (e) => {
@@ -85,7 +85,7 @@ const Mindset = () => {
       if (tempValue.trim() === '') {
          dispatch(deleteMindsetAsync(id))
       } else {
-         dispatch(updateMindsetAsync({ id, updatedMindset: { content: tempValue } }))
+         dispatch(updateMindsetAsync({ id, updatedMindset: { mindset: tempValue } }))
       }
       setEditingIndex(null)
       setErrorMessage('')
@@ -109,7 +109,7 @@ const Mindset = () => {
                            {errorMessage && <ErrorText>{errorMessage}</ErrorText>}
                         </InputWrapper>
                      ) : (
-                        <Text onClick={() => handleEditStart(index)}>{mindset.content}</Text>
+                        <Text onClick={() => handleEditStart(index)}>{mindset.mindset}</Text>
                      )}
                   </Item>
                ))
