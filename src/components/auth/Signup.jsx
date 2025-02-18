@@ -16,7 +16,7 @@ const Signup = () => {
    // 폼 상태
    const [formData, setFormData] = useState({
       email: '',
-      login_id: '',
+      loginId: '',
       password: '',
       confirmPassword: '',
       nickname: '',
@@ -30,8 +30,6 @@ const Signup = () => {
    // 입력 변경 핸들러
    const handleChange = (e) => {
       setFormData({ ...formData, [e.target.name]: e.target.value })
-      setErrors({ ...errors, [e.target.name]: '' }) // ✅ 입력 시 기존 에러 제거
-      setSuccessMessages({ ...successMessages, [e.target.name]: '' }) // ✅ 기존 성공 메시지도 초기화
    }
 
    const validate = () => {
@@ -52,60 +50,58 @@ const Signup = () => {
       return Object.keys(newErrors).length === 0
    }
 
-   // ✅ 아이디 중복 확인
-   const checkDuplicateId = () => {
-      if (!formData.login_id) {
-         setErrors((prev) => ({ ...prev, login_id: '아이디를 입력해주세요.' }))
+   const checkDuplicateId = async () => {
+      if (!formData.loginId) {
+         setErrors((prev) => ({ ...prev, loginId: '아이디를 입력해주세요.' }))
+         setSuccessMessages((prev) => ({ ...prev, loginId: '' })) // 성공 메시지 초기화
          return
       }
 
-      dispatch(checkIdDuplicateThunk(formData.login_id))
-         .unwrap()
-         .then((response) => {
-            if (!response.success) {
-               setErrors((prev) => ({ ...prev, login_id: '중복된 아이디입니다.' }))
-               setSuccessMessages((prev) => ({ ...prev, login_id: '' })) // 성공 메시지 삭제
-            } else {
-               setErrors((prev) => ({ ...prev, login_id: '' }))
-               setSuccessMessages((prev) => ({ ...prev, login_id: '사용할 수 있는 아이디입니다.' })) // ✅ 성공 메시지 추가
-            }
-         })
-         .catch(() => {
-            setErrors((prev) => ({ ...prev, login_id: '아이디 중복 확인 실패' }))
-         })
+      try {
+         const response = await dispatch(checkIdDuplicateThunk(formData.loginId)).unwrap()
+         if (!response.success) {
+            setErrors((prev) => ({ ...prev, loginId: '중복된 아이디입니다.' }))
+            setSuccessMessages((prev) => ({ ...prev, loginId: '' })) // 성공 메시지 삭제
+         } else {
+            setErrors((prev) => ({ ...prev, loginId: '' })) // ✅ 중복이 없을 경우 오류 제거
+            setSuccessMessages((prev) => ({ ...prev, loginId: '사용할 수 있는 아이디입니다.' }))
+         }
+      } catch {
+         setErrors((prev) => ({ ...prev, loginId: '아이디 중복 확인 실패' }))
+      }
    }
 
-   // ✅ 닉네임 중복 확인
-   const checkDuplicateNickname = () => {
+   const checkDuplicateNickname = async () => {
       if (!formData.nickname) {
          setErrors((prev) => ({ ...prev, nickname: '닉네임을 입력해주세요.' }))
+         setSuccessMessages((prev) => ({ ...prev, nickname: '' }))
          return
       }
 
-      dispatch(checkNicknameDuplicateThunk(formData.nickname))
-         .unwrap()
-         .then((response) => {
-            if (!response.success) {
-               setErrors((prev) => ({ ...prev, nickname: '중복된 닉네임입니다.' }))
-               setSuccessMessages((prev) => ({ ...prev, nickname: '' })) // 성공 메시지 삭제
-            } else {
-               setErrors((prev) => ({ ...prev, nickname: '' }))
-               setSuccessMessages((prev) => ({ ...prev, nickname: '사용할 수 있는 닉네임입니다.' })) // ✅ 성공 메시지 추가
-            }
-         })
-         .catch(() => {
-            setErrors((prev) => ({ ...prev, nickname: '닉네임 중복 확인 실패' }))
-         })
+      try {
+         const response = await dispatch(checkNicknameDuplicateThunk(formData.nickname)).unwrap()
+         if (!response.success) {
+            setErrors((prev) => ({ ...prev, nickname: '중복된 닉네임입니다.' }))
+            setSuccessMessages((prev) => ({ ...prev, nickname: '' }))
+         } else {
+            setErrors((prev) => ({ ...prev, nickname: '' }))
+            setSuccessMessages((prev) => ({ ...prev, nickname: '사용할 수 있는 닉네임입니다.' }))
+         }
+      } catch {
+         setErrors((prev) => ({ ...prev, nickname: '닉네임 중복 확인 실패' }))
+      }
    }
 
-   // ✅ 회원가입 버튼 클릭 시 실행
    const handleSubmit = (e) => {
       e.preventDefault()
       if (!validate()) return
 
-      // ✅ 중복 확인을 하지 않았거나, 중복된 경우 회원가입 진행 불가
-      if (errors.login_id || errors.nickname) {
-         alert('닉네임과 아이디 중복 확인을 먼저 해주세요.')
+      // ✅ 아이디 & 닉네임 중복 확인을 했는지 검사
+      if (!successMessages.loginId || !successMessages.nickname) {
+         setErrors((prev) => ({
+            ...prev,
+            general: '아이디와 닉네임 중복 확인을 완료해주세요.',
+         }))
          return
       }
 
@@ -133,13 +129,29 @@ const Signup = () => {
                <InputWrapper>
                   <StyledTextField label="이름" name="name" value={formData.name} onChange={handleChange} />
                   <InputRow>
-                     <StyledTextField label="닉네임" name="nickname" value={formData.nickname} onChange={handleChange} error={!!errors.nickname} helperText={errors.nickname || successMessages.nickname || ''} />
-                     <CheckButton onClick={checkDuplicateNickname}>중복 확인</CheckButton>
+                     <StyledTextField
+                        label="닉네임"
+                        name="nickname"
+                        value={formData.nickname}
+                        onChange={handleChange}
+                        onBlur={checkDuplicateNickname} // ✅ 입력 후 포커스 아웃 시 자동 실행
+                        error={!!errors.nickname}
+                        helperText={errors.nickname || successMessages.nickname || ''}
+                     />
+                     <CheckButton onClick={checkDuplicateNickname}>중복 확인</CheckButton> {/* ✅ 버튼 클릭 시 실행 */}
                   </InputRow>
 
                   <InputRow>
-                     <StyledTextField label="아이디" name="login_id" value={formData.login_id} onChange={handleChange} error={!!errors.login_id} helperText={errors.login_id || successMessages.login_id || ''} />
-                     <CheckButton onClick={checkDuplicateId}>중복 확인</CheckButton>
+                     <StyledTextField
+                        label="아이디"
+                        name="loginId"
+                        value={formData.loginId}
+                        onChange={handleChange}
+                        onBlur={checkDuplicateId} // ✅ 입력 후 포커스 아웃 시 자동 실행
+                        error={!!errors.loginId}
+                        helperText={errors.loginId || successMessages.loginId || ''}
+                     />
+                     <CheckButton onClick={checkDuplicateId}>중복 확인</CheckButton> {/* ✅ 버튼 클릭 시 실행 */}
                   </InputRow>
                   <StyledTextField label="이메일" name="email" type="email" value={formData.email} onChange={handleChange} error={!!errors.email} helperText={errors.email || ''} autoComplete="email" />
                   <StyledTextField label="비밀번호" name="password" type="password" value={formData.password} onChange={handleChange} helperText="비밀번호는 최소 8자 이상, 영문/숫자/특수문자를 포함해야 합니다." autoComplete="new-password" />
