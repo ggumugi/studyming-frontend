@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import dayjs from 'dayjs'
 import { useDispatch, useSelector } from 'react-redux'
-import { fetchDdays, addDdayAsync, updateDdayAsync, deleteDdayAsync } from '../../features/ddaySlice'
+import { fetchDdays, addDdayAsync, updateDdayAsync, deleteDdayAsync } from '../../features/dDaySlice'
 
 const Dday = () => {
    const dispatch = useDispatch()
