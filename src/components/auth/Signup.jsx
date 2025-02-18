@@ -30,6 +30,8 @@ const Signup = () => {
    // 입력 변경 핸들러
    const handleChange = (e) => {
       setFormData({ ...formData, [e.target.name]: e.target.value })
+      setErrors({ ...errors, [e.target.name]: '' }) // ✅ 입력 시 기존 에러 제거
+      setSuccessMessages({ ...successMessages, [e.target.name]: '' }) // ✅ 기존 성공 메시지도 초기화
    }
 
    const validate = () => {
@@ -131,11 +133,12 @@ const Signup = () => {
                <InputWrapper>
                   <StyledTextField label="이름" name="name" value={formData.name} onChange={handleChange} />
                   <InputRow>
-                     <StyledTextField label="닉네임" name="nickname" value={formData.nickname} onChange={handleChange} onBlur={checkDuplicateNickname} error={!!errors.nickname} helperText={errors.nickname || ''} />
+                     <StyledTextField label="닉네임" name="nickname" value={formData.nickname} onChange={handleChange} error={!!errors.nickname} helperText={errors.nickname || successMessages.nickname || ''} />
                      <CheckButton onClick={checkDuplicateNickname}>중복 확인</CheckButton>
                   </InputRow>
+
                   <InputRow>
-                     <StyledTextField label="아이디" name="login_id" value={formData.login_id} onChange={handleChange} onBlur={checkDuplicateId} error={!!errors.login_id} helperText={errors.login_id || ''} />
+                     <StyledTextField label="아이디" name="login_id" value={formData.login_id} onChange={handleChange} error={!!errors.login_id} helperText={errors.login_id || successMessages.login_id || ''} />
                      <CheckButton onClick={checkDuplicateId}>중복 확인</CheckButton>
                   </InputRow>
                   <StyledTextField label="이메일" name="email" type="email" value={formData.email} onChange={handleChange} error={!!errors.email} helperText={errors.email || ''} autoComplete="email" />
