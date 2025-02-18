@@ -6,14 +6,8 @@ import { TextField, Button } from '@mui/material'
 
 import { RiKakaoTalkFill } from 'react-icons/ri'
 import { FcGoogle } from 'react-icons/fc'
-import { signupUserThunk } from '../../features/authSlice'
+import { signupUserThunk, checkIdDuplicateThunk, checkNicknameDuplicateThunk } from '../../features/authSlice'
 import { useDispatch } from 'react-redux'
-import axios from 'axios'
-
-//ui 툴 구상
-//이메일 형식 검사(이상하게 입력 시 작성해달라고 글씨가 뜸),비밀번호확인과 비밀번호 입력필드 서로 다르면 안내문자 뜨기 구현
-
-//백엔드 구현 후 닉네임 아이디 중복 검사기능 구현 -> 후에 버튼 눌렀을 시 중복된 닉네임,중복된 아이디입니다 입력필드 밑에 뜨게 구현
 
 const Signup = () => {
    const navigate = useNavigate()
@@ -35,7 +29,6 @@ const Signup = () => {
 
    // 입력 변경 핸들러
    const handleChange = (e) => {
-      console.log(`입력 필드 변경 - ${e.target.name}:`, e.target.value) // ✅ 변경값 확인
       setFormData({ ...formData, [e.target.name]: e.target.value })
    }
 
@@ -57,7 +50,6 @@ const Signup = () => {
       return Object.keys(newErrors).length === 0
    }
 
-<<<<<<< HEAD
    // ✅ 아이디 중복 확인
    const checkDuplicateId = () => {
       if (!formData.login_id) {
@@ -104,12 +96,16 @@ const Signup = () => {
          })
    }
 
+   // ✅ 회원가입 버튼 클릭 시 실행
    const handleSubmit = (e) => {
       e.preventDefault()
       if (!validate()) return
 
-      // ✅ 이미 중복 체크한 에러가 있으면 바로 리턴
-      if (errors.login_id || errors.nickname) return
+      // ✅ 중복 확인을 하지 않았거나, 중복된 경우 회원가입 진행 불가
+      if (errors.login_id || errors.nickname) {
+         alert('닉네임과 아이디 중복 확인을 먼저 해주세요.')
+         return
+      }
 
       dispatch(signupUserThunk(formData))
          .unwrap()
@@ -124,54 +120,16 @@ const Signup = () => {
                general: '회원가입 중 오류가 발생했습니다.',
             }))
          })
-=======
-   const handleSubmit = async (e) => {
-      e.preventDefault()
-      if (!validate()) return
-
-      try {
-         dispatch(signupUserThunk(formData))
-            .unwrap()
-            .then((user) => {
-               if (user && user.nickname) {
-                  alert(`회원가입이 완료되었습니다! ${user.nickname}님, 로그인해주세요.`)
-               } else {
-                  alert('회원가입이 완료되었습니다! 로그인해주세요.')
-               }
-               navigate('/login') // ✅ 회원가입 후 로그인 페이지로 이동
-            })
-            .catch((error) => {
-               console.error('❌ 회원가입 실패:', error)
-
-               if (error.response?.status === 409) {
-                  // 중복된 아이디 또는 닉네임 오류 처리
-                  setErrors((prevErrors) => ({
-                     ...prevErrors,
-                     login_id: error.response.data.message.includes('아이디') ? '중복된 아이디입니다.' : prevErrors.login_id,
-                     nickname: error.response.data.message.includes('닉네임') ? '중복된 닉네임입니다.' : prevErrors.nickname,
-                  }))
-               } else {
-                  setErrors((prevErrors) => ({
-                     ...prevErrors,
-                     general: '회원가입 중 오류가 발생했습니다.',
-                  }))
-               }
-            })
-      } catch (error) {
-         console.error('회원가입 실패:', error)
-      }
->>>>>>> 235bfecd710c9df6fee2799611b8dc00e904ca2c
    }
+
    return (
       <Wrapper>
          <FormContainer>
             <form onSubmit={handleSubmit}>
-               {/* ✅ 폼 태그 추가 */}
                <Title>회원가입</Title>
                <StyledDivider />
                <InputWrapper>
                   <StyledTextField label="이름" name="name" value={formData.name} onChange={handleChange} />
-<<<<<<< HEAD
                   <InputRow>
                      <StyledTextField label="닉네임" name="nickname" value={formData.nickname} onChange={handleChange} onBlur={checkDuplicateNickname} error={!!errors.nickname} helperText={errors.nickname || ''} />
                      <CheckButton onClick={checkDuplicateNickname}>중복 확인</CheckButton>
@@ -180,19 +138,13 @@ const Signup = () => {
                      <StyledTextField label="아이디" name="login_id" value={formData.login_id} onChange={handleChange} onBlur={checkDuplicateId} error={!!errors.login_id} helperText={errors.login_id || ''} />
                      <CheckButton onClick={checkDuplicateId}>중복 확인</CheckButton>
                   </InputRow>
-=======
-                  <StyledTextField label="닉네임" name="nickname" value={formData.nickname} onChange={handleChange} error={!!errors.nickname} helperText={errors.nickname || ''} />
->>>>>>> 235bfecd710c9df6fee2799611b8dc00e904ca2c
                   <StyledTextField label="이메일" name="email" type="email" value={formData.email} onChange={handleChange} error={!!errors.email} helperText={errors.email || ''} autoComplete="email" />
-                  <StyledTextField label="아이디" name="login_id" value={formData.login_id} onChange={handleChange} error={!!errors.login_id} helperText={errors.login_id || ''} />
-
                   <StyledTextField label="비밀번호" name="password" type="password" value={formData.password} onChange={handleChange} helperText="비밀번호는 최소 8자 이상, 영문/숫자/특수문자를 포함해야 합니다." autoComplete="new-password" />
                   <StyledTextField label="비밀번호 확인" name="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleChange} error={!!errors.confirmPassword} helperText={errors.confirmPassword || ''} autoComplete="new-password" />
                </InputWrapper>
-               <StyledButton type="submit">회원가입</StyledButton> {/* ✅ 버튼 타입 변경 */}
+               <StyledButton type="submit">회원가입</StyledButton>
             </form>
 
-            {/* SNS 로그인 */}
             <StyledDividerText>
                <Line /> SNS 로그인 <Line />
             </StyledDividerText>
@@ -230,7 +182,7 @@ const FormContainer = styled.div`
 const Title = styled.h2`
    font-weight: bold;
    text-align: left;
-   color: black; /* ✅ 회원가입 문구 검정색 적용 */
+   color: black;
 `
 
 const StyledDivider = styled.div`
@@ -245,24 +197,20 @@ const InputWrapper = styled.div`
    flex-direction: column;
    gap: 20px;
 `
-<<<<<<< HEAD
 
 const InputRow = styled.div`
    display: flex;
    align-items: center;
    gap: 10px;
 `
-=======
->>>>>>> 235bfecd710c9df6fee2799611b8dc00e904ca2c
 
 const StyledTextField = styled(TextField)`
    width: 100%;
    &.MuiTextField-root {
-      margin-bottom: 20px; /* ✅ 필드 간격 조정 */
+      margin-bottom: 20px;
    }
 `
 
-<<<<<<< HEAD
 const CheckButton = styled(Button)`
    height: 56px;
    width: 120px;
@@ -272,8 +220,6 @@ const CheckButton = styled(Button)`
    border-radius: 10px !important;
 `
 
-=======
->>>>>>> 235bfecd710c9df6fee2799611b8dc00e904ca2c
 const StyledButton = styled(Button)`
    width: 100%;
    background-color: #ff7a00 !important;
@@ -282,7 +228,7 @@ const StyledButton = styled(Button)`
    font-size: 16px;
    padding: 10px;
    border-radius: 10px !important;
-   margin-top: 30px; /* ✅ 비밀번호 확인 필드와 회원가입 버튼 사이 margin 추가 */
+   margin-top: 30px;
 `
 
 const SNSWrapper = styled.div`
@@ -299,7 +245,7 @@ const StyledDividerText = styled.div`
    justify-content: center;
    width: 100%;
    max-width: 650px;
-   margin: 40px 0 0px; /* SNS 로그인 선 간격 조정 */
+   margin: 40px 0 0px;
    color: gray;
    font-size: 14px;
    font-weight: 500;
@@ -312,6 +258,7 @@ const Line = styled.div`
    background-color: #ddd;
    margin: 0 15px;
 `
+
 const SNSLogin = styled(Button)`
    width: 100%;
    border: 1px solid #ddd !important;
