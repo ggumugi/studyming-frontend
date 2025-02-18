@@ -28,8 +28,13 @@ export const loginUser = async (credentials) => {
 // 아이디 중복 확인 API
 export const checkIdDuplicate = async (loginId) => {
    try {
+<<<<<<< HEAD
       const response = await studymingApi.get('/auth/check-id', { params: { loginId } })
       return { success: true, message: response.data.message } // ✅ 중복 아님
+=======
+      const response = await studymingApi.get(`/auth/check-id`, { params: { login_id } })
+      return response.data
+>>>>>>> 03093f0155aad48c277ea5f6b32627684e4e58a8
    } catch (error) {
       if (error.response?.status === 409) {
          return { success: false, message: '이미 사용 중인 아이디입니다.' } // ✅ 중복임
@@ -41,8 +46,13 @@ export const checkIdDuplicate = async (loginId) => {
 // 닉네임 중복 확인 API
 export const checkNicknameDuplicate = async (nickname) => {
    try {
+<<<<<<< HEAD
       const response = await studymingApi.get('/auth/check-nickname', { params: { nickname } })
       return { success: true, message: response.data.message } // ✅ 중복 아님
+=======
+      const response = await studymingApi.get(`/auth/check-nickname`, { params: { nickname } })
+      return response.data
+>>>>>>> 03093f0155aad48c277ea5f6b32627684e4e58a8
    } catch (error) {
       if (error.response?.status === 409) {
          return { success: false, message: '이미 사용 중인 닉네임입니다.' } // ✅ 중복임

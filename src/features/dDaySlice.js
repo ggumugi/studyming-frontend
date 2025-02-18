@@ -44,7 +44,7 @@ const dDaySlice = createSlice({
          })
          .addCase(fetchDdays.fulfilled, (state, action) => {
             state.loading = false
-            state.ddays = action.payload
+            state.dDays = action.payload
          })
          .addCase(fetchDdays.rejected, (state, action) => {
             state.loading = false
@@ -89,7 +89,7 @@ const dDaySlice = createSlice({
          })
          .addCase(deleteDdayAsync.fulfilled, (state, action) => {
             state.loading = false
-            state.ddays = state.dDays.filter((d) => d.id !== action.payload)
+            state.dDays = state.dDays.filter((d) => d.id !== action.payload)
          })
          .addCase(deleteDdayAsync.rejected, (state, action) => {
             state.loading = false

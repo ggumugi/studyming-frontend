@@ -7,7 +7,7 @@ import { fetchDdays, addDdayAsync, updateDdayAsync, deleteDdayAsync } from '../.
 
 const Dday = () => {
    const dispatch = useDispatch()
-   const { ddays, loading } = useSelector((state) => state.dday) // Redux에서 D-day 목록 가져오기
+   const { dDays = [], loading } = useSelector((state) => state.dDay || { dDays: [] }) // Redux에서 D-day 목록 가져오기
 
    const [ddayTitle, setDdayTitle] = useState('')
    const [ddayDate, setDdayDate] = useState('')
@@ -27,7 +27,7 @@ const Dday = () => {
          return
       }
 
-      if (ddays.length >= 5) {
+      if (dDays.length >= 5) {
          alert('D-day는 최대 5개까지 입력 가능합니다.')
          return
       }
@@ -40,7 +40,7 @@ const Dday = () => {
 
    // ✅ D-day 수정 및 삭제 (Redux 사용)
    const handleEditSave = async (index, field) => {
-      const ddayId = ddays[index].id // ✅ ID 가져오기
+      const ddayId = dDays[index].id // ✅ ID 가져오기
 
       if (tempValue.trim() === '') {
          dispatch(deleteDdayAsync(ddayId)) // ✅ Redux에서 삭제
@@ -48,8 +48,8 @@ const Dday = () => {
          // ✅ 수정되지 않은 값도 포함하여 기존 데이터를 유지
          const updatedDday = {
             id: ddayId,
-            dName: field === 'title' ? tempValue : ddays[index].dName, // ✅ 제목 유지
-            dDay: field === 'date' ? tempValue : ddays[index].dDay, // ✅ 날짜 유지
+            dName: field === 'title' ? tempValue : dDays[index].dName, // ✅ 제목 유지
+            dDay: field === 'date' ? tempValue : dDays[index].dDay, // ✅ 날짜 유지
          }
 
          dispatch(updateDdayAsync({ id: ddayId, updatedDday })) // ✅ Redux에서 수정
@@ -78,14 +78,14 @@ const Dday = () => {
    return (
       <Box>
          <Title>
-            D-day <AddButton onClick={() => (ddays.length < 5 ? setIsDdayModalOpen(true) : alert('D-day는 최대 5개까지 입력 가능합니다.'))}>+</AddButton>
+            D-day <AddButton onClick={() => (dDays.length < 5 ? setIsDdayModalOpen(true) : alert('D-day는 최대 5개까지 입력 가능합니다.'))}>+</AddButton>
          </Title>
          <Line />
          <List>
             {loading ? (
                <p>로딩 중...</p>
-            ) : (
-               ddays.map((dday, index) => (
+            ) : dDays.length > 0 ? (
+               dDays.map((dday, index) => (
                   <Item key={index}>
                      {/* 🔥 제목 수정 가능 */}
                      {editingIndex === `${index}-title` ? (
@@ -107,6 +107,8 @@ const Dday = () => {
                      <DdayRight>{calculateDday(dday.dDay)}</DdayRight>
                   </Item>
                ))
+            ) : (
+               <p>D-day가 없습니다.</p>
             )}
          </List>
 

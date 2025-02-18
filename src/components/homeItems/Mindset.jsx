@@ -1,35 +1,65 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchMindsets, addMindsetAsync, updateMindsetAsync, deleteMindsetAsync } from '../../features/mindsetSlice'
 import styled from 'styled-components'
 
 const Mindset = () => {
-   const [promises, setPromises] = useState([])
+   const dispatch = useDispatch()
+   const { mindsets, loading, error } = useSelector((state) => state.mindset || { mindsets: [] })
+
    const [promiseInput, setPromiseInput] = useState('')
    const [isPromiseModalOpen, setIsPromiseModalOpen] = useState(false)
    const [editingIndex, setEditingIndex] = useState(null)
    const [tempValue, setTempValue] = useState('')
    const [errorMessage, setErrorMessage] = useState('')
 
+   useEffect(() => {
+      dispatch(fetchMindsets()) // 컴포넌트 마운트 시 데이터 로드
+   }, [dispatch])
+
+   // const handleAddPromise = () => {
+   //    if (promiseInput.trim() === '') {
+   //       setErrorMessage('다짐을 입력하세요!')
+   //       return
+   //    }
+   //    if (promiseInput.length > 100) {
+   //       setErrorMessage('다짐은 최대 100자까지 입력 가능합니다.')
+   //       return
+   //    }
+   //    if (mindsets.length < 3) {
+   //       dispatch(addMindsetAsync({ content: promiseInput }))
+   //       setPromiseInput('')
+   //       setErrorMessage('')
+   //       setIsPromiseModalOpen(false)
+   //    }
+   // }
    const handleAddPromise = () => {
       if (promiseInput.trim() === '') {
          setErrorMessage('다짐을 입력하세요!')
          return
       }
-
       if (promiseInput.length > 100) {
          setErrorMessage('다짐은 최대 100자까지 입력 가능합니다.')
          return
       }
-
-      if (promises.length < 3) {
-         setPromises([...promises, promiseInput])
-         setPromiseInput('')
-         setErrorMessage('')
-         setIsPromiseModalOpen(false)
+      if (mindsets.length < 3) {
+         dispatch(addMindsetAsync({ mindset: promiseInput }))
+            .unwrap() // unwrap을 사용하여 결과를 처리
+            .then(() => {
+               setPromiseInput('')
+               setErrorMessage('')
+               setIsPromiseModalOpen(false)
+               dispatch(fetchMindsets()) // 추가된 데이터 다시 불러오기
+            })
+            .catch((error) => {
+               // 오류 처리
+               setErrorMessage(error.message || '다짐 추가 중 오류가 발생했습니다.')
+            })
       }
    }
 
    const handleOpenModal = () => {
-      if (promises.length >= 3) {
+      if (mindsets.length >= 3) {
          alert('다짐은 최대 3개까지 입력 가능합니다.')
          return
       }
@@ -38,7 +68,7 @@ const Mindset = () => {
 
    const handleEditStart = (index) => {
       setEditingIndex(index)
-      setTempValue(promises[index])
+      setTempValue(mindsets[index].content)
    }
 
    const handleEditChange = (e) => {
@@ -51,13 +81,11 @@ const Mindset = () => {
       }
    }
 
-   const handleEditSave = (index) => {
+   const handleEditSave = (id) => {
       if (tempValue.trim() === '') {
-         setPromises(promises.filter((_, i) => i !== index))
+         dispatch(deleteMindsetAsync(id))
       } else {
-         const updatedPromises = [...promises]
-         updatedPromises[index] = tempValue
-         setPromises(updatedPromises)
+         dispatch(updateMindsetAsync({ id, updatedMindset: { content: tempValue } }))
       }
       setEditingIndex(null)
       setErrorMessage('')
@@ -70,18 +98,24 @@ const Mindset = () => {
          </Title>
          <Line />
          <List>
-            {promises.map((promise, index) => (
-               <Item key={index}>
-                  {editingIndex === index ? (
-                     <InputWrapper>
-                        <EditInput type="text" value={tempValue} onChange={handleEditChange} onBlur={() => handleEditSave(index)} onKeyDown={(e) => e.key === 'Enter' && handleEditSave(index)} autoFocus />
-                        {errorMessage && <ErrorText>{errorMessage}</ErrorText>}
-                     </InputWrapper>
-                  ) : (
-                     <Text onClick={() => handleEditStart(index)}>{promise}</Text>
-                  )}
-               </Item>
-            ))}
+            {loading ? (
+               <p>로딩 중...</p>
+            ) : mindsets.length > 0 ? (
+               mindsets.map((mindset, index) => (
+                  <Item key={mindset.id}>
+                     {editingIndex === index ? (
+                        <InputWrapper>
+                           <EditInput type="text" value={tempValue} onChange={handleEditChange} onBlur={() => handleEditSave(mindset.id)} onKeyDown={(e) => e.key === 'Enter' && handleEditSave(mindset.id)} autoFocus />
+                           {errorMessage && <ErrorText>{errorMessage}</ErrorText>}
+                        </InputWrapper>
+                     ) : (
+                        <Text onClick={() => handleEditStart(index)}>{mindset.content}</Text>
+                     )}
+                  </Item>
+               ))
+            ) : (
+               <p>다짐이 없습니다.</p>
+            )}
          </List>
 
          {isPromiseModalOpen && (
@@ -116,7 +150,6 @@ const Mindset = () => {
       </Box>
    )
 }
-
 // ✅ Styled Components
 const Box = styled.div`
    margin: auto;
