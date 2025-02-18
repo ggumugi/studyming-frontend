@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { signupUser, loginUser, logoutUser, checkAuthStatus, googleLoginApi } from '../api/authApi' // ✅ 수정된 API
+import { signupUser, loginUser, checkIdDuplicate, checkNicknameDuplicate, logoutUser, checkAuthStatus, sendVerificationCode, verifyCodeAndFindId, googleLoginApi } from '../api/authApi' // ✅ 수정된 API
 
 // 회원가입
 export const signupUserThunk = createAsyncThunk('auth/signupUser', async (userData, { rejectWithValue }) => {
@@ -18,6 +18,44 @@ export const loginUserThunk = createAsyncThunk('auth/loginUser', async (credenti
       return response.user
    } catch (error) {
       return rejectWithValue(error.response?.data?.message || '로그인 실패')
+   }
+})
+
+// 아이디 중복 확인 Thunk
+export const checkIdDuplicateThunk = createAsyncThunk('auth/checkIdDuplicate', async (login_id, { rejectWithValue }) => {
+   try {
+      const response = await checkIdDuplicate(login_id)
+      return response
+   } catch (error) {
+      return rejectWithValue(error.response?.data?.message || '아이디 중복확인 실패')
+   }
+})
+
+// 닉네임 중복 확인 Thunk
+export const checkNicknameDuplicateThunk = createAsyncThunk('auth/checkNicknameDuplicate', async (nickname, { rejectWithValue }) => {
+   try {
+      const response = await checkNicknameDuplicate(nickname)
+      return response
+   } catch (error) {
+      return rejectWithValue(error.response?.data?.message || '닉네임 중복 확인 실패')
+   }
+})
+
+// ✅ 1. 이메일 인증 코드 전송 Thunk
+export const sendCodeThunk = createAsyncThunk('auth/sendCode', async (email, { rejectWithValue }) => {
+   try {
+      return await sendVerificationCode(email)
+   } catch (error) {
+      return rejectWithValue(error)
+   }
+})
+
+// ✅ 2. 인증 코드 확인 및 아이디 찾기 Thunk
+export const verifyCodeThunk = createAsyncThunk('auth/verifyCode', async ({ email, verificationCode }, { rejectWithValue }) => {
+   try {
+      return await verifyCodeAndFindId(email, verificationCode)
+   } catch (error) {
+      return rejectWithValue(error)
    }
 })
 
@@ -94,18 +132,58 @@ const authSlice = createSlice({
             state.loading = false
             state.error = action.payload
          })
-      // 로그아웃
-      builder
-         .addCase(logoutUserThunk.pending, (state) => {
+         // 아이디 중복 확인
+         .addCase(checkIdDuplicateThunk.pending, (state) => {
+            state.loading = true
+            state.idCheckMessage = null
+            state.error = null
+         })
+         .addCase(checkIdDuplicateThunk.fulfilled, (state, action) => {
+            state.loading = false
+            state.idCheckMessage = action.payload.message
+         })
+         .addCase(checkIdDuplicateThunk.rejected, (state, action) => {
+            state.loading = false
+            state.idCheckMessage = action.payload
+         })
+
+         // 닉네임 중복 확인
+         .addCase(checkNicknameDuplicateThunk.pending, (state) => {
+            state.loading = true
+            state.nicknameCheckMessage = null
+            state.error = null
+         })
+         .addCase(checkNicknameDuplicateThunk.fulfilled, (state, action) => {
+            state.loading = false
+            state.nicknameCheckMessage = action.payload.message
+         })
+         .addCase(checkNicknameDuplicateThunk.rejected, (state, action) => {
+            state.loading = false
+            state.nicknameCheckMessage = action.payload
+         })
+         //인증코드 보내기(아이디)
+         .addCase(sendCodeThunk.pending, (state) => {
             state.loading = true
             state.error = null
          })
-         .addCase(logoutUserThunk.fulfilled, (state, action) => {
+         .addCase(sendCodeThunk.fulfilled, (state, action) => {
             state.loading = false
-            state.isAuthenticated = false
-            state.user = null // 로그아웃 후 유저 정보 초기화
+            state.successMessage = action.payload.message
          })
-         .addCase(logoutUserThunk.rejected, (state, action) => {
+         .addCase(sendCodeThunk.rejected, (state, action) => {
+            state.loading = false
+            state.error = action.payload
+         })
+         //인증번호 확인(아이디)
+         .addCase(verifyCodeThunk.pending, (state) => {
+            state.loading = true
+            state.error = null
+         })
+         .addCase(verifyCodeThunk.fulfilled, (state, action) => {
+            state.loading = false
+            state.loginId = action.payload.loginId
+         })
+         .addCase(verifyCodeThunk.rejected, (state, action) => {
             state.loading = false
             state.error = action.payload
          })

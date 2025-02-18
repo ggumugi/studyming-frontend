@@ -19,7 +19,7 @@ const Login = () => {
    const { loading, error } = useSelector((state) => state.auth)
 
    const [formData, setFormData] = useState({
-      login_id: '',
+      loginId: '',
       password: '',
    })
    //아이디 저장
@@ -50,7 +50,7 @@ const Login = () => {
    const handleSubmit = (e) => {
       e.preventDefault()
       if (rememberMe) {
-         localStorage.setItem('savedLoginId', formData.login_id) //체크 시 아이디 저장
+         localStorage.setItem('savedLoginId', formData.loginId) //체크 시 아이디 저장
       } else {
          localStorage.removeItem('savedLoginId') //체크 해제 시 삭제
       }
@@ -79,7 +79,7 @@ const Login = () => {
 
             <form onSubmit={handleSubmit}>
                <InputWrapper>
-                  <StyledTextField label="아이디" name="login_id" value={formData.login_id} onChange={handleChange} error={!!error} helperText={error || ''} />
+                  <StyledTextField label="아이디" name="loginId" value={formData.loginId} onChange={handleChange} error={!!error} helperText={error || ''} />
                   <StyledTextField label="비밀번호" name="password" type="password" value={formData.password} onChange={handleChange} error={!!error} helperText={error || ''} />
                </InputWrapper>
 
