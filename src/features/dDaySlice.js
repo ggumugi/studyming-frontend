@@ -1,35 +1,35 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { getDdays, addDday, updateDday, deleteDday } from '../api/ddayApi'
+import { getDdays, addDday, updateDday, deleteDday } from '../api/dDayApi'
 
 // ✅ 모든 D-day 불러오기 (비동기)
-export const fetchDdays = createAsyncThunk('dday/fetchDdays', async () => {
+export const fetchDdays = createAsyncThunk('dDay/fetchDdays', async () => {
    const data = await getDdays()
    return data
 })
 
 // ✅ 새로운 D-day 추가 (비동기)
-export const addDdayAsync = createAsyncThunk('dday/addDday', async (newDday) => {
+export const addDdayAsync = createAsyncThunk('dDay/addDday', async (newDday) => {
    const addedDday = await addDday(newDday)
    return addedDday
 })
 
 // ✅ D-day 수정 (비동기)
-export const updateDdayAsync = createAsyncThunk('dday/updateDday', async ({ id, updatedDday }) => {
+export const updateDdayAsync = createAsyncThunk('dDay/updateDday', async ({ id, updatedDday }) => {
    await updateDday(id, updatedDday)
    return { id, updatedDday }
 })
 
 // ✅ D-day 삭제 (비동기)
-export const deleteDdayAsync = createAsyncThunk('dday/deleteDday', async (id) => {
+export const deleteDdayAsync = createAsyncThunk('dDay/deleteDday', async (id) => {
    await deleteDday(id)
    return id
 })
 
 // ✅ slice 생성
 const ddaySlice = createSlice({
-   name: 'dday',
+   name: 'dDay',
    initialState: {
-      ddays: [],
+      dDays: [],
       loading: false,
       error: null,
    },
@@ -58,7 +58,7 @@ const ddaySlice = createSlice({
          })
          .addCase(addDdayAsync.fulfilled, (state, action) => {
             state.loading = false
-            state.ddays.push(action.payload)
+            state.dDays.push(action.payload)
          })
          .addCase(addDdayAsync.rejected, (state, action) => {
             state.loading = false
@@ -72,9 +72,9 @@ const ddaySlice = createSlice({
          })
          .addCase(updateDdayAsync.fulfilled, (state, action) => {
             state.loading = false
-            const index = state.ddays.findIndex((d) => d.id === action.payload.id)
+            const index = state.dDays.findIndex((d) => d.id === action.payload.id)
             if (index !== -1) {
-               state.ddays[index] = { ...state.ddays[index], ...action.payload.updatedDday }
+               state.dDays[index] = { ...state.dDays[index], ...action.payload.updatedDday }
             }
          })
          .addCase(updateDdayAsync.rejected, (state, action) => {
@@ -89,7 +89,7 @@ const ddaySlice = createSlice({
          })
          .addCase(deleteDdayAsync.fulfilled, (state, action) => {
             state.loading = false
-            state.ddays = state.ddays.filter((d) => d.id !== action.payload)
+            state.ddays = state.dDays.filter((d) => d.id !== action.payload)
          })
          .addCase(deleteDdayAsync.rejected, (state, action) => {
             state.loading = false
@@ -98,4 +98,4 @@ const ddaySlice = createSlice({
    },
 })
 
-export default ddaySlice.reducer
+export default dDaySlice.reducer
