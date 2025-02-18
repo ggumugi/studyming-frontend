@@ -28,7 +28,7 @@ export const loginUser = async (credentials) => {
 // 아이디 중복 확인 API
 export const checkIdDuplicate = async (login_id) => {
    try {
-      const response = await studymingApi.get(`${API_URL}/auth/check-id`, { params: { login_id } })
+      const response = await studymingApi.get(`/auth/check-id`, { params: { login_id } })
       return response.data
    } catch (error) {
       throw error.response?.data?.message || '아이디 중복 확인 실패'
@@ -38,7 +38,7 @@ export const checkIdDuplicate = async (login_id) => {
 // 닉네임 중복 확인 API
 export const checkNicknameDuplicate = async (nickname) => {
    try {
-      const response = await studymingApi.get(`${API_URL}/auth/check-nickname`, { params: { nickname } })
+      const response = await studymingApi.get(`/auth/check-nickname`, { params: { nickname } })
       return response.data
    } catch (error) {
       throw error.response?.data?.message || '닉네임 중복 확인 실패'
