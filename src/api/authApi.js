@@ -1,12 +1,10 @@
-import axios from 'axios'
-
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000'
+import studymingApi from './axiosApi' // studymingApi 인스턴스를 import
 
 // 회원가입
 export const signupUser = async (userData) => {
    try {
       console.log('회원가입 요청 데이터:', userData) // ✅ 실제 프론트에서 보낼 데이터 확인
-      const response = await axios.post(`${API_URL}/auth/signup`, userData, { withCredentials: true })
+      const response = await studymingApi.post('/auth/signup', userData)
       return response.data
    } catch (error) {
       console.error('Signup failed', error)
@@ -18,7 +16,7 @@ export const signupUser = async (userData) => {
 export const loginUser = async (credentials) => {
    try {
       console.log('📡 로그인 요청 데이터:', credentials)
-      const response = await axios.post(`${API_URL}/auth/login`, credentials, { withCredentials: true })
+      const response = await studymingApi.post('/auth/login', credentials)
       console.log('✅ 로그인 응답 데이터:', response.data)
       return response.data
    } catch (error) {
@@ -50,7 +48,7 @@ export const checkNicknameDuplicate = async (nickname) => {
 // 로그아웃
 export const logoutUser = async () => {
    try {
-      await axios.get(`${API_URL}/auth/logout`, { withCredentials: true })
+      await studymingApi.get('/auth/logout')
    } catch (error) {
       console.error('Logout failed', error)
       throw error
@@ -60,7 +58,7 @@ export const logoutUser = async () => {
 // 로그인 상태 확인
 export const checkAuthStatus = async () => {
    try {
-      const response = await axios.get(`${API_URL}/auth/status`, { withCredentials: true })
+      const response = await studymingApi.get('/auth/status')
       return response.data
    } catch (error) {
       console.error('Auth check failed', error)
@@ -71,7 +69,7 @@ export const checkAuthStatus = async () => {
 // 구글 로그인 (토큰 기반 로그인)
 export const googleLoginApi = async (tokenId) => {
    try {
-      const response = await axios.post(`${API_URL}/auth/google-login`, { tokenId }, { withCredentials: true })
+      const response = await studymingApi.post('/auth/google-login', { tokenId })
       return response.data
    } catch (error) {
       console.error('Google login API failed', error)
