@@ -27,6 +27,26 @@ export const loginUser = async (credentials) => {
    }
 }
 
+// 아이디 중복 확인 API
+export const checkIdDuplicate = async (login_id) => {
+   try {
+      const response = await axios.get(`${API_URL}/auth/check-id`, { params: { login_id } })
+      return response.data
+   } catch (error) {
+      throw error.response?.data?.message || '아이디 중복 확인 실패'
+   }
+}
+
+// 닉네임 중복 확인 API
+export const checkNicknameDuplicate = async (nickname) => {
+   try {
+      const response = await axios.get(`${API_URL}/auth/check-nickname`, { params: { nickname } })
+      return response.data
+   } catch (error) {
+      throw error.response?.data?.message || '닉네임 중복 확인 실패'
+   }
+}
+
 // 로그아웃
 export const logoutUser = async () => {
    try {
