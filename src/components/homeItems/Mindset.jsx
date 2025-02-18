@@ -17,6 +17,22 @@ const Mindset = () => {
       dispatch(fetchMindsets()) // 컴포넌트 마운트 시 데이터 로드
    }, [dispatch])
 
+   // const handleAddPromise = () => {
+   //    if (promiseInput.trim() === '') {
+   //       setErrorMessage('다짐을 입력하세요!')
+   //       return
+   //    }
+   //    if (promiseInput.length > 100) {
+   //       setErrorMessage('다짐은 최대 100자까지 입력 가능합니다.')
+   //       return
+   //    }
+   //    if (mindsets.length < 3) {
+   //       dispatch(addMindsetAsync({ content: promiseInput }))
+   //       setPromiseInput('')
+   //       setErrorMessage('')
+   //       setIsPromiseModalOpen(false)
+   //    }
+   // }
    const handleAddPromise = () => {
       if (promiseInput.trim() === '') {
          setErrorMessage('다짐을 입력하세요!')
@@ -27,10 +43,18 @@ const Mindset = () => {
          return
       }
       if (mindsets.length < 3) {
-         dispatch(addMindsetAsync({ content: promiseInput }))
-         setPromiseInput('')
-         setErrorMessage('')
-         setIsPromiseModalOpen(false)
+         dispatch(addMindsetAsync({ mindset: promiseInput }))
+            .unwrap() // unwrap을 사용하여 결과를 처리
+            .then(() => {
+               setPromiseInput('')
+               setErrorMessage('')
+               setIsPromiseModalOpen(false)
+               dispatch(fetchMindsets()) // 추가된 데이터 다시 불러오기
+            })
+            .catch((error) => {
+               // 오류 처리
+               setErrorMessage(error.message || '다짐 추가 중 오류가 발생했습니다.')
+            })
       }
    }
 
