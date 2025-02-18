@@ -1,33 +1,35 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { getDdays, addDday, updateDday, deleteDday } from '../api/dDayApi'
+import { getMindset, addMindset, updateMindset, deleteMindset } from '../api/mindsetApiApi'
 
-//  모든 D-day 불러오기 (비동기)
-export const fetchDdays = createAsyncThunk('dDay/fetchDdays', async () => {
-   const data = await getDdays()
+//  모든 mindset 불러오기 (비동기)
+export const fetchMindsets = createAsyncThunk('mindset/fetchMindsets', async () => {
+   const data = await getMindset()
    return data
 })
 
-//  새로운 D-day 추가 (비동기)
-export const addDdayAsync = createAsyncThunk('dDay/addDday', async (newDday) => {
-   const addedDday = await addDday(newDday)
-   return addedDday
+/* 여기서부터 보기 */
+
+//  새로운 mindset 추가 (비동기)
+export const addMindsetAsync = createAsyncThunk('mindset/addMindset', async (newMindset) => {
+   const addedMindset = await addMindset(newMindset)
+   return addedMindset
 })
 
-//  D-day 수정 (비동기)
-export const updateDdayAsync = createAsyncThunk('dDay/updateDday', async ({ id, updatedDday }) => {
-   await updateDday(id, updatedDday)
-   return { id, updatedDday }
+//  mindset 수정 (비동기)
+export const updateMindsetAsync = createAsyncThunk('mindset/updateMindset', async ({ id, updatedMindset }) => {
+   await updateMindset(id, updatedMindset)
+   return { id, updateMindset }
 })
 
-//  D-day 삭제 (비동기)
-export const deleteDdayAsync = createAsyncThunk('dDay/deleteDday', async (id) => {
-   await deleteDday(id)
+//  mindset 삭제 (비동기)
+export const deleteDdayAsync = createAsyncThunk('mindset/deleteDday', async (id) => {
+   await deleteMindset(id)
    return id
 })
 
 //  slice 생성
-const dDaySlice = createSlice({
-   name: 'dDay',
+const ddaySlice = createSlice({
+   name: 'mindset',
    initialState: {
       dDays: [],
       loading: false,
