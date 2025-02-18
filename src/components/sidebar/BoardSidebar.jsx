@@ -90,7 +90,8 @@ export default BoardSidebar
 // ⭐ Styled Components
 const Container = styled.div`
    display: flex;
-   height: 100vh;
+   height: 100%;
+   margin-bottom: 50px;
 `
 
 const SidebarContainer = styled.nav`

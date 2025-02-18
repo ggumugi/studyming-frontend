@@ -26,12 +26,15 @@ export const loginUser = async (credentials) => {
 }
 
 // 아이디 중복 확인 API
-export const checkIdDuplicate = async (login_id) => {
+export const checkIdDuplicate = async (loginId) => {
    try {
       const response = await studymingApi.get(`/auth/check-id`, { params: { login_id } })
       return response.data
    } catch (error) {
-      throw error.response?.data?.message || '아이디 중복 확인 실패'
+      if (error.response?.status === 409) {
+         return { success: false, message: '이미 사용 중인 아이디입니다.' } // ✅ 중복임
+      }
+      return { success: false, message: error.response?.data?.message || '아이디 중복 확인 실패' }
    }
 }
 
@@ -41,7 +44,29 @@ export const checkNicknameDuplicate = async (nickname) => {
       const response = await studymingApi.get(`/auth/check-nickname`, { params: { nickname } })
       return response.data
    } catch (error) {
-      throw error.response?.data?.message || '닉네임 중복 확인 실패'
+      if (error.response?.status === 409) {
+         return { success: false, message: '이미 사용 중인 닉네임입니다.' } // ✅ 중복임
+      }
+      return { success: false, message: error.response?.data?.message || '닉네임 중복 확인 실패' }
+   }
+}
+//  1. 이메일로 인증 코드 요청
+export const sendVerificationCode = async (email) => {
+   try {
+      const response = await studymingApi.post('/auth/find-id/send-code', { email })
+      return { success: true, message: response.data.message } // ✅ 성공
+   } catch (error) {
+      return { success: false, message: error.response?.data?.message || '인증 코드 전송 실패' }
+   }
+}
+
+//  2. 인증 코드 검증 및 아이디 찾기
+export const verifyCodeAndFindId = async (email, verificationCode) => {
+   try {
+      const response = await studymingApi.post('/auth/find-id/verify-code', { email, verificationCode })
+      return { success: true, loginId: response.data.loginId } // ✅ 성공
+   } catch (error) {
+      return { success: false, message: error.response?.data?.message || '인증 코드 확인 실패' }
    }
 }
 
