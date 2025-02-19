@@ -44,7 +44,7 @@ const mindsetSlice = createSlice({
          })
          .addCase(fetchMindsets.fulfilled, (state, action) => {
             state.loading = false
-            state.mindsets = action.payload.map(({ id, mindset }) => ({ id, content: mindset })) // 불필요한 데이터 제거
+            state.mindsets = action.payload.map(({ id, mindset }) => ({ id, mindset })) // 불필요한 데이터 제거
          })
          .addCase(fetchMindsets.rejected, (state, action) => {
             state.loading = false
