@@ -1,32 +1,37 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchItems } from '../features/itemSlice' // ✅ 상품 목록 가져오기 액션
+import { fetchUserPoints } from '../features/pointSlice' // ✅ 유저 포인트 조회
 import ItemList from '../components/shop/ItemList'
 
 const MingShopPage = () => {
-   const items = [
-      { id: 1, title: '50밍', detail: '50밍 구매', price: '500', img: '/img/50ming.png', limit: null, type: 'cash' },
-      { id: 2, title: '150밍', detail: '150밍 구매', price: '1400', img: '/img/150ming.png', limit: null, type: 'cash' },
-      { id: 3, title: '250밍', detail: '250밍 구매', price: '2300', img: '/img/250ming.png', limit: null, type: 'cash' },
-      { id: 4, title: '550밍', detail: '550밍 구매', price: '4500', img: '/img/550ming.png', limit: null, type: 'cash' },
-      { id: 5, title: '웃는 토끼 콘', detail: '진심을 다해 응원하는 토끼 이모티콘', price: '100', img: '/img/sebin.png', limit: 7, type: 'emoticon' },
-      { id: 6, title: '소금뿌리는 토끼 콘 (GIF)', detail: '소금을 뿌려 액운을 막아주는 토끼 이모티콘', price: '100', img: '/img/salt.gif', limit: 7, type: 'emoticon' },
-      { id: 7, title: '혼내는 토끼 콘1 (GIF)', detail: '거대당근으로 혼내주는 토끼 이모티콘', price: '100', img: '/img/carrotsmash.gif', limit: 7, type: 'emoticon' },
-      { id: 8, title: '혼내는 토끼 콘2 (GIF)', detail: '회전 회오리로 혼내주는 토끼 이모티콘', price: '100', img: '/img/tornado.gif', limit: 7, type: 'emoticon' },
-      { id: 9, title: '보라돌이 이모티콘', detail: '텔레토비 보라돌이의 안녕 이모티콘', price: '100', img: '/img/purple.png', limit: 7, type: 'emoticon' },
-      { id: 10, title: '뚜비 이모티콘', detail: '텔레토비 뚜비의 안녕 이모티콘', price: '100', img: '/img/green.png', limit: 7, type: 'emoticon' },
-      { id: 11, title: '나나 이모티콘', detail: '텔레토비 나나의 안녕 이모티콘', price: '100', img: '/img/yellow.png', limit: 7, type: 'emoticon' },
-      { id: 12, title: '뽀 이모티콘', detail: '텔레토비 뽀의 안녕 이모티콘', price: '100', img: '/img/red.png', limit: 7, type: 'emoticon' },
-      { id: 13, title: '채팅방 당근 세트', detail: '주황주황 채팅방 테마~', price: '100', img: '/img/carrot.png', limit: 7, type: 'decoration' },
-      { id: 14, title: '채팅방 토마토 세트', detail: '빨강빨강 채팅방 테마~', price: '100', img: '/img/tomato.png', limit: 7, type: 'decoration' },
-      { id: 15, title: '채팅방 가지 세트', detail: '보라보라 채팅방 테마~', price: '100', img: '/img/eggplant.png', limit: 7, type: 'decoration' },
-      { id: 16, title: '채팅방 자색고구마 세트', detail: '핑크핑크 채팅방 테마~', price: '100', img: '/img/sweetpotato.png', limit: 7, type: 'decoration' },
-      { id: 17, title: '백색소음', detail: 'comming soon~', price: '100', img: '/img/whitenoise.png', limit: 7, type: 'studytool' },
-      { id: 18, title: '뽀모도로 타이머', detail: 'comming soon~', price: '100', img: '/img/timer.png', limit: 7, type: 'studytool' },
-   ]
+   const dispatch = useDispatch()
+   const [loading, setLoading] = useState(true)
+
+   // ✅ Redux에서 현재 보유 포인트 가져오기
+   const userPoints = useSelector((state) => state.points?.points ?? 0)
+
+   // ✅ Redux에서 상품 목록 가져오기
+   const items = useSelector((state) => state.items.items)
+
+   useEffect(() => {
+      dispatch(fetchItems()) // ✅ 상품 목록 불러오기
+      dispatch(fetchUserPoints()) // ✅ 유저 포인트 불러오기
+   }, [dispatch])
+
+   useEffect(() => {
+      setLoading(true) // ✅ API 요청 전 로딩 상태 활성화
+      dispatch(fetchItems()).finally(() => setLoading(false)) // ✅ 상품 목록 불러온 후 로딩 해제
+      dispatch(fetchUserPoints())
+   }, [dispatch])
+
    const titleList = ['이 모든 매력적인 상품을 쉽고 빠르게 구매할 수 있는 방법', '채팅방의 인싸템! 이모티콘', '삭막한 채팅창에 활력을! 채팅창 꾸미기', '이것만 있다면 당신도 될 수 있다 공부왕!']
 
+   if (loading) return <Container>상품을 불러오는 중...</Container> // ✅ 로딩 중 화면 표시
    return (
       <Container>
+         <Title>현재 보유 포인트: {userPoints} 밍</Title>
          <Title>{titleList[0]}</Title>
          <ItemList items={items.filter((item) => item.type === 'cash')} />
          <Title>{titleList[1]}</Title>
