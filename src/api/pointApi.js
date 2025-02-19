@@ -14,7 +14,7 @@ export const getUserPoints = async () => {
 // 포인트 사용 API (상품 구매)
 export const usePointsForItem = async (itemId) => {
    try {
-      const response = await studymingApi.post('/point/use', { itemId })
+      const response = await studymingApi.post('/point', { itemId })
       return response
    } catch (error) {
       console.error(`API 요청 오류: ${error.message}`)

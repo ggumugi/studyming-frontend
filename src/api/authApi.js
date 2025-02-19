@@ -50,6 +50,8 @@ export const checkNicknameDuplicate = async (nickname) => {
       return { success: false, message: error.response?.data?.message || '닉네임 중복 확인 실패' }
    }
 }
+
+//아이디 찾기
 //  1. 이메일로 인증 코드 요청
 export const sendVerificationCode = async (email) => {
    try {
@@ -67,6 +69,51 @@ export const verifyCodeAndFindId = async (email, verificationCode) => {
       return { success: true, loginId: response.data.loginId } // ✅ 성공
    } catch (error) {
       return { success: false, message: error.response?.data?.message || '인증 코드 확인 실패' }
+   }
+}
+
+//비밀번호 찾기
+// 아이디 검증 함수
+export const checkIdExists = async (loginId) => {
+   try {
+      const response = await studymingApi.post('auth/password-reset/check-id', { loginId })
+      return response.data
+   } catch (error) {
+      console.error('아이디 검증 실패', error)
+      throw error.response ? error.response.data.message : '아이디 검증 중 오류 발생'
+   }
+}
+
+// 이메일과 아이디 검증 후 인증 코드 전송 함수
+export const checkEmailMatches = async (loginId, email) => {
+   try {
+      const response = await studymingApi.post('auth/password-reset/check-email', { loginId, email })
+      return response.data
+   } catch (error) {
+      console.error('아이디와 이메일 검증 실패', error)
+      throw error.response ? error.response.data.message : '아이디와 이메일 검증 중 오류 발생'
+   }
+}
+
+// 인증 코드 검증 함수
+export const verifyCode = async (email, verificationCode) => {
+   try {
+      const response = await studymingApi.post('auth/password-reset/verify-codepw', { email, verificationCode })
+      return response.data
+   } catch (error) {
+      console.error('인증 코드 검증 실패', error)
+      throw error.response ? error.response.data.message : '인증 코드 검증 중 오류 발생'
+   }
+}
+
+// 새 비밀번호 설정 함수
+export const updatePassword = async (newPassword) => {
+   try {
+      const response = await studymingApi.patch('auth/password-reset/update-password', { newPassword })
+      return response.data
+   } catch (error) {
+      console.error('비밀번호 변경 실패', error)
+      throw error.response ? error.response.data.message : '비밀번호 변경 중 오류 발생'
    }
 }
 
