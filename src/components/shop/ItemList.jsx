@@ -26,22 +26,29 @@ const ItemList = ({ items }) => {
    return (
       <Container>
          <Grid>
-            {items.map((item) => (
-               <ItemCard key={item.id}>
-                  <ImageWrapper>
-                     {item.type !== 'cash' && <Tag>7일</Tag>}
-                     <Image src={item.img} alt={item.title} />
-                  </ImageWrapper>
-                  <ItemTitle>{item.title}</ItemTitle>
-                  <ItemDescription>{item.detail}</ItemDescription>
-                  <PriceContainer>
-                     <ItemPrice>
-                        {item.price} {item.type === 'cash' ? '원' : '밍'}
-                     </ItemPrice>
-                     <BuyButton onClick={() => handlePurchase(item)}>구매하기</BuyButton>
-                  </PriceContainer>
-               </ItemCard>
-            ))}
+            {items.length > 0 ? ( // ✅ 데이터가 있을 때만 출력
+               items.map((item) => (
+                  <ItemCard key={item.id}>
+                     <ImageWrapper>
+                        {item.type !== 'cash' && <Tag>7일</Tag>}
+                        <Image
+                           src={item.img ? `http://localhost:8000${item.img}` : '/img/default.png'} // ✅ 기본 이미지 추가
+                           alt={item.title}
+                        />
+                     </ImageWrapper>
+                     <ItemTitle>{item.title}</ItemTitle>
+                     <ItemDescription>{item.detail}</ItemDescription>
+                     <PriceContainer>
+                        <ItemPrice>
+                           {item.price} {item.type === 'cash' ? '원' : '밍'}
+                        </ItemPrice>
+                        <BuyButton onClick={() => handlePurchase(item)}>구매하기</BuyButton>
+                     </PriceContainer>
+                  </ItemCard>
+               ))
+            ) : (
+               <p>상품이 없습니다.</p> // ✅ 데이터가 없을 때 메시지 표시
+            )}
          </Grid>
       </Container>
    )
