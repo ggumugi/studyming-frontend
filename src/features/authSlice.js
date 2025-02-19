@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { signupUser, loginUser, checkIdDuplicate, checkNicknameDuplicate, logoutUser, checkAuthStatus, sendVerificationCode, verifyCodeAndFindId, googleLoginApi } from '../api/authApi' // ✅ 수정된 API
+import { signupUser, loginUser, checkIdDuplicate, checkNicknameDuplicate, logoutUser, checkAuthStatus, sendVerificationCode, verifyCodeAndFindId, checkIdExists, checkEmailMatches, verifyCode, updatePassword, googleLoginApi } from '../api/authApi' // ✅ 수정된 API
 
 // 회원가입
 export const signupUserThunk = createAsyncThunk('auth/signupUser', async (userData, { rejectWithValue }) => {
@@ -41,21 +41,75 @@ export const checkNicknameDuplicateThunk = createAsyncThunk('auth/checkNicknameD
    }
 })
 
+//아이디 변경 부분
 // ✅ 1. 이메일 인증 코드 전송 Thunk
 export const sendCodeThunk = createAsyncThunk('auth/sendCode', async (email, { rejectWithValue }) => {
    try {
-      return await sendVerificationCode(email)
+      const response = await sendVerificationCode(email)
+
+      if (!response.success) {
+         return rejectWithValue(response) // ✅ `success: false`이면 `rejectWithValue()` 실행
+      }
+
+      return response
    } catch (error) {
-      return rejectWithValue(error)
+      return rejectWithValue(error.response?.data || { message: '인증 코드 요청 중 오류가 발생했습니다.' })
    }
 })
 
 // ✅ 2. 인증 코드 확인 및 아이디 찾기 Thunk
 export const verifyCodeThunk = createAsyncThunk('auth/verifyCode', async ({ email, verificationCode }, { rejectWithValue }) => {
    try {
-      return await verifyCodeAndFindId(email, verificationCode)
+      const response = await verifyCodeAndFindId(email, verificationCode)
+
+      if (!response.success) {
+         return rejectWithValue(response) // ✅ 반드시 `rejectWithValue()` 사용
+      }
+
+      return response
    } catch (error) {
-      return rejectWithValue(error)
+      return rejectWithValue(error.response?.data || { message: '인증 코드 확인 중 오류가 발생했습니다.' })
+   }
+})
+//비밀번호 변경 부분
+
+// 1. 아이디 검증
+export const checkIdExistsThunk = createAsyncThunk('auth/checkIdExists', async (loginId, { rejectWithValue }) => {
+   try {
+      const response = await checkIdExists(loginId)
+      return response // 성공 시 응답 반환
+   } catch (error) {
+      return rejectWithValue(error) // 에러 처리
+   }
+})
+
+// 2. 아이디 & 이메일 검증 후 인증 코드 전송
+export const checkEmailMatchesThunk = createAsyncThunk('auth/checkEmailMatches', async ({ loginId, email }, { rejectWithValue }) => {
+   try {
+      const response = await checkEmailMatches(loginId, email)
+      return response // 성공 시 응답 반환
+   } catch (error) {
+      return rejectWithValue(error) // 에러 처리
+   }
+})
+
+// 3. 인증 코드 검증
+export const verifyCodepwThunk = createAsyncThunk('auth/verifyCode', async ({ email, verificationCodepw }, { rejectWithValue }) => {
+   try {
+      const response = await verifyCode(email, verificationCodepw)
+      return response // 성공 시 응답 반환
+   } catch (error) {
+      return rejectWithValue(error) // 에러 처리
+   }
+})
+
+// 4. 새 비밀번호 설정
+export const updatePasswordThunk = createAsyncThunk('auth/updatePassword', async (newPassword, { rejectWithValue }) => {
+   try {
+      const response = await updatePassword(newPassword)
+      return response // 성공 시 응답 반환
+   } catch (error) {
+      return rejectWithValue(error) // 에러 처리
    }
 })
 
@@ -96,6 +150,7 @@ const authSlice = createSlice({
       isAuthenticated: false, // 로그인 상태: 로그인이 되어 있으면 true, 그렇지 않으면 false
       loading: false,
       error: null,
+      step: 1, // 비밀번호 찾기 단계
    },
    reducers: {},
    extraReducers: (builder) => {
@@ -184,6 +239,52 @@ const authSlice = createSlice({
             state.loginId = action.payload.loginId
          })
          .addCase(verifyCodeThunk.rejected, (state, action) => {
+            state.loading = false
+            state.error = action.payload
+         })
+
+      // 1. 아이디 검증
+      builder
+         .addCase(checkIdExistsThunk.pending, (state) => {
+            state.loading = true
+         })
+         .addCase(checkIdExistsThunk.fulfilled, (state, action) => {
+            state.loading = false
+            state.successMessage = action.payload.message
+            state.step = 2 // 이메일 입력 단계로 넘어가기
+         })
+         .addCase(checkIdExistsThunk.rejected, (state, action) => {
+            state.loading = false
+            state.error = action.payload
+         })
+
+      // 2. 아이디 & 이메일 검증 후 인증 코드 전송
+      builder
+         .addCase(checkEmailMatchesThunk.pending, (state) => {
+            state.loading = true
+         })
+         .addCase(checkEmailMatchesThunk.fulfilled, (state, action) => {
+            state.loading = false
+            state.successMessage = action.payload.message
+            state.step = 3 // 인증 코드 전송 단계로 넘어가기
+         })
+         .addCase(checkEmailMatchesThunk.rejected, (state, action) => {
+            state.loading = false
+            state.error = action.payload
+         })
+
+      //내일 3번 작성
+      // 4. 새 비밀번호 설정
+      builder
+         .addCase(updatePasswordThunk.pending, (state) => {
+            state.loading = true
+         })
+         .addCase(updatePasswordThunk.fulfilled, (state, action) => {
+            state.loading = false
+            state.successMessage = action.payload.message
+            state.step = 5 // 비밀번호 변경 완료 단계로 넘어가기
+         })
+         .addCase(updatePasswordThunk.rejected, (state, action) => {
             state.loading = false
             state.error = action.payload
          })

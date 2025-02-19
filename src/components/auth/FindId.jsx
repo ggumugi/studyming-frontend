@@ -13,7 +13,6 @@ const FindIdPage = () => {
    const [inputCode, setInputCode] = useState('')
    const [step, setStep] = useState(1)
 
-   // ✅ 이메일 인증 코드 요청
    const handleSendCode = () => {
       if (!email) {
          alert('이메일을 입력해주세요.')
@@ -23,27 +22,31 @@ const FindIdPage = () => {
       dispatch(sendCodeThunk(email))
          .unwrap()
          .then(() => {
-            setStep(2)
             alert('이메일로 인증번호가 전송되었습니다.')
+            setStep(2) // ✅ 성공한 경우에만 실행
          })
-         .catch((err) => alert(err))
+         .catch((err) => {
+            console.log('🚨 [DEBUG] 이메일 인증 오류 응답:', err) // ✅ 오류 데이터 확인
+            alert(err?.message || err?.error || JSON.stringify(err) || '이메일 인증 요청 중 오류가 발생했습니다.')
+         })
    }
-   // ✅ 인증 코드 확인 및 아이디 찾기
+
    const handleVerifyCode = () => {
       if (!inputCode) {
          alert('인증 코드를 입력해주세요.')
          return
       }
-
       dispatch(verifyCodeThunk({ email, verificationCode: inputCode }))
          .unwrap()
          .then(() => {
-            setStep(3)
             alert('아이디 찾기 성공! 아이디를 확인하세요.')
+            setStep(3) // ✅ 성공한 경우에만 실행
          })
-         .catch((err) => alert(err))
+         .catch((err) => {
+            console.log('🚨 [DEBUG] 인증 코드 오류 응답:', err) // ✅ 오류 데이터 확인
+            alert(err?.message || err?.error || JSON.stringify(err) || '인증 코드 확인 중 오류가 발생했습니다.')
+         })
    }
-
    return (
       <div className="wrapper">
          <div className="form-container">
