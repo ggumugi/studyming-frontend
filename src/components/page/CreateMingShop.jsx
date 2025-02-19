@@ -1,41 +1,47 @@
 import React, { useState } from 'react'
 import { Container, Input, Button, Typography, RadioGroup, FormControlLabel, Radio, Box } from '@mui/material'
+import { useDispatch } from 'react-redux'
+import { createItemThunk } from '../../features/itemSlice'
+import { useNavigate } from 'react-router-dom'
 
 const CreateMingShop = () => {
+   const dispatch = useDispatch()
+   const navigate = useNavigate()
    const [productName, setProductName] = useState('')
    const [price, setPrice] = useState('')
-   const [image, setImage] = useState(null)
-   const [preview, setPreview] = useState(null)
    const [description, setDescription] = useState('')
+   const [type, setType] = useState('emoticon')
+   const [image, setImage] = useState(null)
    const [status, setStatus] = useState('판매중')
+   const [preview, setPreview] = useState(null)
 
    // ✅ 이미지 업로드 핸들러
-   const handleImageUpload = (event) => {
-      const file = event.target.files[0]
-      if (file) {
-         setImage(file)
-         setPreview(URL.createObjectURL(file)) // 미리보기용 URL 생성
-      }
+   const handleImageChange = (e) => {
+      const file = e.target.files[0]
+      setImage(file) // 기존 코드 (파일 저장)
+      setPreview(URL.createObjectURL(file)) // ✅ 미리보기 URL 생성
    }
 
    // ✅ 상품 등록 핸들러
    const handleSubmit = () => {
-      if (!productName.trim() || !price.trim()) {
-         alert('상품명과 판매 가격을 입력해주세요.')
+      if (!productName.trim() || !price.trim() || !image) {
+         alert('상품명, 가격, 이미지를 입력하세요.')
          return
       }
 
-      console.log({
-         productName,
-         price,
-         image,
-         description,
-         status,
+      const formData = new FormData()
+      formData.append('name', productName)
+      formData.append('price', price)
+      formData.append('detail', description)
+      formData.append('limit', 7) // 기본 7일
+      formData.append('type', type)
+      formData.append('img', image) // 파일 추가
+
+      dispatch(createItemThunk(formData)).then(() => {
+         alert('상품이 등록되었습니다!') // ✅ 등록 성공 알림
+         navigate('/mingshop') // ✅ MingShopPage로 이동
       })
-
-      alert('상품이 등록되었습니다!')
    }
-
    return (
       <Container maxWidth="lg" sx={{ mt: 6, height: '1000px' }}>
          {/* 제목 - 왼쪽 정렬 */}
@@ -82,7 +88,7 @@ const CreateMingShop = () => {
 
                {/* 이미지 등록 버튼 (미리보기 아래) */}
                <Box sx={{ display: 'flex', justifyContent: 'flex-start', marginLeft: '176px', mt: 1 }}>
-                  <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} id="image-upload" />
+                  <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} id="image-upload" />
                   <label htmlFor="image-upload">
                      <Button variant="contained" component="span" color="warning">
                         등록
@@ -111,6 +117,11 @@ const CreateMingShop = () => {
                   <FormControlLabel value="품절" control={<Radio />} label="품절" />
                </RadioGroup>
             </Box>
+            <select value={type} onChange={(e) => setType(e.target.value)}>
+               <option value="emoticon">이모티콘</option>
+               <option value="decoration">채팅방 테마</option>
+               <option value="cash">포인트 충전</option>
+            </select>
 
             {/* 상품 등록 버튼 */}
             <Box sx={{ display: 'flex', justifyContent: 'center', width: '550px', mt: 4 }}>
