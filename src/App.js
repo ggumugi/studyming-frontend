@@ -26,6 +26,7 @@ import StudyEditPage from './pages/StudyEditPage'
 import StudyLeaderExitPendingPage from './pages/StudyLeaderExitPendingPage'
 import StudyLeaderTransferPage from './pages/StudyLeaderTransferPage'
 import InfoPage from './pages/InfoPage'
+import EditMingShopPage from './pages/EditMingShopPage'
 // import Sidebar from './components/shared/Sidebar'
 
 import { checkAuthStatusThunk } from './features/authSlice'

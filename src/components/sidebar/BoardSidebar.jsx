@@ -74,7 +74,7 @@ const BoardSidebar = () => {
                   onClick={() => setIsWriting(true)}
                >
                   글쓰기
-               </Button>{' '}
+               </Button>
                {/* ✅ 글쓰기 버튼 */}
             </h2>
 

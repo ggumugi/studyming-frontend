@@ -2,10 +2,13 @@ import React from 'react'
 import styled from 'styled-components'
 import { useDispatch, useSelector } from 'react-redux'
 import { pointsForItemThunk, fetchUserPoints } from '../../features/pointSlice'
+import { useNavigate } from 'react-router-dom'
 
 const ItemList = ({ items }) => {
    const dispatch = useDispatch()
+   const navigate = useNavigate()
    const userPoints = useSelector((state) => state.points.points)
+   const userRole = useSelector((state) => state.auth.user?.role)
 
    const handlePurchase = (item) => {
       if (item.type === 'cash') {
@@ -42,6 +45,7 @@ const ItemList = ({ items }) => {
                         <ItemPrice>
                            {item.price} {item.type === 'cash' ? '원' : '밍'}
                         </ItemPrice>
+                        {userRole === 'ADMIN' && <EditButton onClick={() => navigate(`/mingshop/edit/${item.id}`)}>수정</EditButton>}
                         <BuyButton onClick={() => handlePurchase(item)}>구매하기</BuyButton>
                      </PriceContainer>
                   </ItemCard>
@@ -148,4 +152,19 @@ const BuyButton = styled.button`
    cursor: pointer;
    font-weight: bold;
    height: 30px; /* 가격 크기에 맞춤 */
+`
+const EditButton = styled(BuyButton)`
+   font-size: 12px;
+   padding: 5px 15px;
+
+   color: white;
+   border: none;
+   border-radius: 15px;
+   cursor: pointer;
+   font-weight: bold;
+   height: 30px; /* 가격 크기에 맞춤 */
+   background-color: #3498db;
+   &:hover {
+      background-color: #2980b9;
+   }
 `
