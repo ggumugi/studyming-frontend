@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { signupUser, loginUser, checkIdDuplicate, checkNicknameDuplicate, logoutUser, checkAuthStatus, sendVerificationCode, verifyCodeAndFindId, checkIdExists, checkEmailMatches, verifyCode, updatePassword, googleLoginApi } from '../api/authApi' // ✅ 수정된 API
+import { signupUser, loginUser, checkIdDuplicate, checkNicknameDuplicate, logoutUser, checkAuthStatus, sendVerificationCode, verifyCodeAndFindId, checkIdExists, checkEmailMatches, verifyCodepw, updatePassword, googleLoginApi } from '../api/authApi' // ✅ 수정된 API
 
 // 회원가입
 export const signupUserThunk = createAsyncThunk('auth/signupUser', async (userData, { rejectWithValue }) => {
@@ -94,9 +94,9 @@ export const checkEmailMatchesThunk = createAsyncThunk('auth/checkEmailMatches',
 })
 
 // 3. 인증 코드 검증
-export const verifyCodepwThunk = createAsyncThunk('auth/verifyCode', async ({ email, verificationCodepw }, { rejectWithValue }) => {
+export const verifyCodepwThunk = createAsyncThunk('auth/verifyCodepw', async ({ email, verificationCodepw }, { rejectWithValue }) => {
    try {
-      const response = await verifyCode(email, verificationCodepw)
+      const response = await verifyCodepw(email, verificationCodepw)
       return response // 성공 시 응답 반환
    } catch (error) {
       return rejectWithValue(error) // 에러 처리
@@ -273,8 +273,19 @@ const authSlice = createSlice({
             state.loading = false
             state.error = action.payload
          })
-
-      //내일 3번 작성
+      builder
+         .addCase(verifyCodepwThunk.pending, (state) => {
+            state.loading = true
+         })
+         .addCase(verifyCodepwThunk.fulfilled, (state, action) => {
+            state.loading = false
+            state.successMessage = action.payload.message
+            state.step = 4 // ✅ 인증 성공 시 비밀번호 변경 단계로 넘어가기
+         })
+         .addCase(verifyCodepwThunk.rejected, (state, action) => {
+            state.loading = false
+            state.error = action.payload
+         })
       // 4. 새 비밀번호 설정
       builder
          .addCase(updatePasswordThunk.pending, (state) => {

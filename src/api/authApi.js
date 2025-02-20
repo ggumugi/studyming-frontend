@@ -96,7 +96,7 @@ export const checkEmailMatches = async (loginId, email) => {
 }
 
 // 인증 코드 검증 함수
-export const verifyCode = async (email, verificationCode) => {
+export const verifyCodepw = async (email, verificationCode) => {
    try {
       const response = await studymingApi.post('auth/password-reset/verify-codepw', { email, verificationCode })
       return response.data
