@@ -1,62 +1,75 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { TextField, Button } from '@mui/material'
+import { useDispatch } from 'react-redux'
+import { addPost } from '../../features/postSlice' // Redux 액션 가져오기
 
 const CreateBoard = ({ setIsWriting }) => {
+   const dispatch = useDispatch()
    const [title, setTitle] = useState('')
    const [content, setContent] = useState('')
    const [image, setImage] = useState(null)
+   const [imageFile, setImageFile] = useState(null) // 파일 데이터 저장
 
-   // ✅ 이미지 업로드 핸들러
+   // ✅ 이미지 업로드 핸들러 (파일 저장 추가)
    const handleImageUpload = (event) => {
       const file = event.target.files[0]
       if (file) {
          setImage(URL.createObjectURL(file)) // 미리보기용 URL 생성
+         setImageFile(file) // 파일 데이터 저장 (백엔드 전송용)
       }
    }
 
-   // ✅ 글쓰기 버튼 클릭 시 동작
-   const handleSubmit = () => {
+   // ✅ 글쓰기 버튼 클릭 시 API 요청
+   const handleSubmit = async () => {
       if (!title.trim() || !content.trim()) {
          alert('제목과 내용을 입력해주세요!')
          return
       }
 
-      // 여기에 API 연동 코드 추가 가능 (예: 백엔드에 데이터 전송)
-      console.log({
-         title,
-         content,
-         image,
-      })
+      const formData = new FormData()
+      formData.append('title', title)
+      formData.append('content', content)
+      formData.append('category', '자유게시판') // 기본 카테고리 지정
+      if (imageFile) {
+         formData.append('image', imageFile) // 이미지 파일 추가
+      }
 
-      alert('게시글이 등록되었습니다!')
+      try {
+         await dispatch(addPost(formData)).unwrap() // Redux 액션 실행
+         alert('게시글이 등록되었습니다!')
+         setIsWriting(false) // 글쓰기 창 닫기
+      } catch (error) {
+         console.error('게시글 등록 실패:', error)
+         alert('게시글 등록에 실패했습니다.')
+      }
    }
 
    return (
       <Container>
-         {/* 제목 */}
          <FormGroup>
-            <Label style={{ marginTop: '16.5px' }}>제목</Label>
+            <Label>제목</Label>
             <StyledTextField variant="outlined" placeholder="제목을 입력해주세요." value={title} onChange={(e) => setTitle(e.target.value)} />
          </FormGroup>
-         {/* 내용 */}
+
          <FormGroup>
-            <Label style={{ marginTop: '16.5px' }}>내용</Label>
+            <Label>내용</Label>
             <StyledTextField variant="outlined" placeholder="내용을 입력해주세요." multiline rows={15} value={content} onChange={(e) => setContent(e.target.value)} />
          </FormGroup>
-         {/* 이미지 업로드 */}
+
          <ButtonContainer>
             <UploadContainer>
                <UploadButton>
                   <input type="file" accept="image/*" onChange={handleImageUpload} />
                   이미지 업로드
                </UploadButton>
+               {image && <img src={image} alt="미리보기" style={{ width: '100px', marginLeft: '10px' }} />}
             </UploadContainer>
 
-            {/* 글쓰기 버튼 */}
             <SubmitButton onClick={handleSubmit}>글쓰기</SubmitButton>
          </ButtonContainer>
-         <Button onClick={() => setIsWriting(false)}>← 뒤로가기</Button> {/*뒤로가기는 지워도됨*/}
+
+         <Button onClick={() => setIsWriting(false)}>← 뒤로가기</Button>
       </Container>
    )
 }
