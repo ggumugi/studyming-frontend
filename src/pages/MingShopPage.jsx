@@ -4,10 +4,17 @@ import { useDispatch, useSelector } from 'react-redux'
 import { fetchItems } from '../features/itemSlice' // ✅ 상품 목록 가져오기 액션
 import { fetchUserPoints } from '../features/pointSlice' // ✅ 유저 포인트 조회
 import ItemList from '../components/shop/ItemList'
+import { useNavigate } from 'react-router-dom'
+import { checkAuthStatusThunk } from '../features/authSlice'
 
 const MingShopPage = () => {
    const dispatch = useDispatch()
+   const navigate = useNavigate()
    const [loading, setLoading] = useState(true)
+
+   // ✅ Redux에서 현재 로그인된 유저 정보 가져오기
+   const user = useSelector((state) => state.auth.user)
+   const userRole = user?.role ?? 'USER' // 'USER' 기본값 설정
 
    // ✅ Redux에서 현재 보유 포인트 가져오기
    const userPoints = useSelector((state) => state.points?.points ?? 0)
@@ -15,15 +22,10 @@ const MingShopPage = () => {
    // ✅ Redux에서 상품 목록 가져오기
    const items = useSelector((state) => state.items.items)
 
+   // ✅ 모든 API 요청을 한 번에 실행하여 로딩 시간 최적화
    useEffect(() => {
-      dispatch(fetchItems()) // ✅ 상품 목록 불러오기
-      dispatch(fetchUserPoints()) // ✅ 유저 포인트 불러오기
-   }, [dispatch])
-
-   useEffect(() => {
-      setLoading(true) // ✅ API 요청 전 로딩 상태 활성화
-      dispatch(fetchItems()).finally(() => setLoading(false)) // ✅ 상품 목록 불러온 후 로딩 해제
-      dispatch(fetchUserPoints())
+      setLoading(true)
+      Promise.all([dispatch(fetchItems()), dispatch(fetchUserPoints()), dispatch(checkAuthStatusThunk())]).finally(() => setLoading(false))
    }, [dispatch])
 
    const titleList = ['이 모든 매력적인 상품을 쉽고 빠르게 구매할 수 있는 방법', '채팅방의 인싸템! 이모티콘', '삭막한 채팅창에 활력을! 채팅창 꾸미기', '이것만 있다면 당신도 될 수 있다 공부왕!']
@@ -31,7 +33,9 @@ const MingShopPage = () => {
    if (loading) return <Container>상품을 불러오는 중...</Container> // ✅ 로딩 중 화면 표시
    return (
       <Container>
-         <Title>현재 보유 포인트: {userPoints} 밍</Title>
+         <Title>
+            현재 보유 포인트: {userPoints} 밍{userRole === 'ADMIN' && <button onClick={() => navigate('/mingshop/create')}>등록하기</button>}
+         </Title>
          <Title>{titleList[0]}</Title>
          <ItemList items={items.filter((item) => item.type === 'cash')} />
          <Title>{titleList[1]}</Title>
