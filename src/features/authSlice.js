@@ -103,7 +103,7 @@ export const verifyCodepwThunk = createAsyncThunk('auth/verifyCode', async ({ em
    }
 })
 
-// 4. 새 비밀번호 설정
+// 4. 새 비밀번호 설정(비밀번호 변경)
 export const updatePasswordThunk = createAsyncThunk('auth/updatePassword', async (newPassword, { rejectWithValue }) => {
    try {
       const response = await updatePassword(newPassword)
@@ -287,6 +287,20 @@ const authSlice = createSlice({
          .addCase(updatePasswordThunk.rejected, (state, action) => {
             state.loading = false
             state.error = action.payload
+         })
+      //로그아웃
+      builder
+         .addCase(logoutUserThunk.pending, (state) => {
+            state.loading = true
+         })
+         .addCase(logoutUserThunk.fulfilled, (state) => {
+            state.loading = false
+            state.isAuthenticated = false // ✅ 로그인 상태 해제
+            state.user = null // ✅ 사용자 정보 초기화
+         })
+         .addCase(logoutUserThunk.rejected, (state, action) => {
+            state.loading = false
+            state.error = action.payload // ✅ 에러 메시지 저장
          })
       // 로그인 상태 확인
       builder

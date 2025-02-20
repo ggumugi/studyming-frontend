@@ -29,35 +29,43 @@ import InfoPage from './pages/InfoPage'
 import EditMingShopPage from './pages/EditMingShopPage'
 // import Sidebar from './components/shared/Sidebar'
 
+import { checkAuthStatusThunk } from './features/authSlice'
+import { useDispatch, useSelector } from 'react-redux'
+import { useEffect } from 'react'
+
 function App() {
+   const dispatch = useDispatch()
+   const { isAuthenticated, user } = useSelector((state) => state.auth)
+
+   useEffect(() => {
+      dispatch(checkAuthStatusThunk())
+   }, [dispatch])
    return (
       <>
-         <Header />
+         <Header isAuthenticated={isAuthenticated} user={user} />
          <Routes>
             <Route path="/" element={<WelcomePage />} />
-            <Route path="/home" element={<Home />} />
+            <Route path="/home" element={<Home isAuthenticated={isAuthenticated} user={user} />} />
             <Route path="/info" element={<InfoPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/find/id" element={<FindIdPage />} />
             <Route path="/find/password" element={<FindPasswordPage />} />
-            <Route path="/board" element={<BoardListPage />} />
-            <Route path="/board/create" element={<BoardCreatePage />} />
+            <Route path="/board" element={<BoardListPage isAuthenticated={isAuthenticated} user={user} />} />
+            <Route path="/board/create" element={<BoardCreatePage isAuthenticated={isAuthenticated} user={user} />} />
             {/* <Route path="/board/edit/:id" element={<BoardEditPage />} /> */}
             {/* <Route path="/board/detail/:id" element={<BoardDetailPage />} /> */}
-            <Route path="/mypage" element={<MyPage />} />
-            <Route path="/studygroup/:id" element={<StudyGroupPage />} />
-            <Route path="/mingshop" element={<MingShopPage />} />
-            <Route path="/mingshop/create" element={<CreateMingShopPage />} />
-            <Route path="/mingshop/edit/:id" element={<EditMingShopPage />} />
-            <Route path="/admin" element={<AdminPage />} />
-            <Route path="/study/list" element={<StudyListPage />} />
-            <Route path="/study/create" element={<StudyCreatePage />} />
-            <Route path="/study/detail/:id" element={<StudyDetailPage />} />
-            <Route path="/study/edit/:id" element={<StudyEditPage />} />
-            <Route path="/study/leader/exit" element={<StudyLeaderExitPendingPage />} />
-            <Route path="/study/leader/transfer" element={<StudyLeaderTransferPage />} />
-            <Route path="/study/find/pwquestion" element={<FindPwquestionPage />} />
+            <Route path="/mypage" element={<MyPage isAuthenticated={isAuthenticated} user={user} />} />
+            <Route path="/studygroup/:id" element={<StudyGroupPage isAuthenticated={isAuthenticated} user={user} />} />
+            <Route path="/mingshop" element={<MingShopPage isAuthenticated={isAuthenticated} user={user} />} />
+            <Route path="/mingshop/create" element={<CreateMingShopPage isAuthenticated={isAuthenticated} user={user} />} />
+            <Route path="/admin" element={<AdminPage isAuthenticated={isAuthenticated} user={user} />} />
+            <Route path="/study/list" element={<StudyListPage isAuthenticated={isAuthenticated} user={user} />} />
+            <Route path="/study/create" element={<StudyCreatePage isAuthenticated={isAuthenticated} user={user} />} />
+            <Route path="/study/detail/:id" element={<StudyDetailPage isAuthenticated={isAuthenticated} user={user} />} />
+            <Route path="/study/edit/:id" element={<StudyEditPage isAuthenticated={isAuthenticated} user={user} />} />
+            <Route path="/study/leader/exit" element={<StudyLeaderExitPendingPage />} isAuthenticated={isAuthenticated} user={user} />
+            <Route path="/study/leader/transfer" element={<StudyLeaderTransferPage />} isAuthenticated={isAuthenticated} user={user} />
          </Routes>
          {/* <Sidebar/> */}
          <Footer />
