@@ -96,9 +96,9 @@ export const checkEmailMatches = async (loginId, email) => {
 }
 
 // 인증 코드 검증 함수
-export const verifyCode = async (email, verificationCode) => {
+export const verifyCodepw = async (email, verificationCodepw) => {
    try {
-      const response = await studymingApi.post('auth/password-reset/verify-codepw', { email, verificationCode })
+      const response = await studymingApi.post('auth/password-reset/verify-codepw', { email, verificationCodepw })
       return response.data
    } catch (error) {
       console.error('인증 코드 검증 실패', error)
@@ -107,9 +107,10 @@ export const verifyCode = async (email, verificationCode) => {
 }
 
 // 새 비밀번호 설정 함수
-export const updatePassword = async (newPassword) => {
+export const updatePassword = async (info) => {
    try {
-      const response = await studymingApi.patch('auth/password-reset/update-password', { newPassword })
+      console.log('📡 API 요청 데이터:', info) // ✅ 디버깅 로그 추가
+      const response = await studymingApi.patch('auth/password-reset/update-password', { email: info.email, newPassword: info.newPassword })
       return response.data
    } catch (error) {
       console.error('비밀번호 변경 실패', error)
@@ -117,20 +118,24 @@ export const updatePassword = async (newPassword) => {
    }
 }
 
-// 로그아웃
+// 로그아웃 API
 export const logoutUser = async () => {
    try {
-      await studymingApi.get('/auth/logout')
+      const response = await studymingApi.get('/auth/logout') // ✅ 서버에 로그아웃 요청
+      console.log('✅ 로그아웃 성공:', response.data)
+
+      return response.data // ✅ 로그아웃 성공 메시지 반환
    } catch (error) {
-      console.error('Logout failed', error)
-      throw error
+      console.error('❌ 로그아웃 실패:', error)
+      throw error.response?.data?.message || '로그아웃 중 오류가 발생했습니다.'
    }
 }
 
 // 로그인 상태 확인
 export const checkAuthStatus = async () => {
    try {
-      const response = await studymingApi.get('/auth/status')
+      const response = await studymingApi.get('/auth/user')
+
       return response.data
    } catch (error) {
       console.error('Auth check failed', error)

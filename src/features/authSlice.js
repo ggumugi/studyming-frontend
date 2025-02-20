@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { signupUser, loginUser, checkIdDuplicate, checkNicknameDuplicate, logoutUser, checkAuthStatus, sendVerificationCode, verifyCodeAndFindId, checkIdExists, checkEmailMatches, verifyCode, updatePassword, googleLoginApi } from '../api/authApi' // ✅ 수정된 API
+import { signupUser, loginUser, checkIdDuplicate, checkNicknameDuplicate, logoutUser, checkAuthStatus, sendVerificationCode, verifyCodeAndFindId, checkIdExists, checkEmailMatches, updatePassword, googleLoginApi, verifyCodepw } from '../api/authApi' // ✅ 수정된 API
 
 // 회원가입
 export const signupUserThunk = createAsyncThunk('auth/signupUser', async (userData, { rejectWithValue }) => {
@@ -96,14 +96,14 @@ export const checkEmailMatchesThunk = createAsyncThunk('auth/checkEmailMatches',
 // 3. 인증 코드 검증
 export const verifyCodepwThunk = createAsyncThunk('auth/verifyCode', async ({ email, verificationCodepw }, { rejectWithValue }) => {
    try {
-      const response = await verifyCode(email, verificationCodepw)
+      const response = await verifyCodepw(email, verificationCodepw)
       return response // 성공 시 응답 반환
    } catch (error) {
       return rejectWithValue(error) // 에러 처리
    }
 })
 
-// 4. 새 비밀번호 설정
+// 4. 새 비밀번호 설정(비밀번호 변경)
 export const updatePasswordThunk = createAsyncThunk('auth/updatePassword', async (newPassword, { rejectWithValue }) => {
    try {
       const response = await updatePassword(newPassword)
@@ -288,6 +288,20 @@ const authSlice = createSlice({
             state.loading = false
             state.error = action.payload
          })
+      //로그아웃
+      builder
+         .addCase(logoutUserThunk.pending, (state) => {
+            state.loading = true
+         })
+         .addCase(logoutUserThunk.fulfilled, (state) => {
+            state.loading = false
+            state.isAuthenticated = false // ✅ 로그인 상태 해제
+            state.user = null // ✅ 사용자 정보 초기화
+         })
+         .addCase(logoutUserThunk.rejected, (state, action) => {
+            state.loading = false
+            state.error = action.payload // ✅ 에러 메시지 저장
+         })
       // 로그인 상태 확인
       builder
          .addCase(checkAuthStatusThunk.pending, (state) => {
@@ -296,8 +310,8 @@ const authSlice = createSlice({
          })
          .addCase(checkAuthStatusThunk.fulfilled, (state, action) => {
             state.loading = false
-            state.isAuthenticated = action.payload.isAuthenticated
-            state.user = action.payload.user || null
+            state.isAuthenticated = true
+            state.user = action.payload || null
          })
          .addCase(checkAuthStatusThunk.rejected, (state, action) => {
             state.loading = false
