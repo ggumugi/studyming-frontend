@@ -22,14 +22,16 @@ const StudyCreate = ({ onSubmit, isAuthenticated, user }) => {
    const [capOnOff, setCapOnOff] = useState(false)
    const [createdBy, setCreatedBy] = useState(null)
 
+   useEffect(() => {
+      setCreatedBy(user?.id)
+   }, [user])
+
    const handleSubmit = (e) => {
       e.preventDefault()
 
       if (!user) {
          alert('로그인이 필요합니다.')
          return
-      } else {
-         setCreatedBy(user.id)
       }
 
       const groupData = {
