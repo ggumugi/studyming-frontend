@@ -96,7 +96,7 @@ export const checkEmailMatches = async (loginId, email) => {
 }
 
 // 인증 코드 검증 함수
-export const verifyCode = async (email, verificationCode) => {
+export const verifyCodepw = async (email, verificationCode) => {
    try {
       const response = await studymingApi.post('auth/password-reset/verify-codepw', { email, verificationCode })
       return response.data
@@ -130,7 +130,8 @@ export const logoutUser = async () => {
 // 로그인 상태 확인
 export const checkAuthStatus = async () => {
    try {
-      const response = await studymingApi.get('/auth/status')
+      const response = await studymingApi.get('/auth/user')
+
       return response.data
    } catch (error) {
       console.error('Auth check failed', error)

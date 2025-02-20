@@ -8,7 +8,10 @@ import captchaReducer from '../features/captchaSlice'
 import goalsReducer from '../features/goalsSlice'
 import studygroupReducer from '../features/studygroupSlice'
 import itemReducer from '../features/itemSlice'
+<<<<<<< HEAD
 import postReducer from '../features/postSlice'
+=======
+>>>>>>> 3016d6eb5da48341d84a5705eca3d9dbfedba786
 
 const store = configureStore({
    reducer: {
@@ -20,7 +23,10 @@ const store = configureStore({
       goals: goalsReducer,
       studygroup: studygroupReducer,
       items: itemReducer,
+<<<<<<< HEAD
       posts: postReducer,
+=======
+>>>>>>> 3016d6eb5da48341d84a5705eca3d9dbfedba786
    },
 })
 
