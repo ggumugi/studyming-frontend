@@ -26,6 +26,7 @@ import StudyEditPage from './pages/StudyEditPage'
 import StudyLeaderExitPendingPage from './pages/StudyLeaderExitPendingPage'
 import StudyLeaderTransferPage from './pages/StudyLeaderTransferPage'
 import InfoPage from './pages/InfoPage'
+import EditMingShopPage from './pages/EditMingShopPage'
 // import Sidebar from './components/shared/Sidebar'
 
 function App() {
@@ -48,6 +49,7 @@ function App() {
             <Route path="/studygroup/:id" element={<StudyGroupPage />} />
             <Route path="/mingshop" element={<MingShopPage />} />
             <Route path="/mingshop/create" element={<CreateMingShopPage />} />
+            <Route path="/mingshop/edit/:id" element={<EditMingShopPage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/study/list" element={<StudyListPage />} />
             <Route path="/study/create" element={<StudyCreatePage />} />

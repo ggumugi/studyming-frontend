@@ -6,6 +6,7 @@ import { fetchUserPoints } from '../features/pointSlice' // ✅ 유저 포인트
 import ItemList from '../components/shop/ItemList'
 import { useNavigate } from 'react-router-dom'
 import { checkAuthStatusThunk } from '../features/authSlice'
+import { Button } from '@mui/material'
 
 const MingShopPage = () => {
    const dispatch = useDispatch()
@@ -34,7 +35,22 @@ const MingShopPage = () => {
    return (
       <Container>
          <Title>
-            현재 보유 포인트: {userPoints} 밍{userRole === 'ADMIN' && <button onClick={() => navigate('/mingshop/create')}>등록하기</button>}
+            현재 보유 포인트: {userPoints} 밍
+            {userRole === 'ADMIN' && (
+               <Button
+                  variant="contained"
+                  sx={{
+                     borderRadius: '20px',
+                     backgroundColor: '#FF5733',
+                     color: '#fff',
+                     marginRight: '10px',
+                     '&:hover': { backgroundColor: '#E74C3C' },
+                  }}
+                  onClick={() => navigate('/mingshop/create')}
+               >
+                  등록하기
+               </Button>
+            )}
          </Title>
          <Title>{titleList[0]}</Title>
          <ItemList items={items.filter((item) => item.type === 'cash')} />
@@ -60,6 +76,9 @@ const Container = styled.div`
 `
 
 const Title = styled.h2`
+   display: flex;
+   justify-content: space-between; /* 🔹 좌우 정렬 */
+   align-items: center; /* 🔹 세로 정렬 */
    width: 100%; /* 컨테이너의 전체 길이 */
    max-width: 1200px; /* 최대 너비 설정 */
    text-align: left; /* 왼쪽 정렬 */
