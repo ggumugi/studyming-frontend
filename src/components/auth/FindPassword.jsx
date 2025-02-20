@@ -2,10 +2,12 @@ import React, { useState } from 'react'
 import { TextField, Button, CircularProgress } from '@mui/material'
 import { checkIdExistsThunk, checkEmailMatchesThunk, verifyCodepwThunk, updatePasswordThunk } from '../../features/authSlice' // Thunk 액션 불러오기
 import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import '../../styles/authFind.css'
 
 const FindPassword = () => {
+   const navigate = useNavigate()
    const dispatch = useDispatch()
 
    const { loading, successMessage, error } = useSelector((state) => state.auth) // Redux 상태 가져오기
@@ -51,7 +53,9 @@ const FindPassword = () => {
 
    // 인증 코드 검증
    const handleCodeVerify = () => {
-      dispatch(verifyCodepwThunk({ email, verificationCode }))
+      console.log('📡 인증 코드 검증 요청:', email, inputCode) // ✅ 디버깅 로그 추가
+
+      dispatch(verifyCodepwThunk({ email, verificationCodepw: inputCode }))
          .unwrap()
          .then((result) => {
             if (result.success) {
@@ -63,18 +67,26 @@ const FindPassword = () => {
          })
    }
 
-   // 비밀번호 업데이트
    const handlePasswordUpdate = () => {
+      if (!newPassword || !confirmPassword) {
+         alert('새 비밀번호를 입력해주세요.')
+         return
+      }
+
       if (newPassword !== confirmPassword) {
          alert('비밀번호가 일치하지 않습니다.')
          return
       }
-      dispatch(updatePasswordThunk(newPassword))
+
+      console.log('📡 비밀번호 변경 요청:', { email, newPassword }) // ✅ 디버깅 로그 추가
+
+      dispatch(updatePasswordThunk({ email: email, newPassword: newPassword })) // 🔥 중첩되지 않도록 수정!
          .unwrap()
          .then((result) => {
             if (result.success) {
-               alert('비밀번호가 성공적으로 변경되었습니다.')
-               setStep(5) // 비밀번호 변경 완료
+               alert('비밀번호가 성공적으로 변경되었습니다. 로그인 페이지로 이동합니다.')
+               setStep(5) // ✅ 비밀번호 변경 완료
+               navigate('/login')
             }
          })
          .catch((error) => {
@@ -82,7 +94,6 @@ const FindPassword = () => {
          })
    }
 
-   //내일 button 타입 바꿔라...
    return (
       <div className="wrapper">
          <div className="form-container">
@@ -94,8 +105,8 @@ const FindPassword = () => {
                <>
                   <TextField className="styled-textfield" label="아이디" value={id} onChange={(e) => setId(e.target.value)} />
                   <p className="small-text">가입하신 아이디를 입력해주세요</p>
-                  <Button onClick={handleIdCheck} disabled={loading}>
-                     {loading ? <CircularProgress size={24} /> : '아이디 확인'}
+                  <Button className="styled-button" onClick={handleIdCheck} disabled={loading}>
+                     확인
                   </Button>
                </>
             )}
@@ -105,8 +116,8 @@ const FindPassword = () => {
                <>
                   <TextField className="styled-textfield" label="이메일" value={email} onChange={(e) => setEmail(e.target.value)} />
                   <p className="small-text">가입하신 이메일을 입력해주세요</p>
-                  <Button onClick={handleEmailCheck} disabled={loading}>
-                     {loading ? <CircularProgress size={24} /> : '이메일 확인'}
+                  <Button className="styled-button" onClick={handleEmailCheck} disabled={loading}>
+                     확인
                   </Button>
                </>
             )}
@@ -116,8 +127,8 @@ const FindPassword = () => {
                <>
                   <TextField className="styled-textfield" label="인증번호 입력" value={inputCode} onChange={(e) => setInputCode(e.target.value)} />
                   <p className="small-text">이메일로 발송하신 인증번호를 입력해주세요</p>
-                  <Button onClick={handleCodeVerify} disabled={loading}>
-                     {loading ? <CircularProgress size={24} /> : '인증 코드 확인'}
+                  <Button className="styled-button" onClick={handleCodeVerify} disabled={loading}>
+                     확인
                   </Button>
                </>
             )}
@@ -131,8 +142,8 @@ const FindPassword = () => {
                   <TextField className="styled-textfield" label="비밀번호 확인" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
                   {!isPasswordMatch && <p className="error-text">비밀번호가 일치하지 않습니다.</p>}
 
-                  <Button onClick={handlePasswordUpdate} disabled={loading}>
-                     {loading ? <CircularProgress size={24} /> : '비밀번호 변경'}
+                  <Button className="styled-button" onClick={handlePasswordUpdate} disabled={loading}>
+                     확인
                   </Button>
 
                   {/* 성공 또는 실패 메시지 */}
