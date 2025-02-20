@@ -127,6 +127,7 @@ export const logoutUserThunk = createAsyncThunk('auth/logoutUser', async (_, { r
 export const checkAuthStatusThunk = createAsyncThunk('auth/checkAuthStatus', async (_, { rejectWithValue }) => {
    try {
       const response = await checkAuthStatus()
+
       return response
    } catch (error) {
       return rejectWithValue(error.response?.data?.message || '상태 확인 실패')
@@ -321,8 +322,8 @@ const authSlice = createSlice({
          })
          .addCase(checkAuthStatusThunk.fulfilled, (state, action) => {
             state.loading = false
-            state.isAuthenticated = action.payload.isAuthenticated
-            state.user = action.payload.user || null
+            state.isAuthenticated = true
+            state.user = action.payload || null
          })
          .addCase(checkAuthStatusThunk.rejected, (state, action) => {
             state.loading = false

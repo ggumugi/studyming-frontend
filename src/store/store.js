@@ -8,6 +8,7 @@ import captchaReducer from '../features/captchaSlice'
 import goalsReducer from '../features/goalsSlice'
 import studygroupReducer from '../features/studygroupSlice'
 import itemReducer from '../features/itemSlice'
+import postReducer from '../features/postSlice'
 
 const store = configureStore({
    reducer: {
@@ -19,6 +20,7 @@ const store = configureStore({
       goals: goalsReducer,
       studygroup: studygroupReducer,
       items: itemReducer,
+      posts: postReducer,
    },
 })
 

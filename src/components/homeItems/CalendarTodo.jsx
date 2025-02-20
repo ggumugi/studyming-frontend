@@ -1,3 +1,5 @@
+/* 화살표 사용 해서 일주일(월~일)까지만 넘길 수 있게  */
+
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'

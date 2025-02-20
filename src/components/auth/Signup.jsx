@@ -1,9 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-
 import styled from 'styled-components'
 import { TextField, Button } from '@mui/material'
-
 import { RiKakaoTalkFill } from 'react-icons/ri'
 import { FcGoogle } from 'react-icons/fc'
 import { signupUserThunk, checkIdDuplicateThunk, checkNicknameDuplicateThunk } from '../../features/authSlice'
@@ -138,7 +136,6 @@ const Signup = () => {
                         error={!!errors.nickname}
                         helperText={errors.nickname || successMessages.nickname || ''}
                      />
-                     <CheckButton onClick={checkDuplicateNickname}>중복 확인</CheckButton> {/* ✅ 버튼 클릭 시 실행 */}
                   </InputRow>
 
                   <InputRow>
@@ -151,7 +148,6 @@ const Signup = () => {
                         error={!!errors.loginId}
                         helperText={errors.loginId || successMessages.loginId || ''}
                      />
-                     <CheckButton onClick={checkDuplicateId}>중복 확인</CheckButton> {/* ✅ 버튼 클릭 시 실행 */}
                   </InputRow>
                   <StyledTextField label="이메일" name="email" type="email" value={formData.email} onChange={handleChange} error={!!errors.email} helperText={errors.email || ''} autoComplete="email" />
                   <StyledTextField label="비밀번호" name="password" type="password" value={formData.password} onChange={handleChange} helperText="비밀번호는 최소 8자 이상, 영문/숫자/특수문자를 포함해야 합니다." autoComplete="new-password" />
