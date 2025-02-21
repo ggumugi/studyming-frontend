@@ -1,4 +1,4 @@
-import { createItem, getItems, updateItem } from '../api/itemApi'
+import { createItem, getItems, updateItem, getMyItems } from '../api/itemApi'
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
 // ✅ 상품 등록
@@ -22,9 +22,17 @@ export const fetchItems = createAsyncThunk('items/fetchItems', async (_, { rejec
    return response.items
 })
 
+// ✅ 사용자의 아이템 목록 가져오기
+export const fetchMyItems = createAsyncThunk('items/fetchMyItems', async (_, { rejectWithValue }) => {
+   const response = await getMyItems()
+   if (response.error) return rejectWithValue(response.error)
+   return response
+})
+
 const itemSlice = createSlice({
    name: 'items',
    initialState: {
+      myItems: [],
       items: [],
       selectedItem: null,
       loading: false,
@@ -74,6 +82,20 @@ const itemSlice = createSlice({
             state.items = action.payload
          })
          .addCase(fetchItems.rejected, (state, action) => {
+            state.loading = false
+            state.error = action.payload
+         })
+
+         // 아이템 목록 조회
+         .addCase(fetchMyItems.pending, (state) => {
+            state.loading = true
+            state.error = null
+         })
+         .addCase(fetchMyItems.fulfilled, (state, action) => {
+            state.loading = false
+            state.myItems = action.payload
+         })
+         .addCase(fetchMyItems.rejected, (state, action) => {
             state.loading = false
             state.error = action.payload
          })
