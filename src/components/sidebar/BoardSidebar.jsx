@@ -13,7 +13,7 @@ import CreateBoard from '../page/CreateBoard'
 /* 각 페이지 불러오기 (테스트로 채팅만 불러봄봄) */
 // import ChatPage from './ChatPage'
 
-const BoardSidebar = () => {
+const BoardSidebar = ({ isAuthenticated, user }) => {
    const [isWriting, setIsWriting] = useState(false)
    const [selectedMenu, setSelectedMenu] = useState('자유') // 기본 선택된 메뉴
 
@@ -79,7 +79,7 @@ const BoardSidebar = () => {
             </h2>
 
             {/* ✅ 글쓰기 모드일 때 `CreateBoard`로 변경 */}
-            {isWriting ? <CreateBoard setIsWriting={setIsWriting} /> : boardContent[selectedMenu]}
+            {isWriting ? <CreateBoard setIsWriting={setIsWriting} isAuthenticated={isAuthenticated} user={user} /> : boardContent[selectedMenu]}
          </ContentArea>
       </Container>
    )

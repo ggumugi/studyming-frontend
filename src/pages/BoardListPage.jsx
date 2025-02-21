@@ -1,10 +1,10 @@
 import BoardSidebar from '../components/sidebar/BoardSidebar'
 import { BrowserRouter } from 'react-router-dom'
 
-function BoardListPage() {
+function BoardListPage({ isAuthenticated, user }) {
    return (
       <>
-         <BoardSidebar />
+         <BoardSidebar isAuthenticated={isAuthenticated} user={user} />
       </>
    )
 }
