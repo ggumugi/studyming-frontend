@@ -56,9 +56,14 @@ export const fetchPostByIdThunk = createAsyncThunk('posts/fetchPostById', async 
 export const fetchPostsThunk = createAsyncThunk('posts/fetchPosts', async ({ page, category }, { rejectWithValue }) => {
    try {
       const response = await fetchPosts({ page, category })
-      return response.data
-   } catch (err) {
-      return rejectWithValue(err.response?.data?.message || '전체 게시물 조회 실패')
+
+      if (!response || !response.posts) {
+         return rejectWithValue('응답에 posts가 없습니다.')
+      }
+
+      return response // ✅ 응답 반환
+   } catch (error) {
+      return rejectWithValue(error.message)
    }
 })
 
@@ -130,9 +135,10 @@ const postSlice = createSlice({
          })
          .addCase(fetchPostsThunk.fulfilled, (state, action) => {
             state.loading = false
-            state.posts = action.payload.posts
-            state.pagination = action.payload.pagination
+            state.posts = action.payload?.posts || [] // ✅ posts가 undefined일 경우 빈 배열로 설정
+            state.pagination = action.payload?.pagination || { totalPosts: 0, currentPage: 1, totalPages: 1, limit: 10 }
          })
+
          .addCase(fetchPostsThunk.rejected, (state, action) => {
             state.loading = false
             state.error = action.payload
