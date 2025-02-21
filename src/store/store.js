@@ -9,6 +9,7 @@ import goalsReducer from '../features/goalsSlice'
 import studygroupReducer from '../features/studygroupSlice'
 import itemReducer from '../features/itemSlice'
 import postReducer from '../features/postSlice'
+import conmmetReducer from '../features/commentSlice'
 
 const store = configureStore({
    reducer: {
@@ -21,6 +22,7 @@ const store = configureStore({
       studygroup: studygroupReducer,
       items: itemReducer,
       posts: postReducer,
+      comments: conmmetReducer,
    },
 })
 
