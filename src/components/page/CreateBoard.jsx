@@ -37,7 +37,6 @@ const CreateBoard = ({ setIsWriting, user }) => {
       formData.append('title', title)
       formData.append('content', content)
       formData.append('category', 'free')
-      formData.append('userId', user.id)
       imageFiles.forEach((file) => {
          formData.append('images', file)
       })
