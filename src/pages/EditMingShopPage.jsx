@@ -1,9 +1,9 @@
 import CreateMingShop from '../components/page/CreateMingShop'
 
-function EditMingShopPage() {
+function EditMingShopPage({ isAuthenticated, user }) {
    return (
       <>
-         <CreateMingShop />
+         <CreateMingShop isAuthenticated={isAuthenticated} user={user} />
       </>
    )
 }

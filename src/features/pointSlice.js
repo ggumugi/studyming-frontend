@@ -34,7 +34,7 @@ export const sendPointsThunk = createAsyncThunk('points/sendPoints', async (data
 // 포인트 변동 내역 조회
 export const fetchPointHistory = createAsyncThunk('points/fetchPointHistory', async (_, { rejectWithValue }) => {
    try {
-      const response = await getPointHistory()
+      const response = await getPointHistory() // API 호출
       return response.data
    } catch (error) {
       return rejectWithValue(error.response?.data?.message || '포인트 변동 내역 조회 실패')

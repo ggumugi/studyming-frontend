@@ -1,30 +1,44 @@
 import React, { useState, useEffect } from 'react' // React 훅 불러오기
-import { useSelector } from 'react-redux' // React-Redux 훅 불러오기
 
 import styled from 'styled-components'
 
-const StudyCreate = ({ onSubmit, isAuthenticated, user }) => {
-   const [name, setName] = useState(null)
-   const [description, setDescription] = useState(null)
-   const [startDate, setStartDate] = useState(null)
-   const [endDate, setEndDate] = useState(null)
-   const [startTime, setStartTime] = useState(null)
-   const [dayZone, setDayZone] = useState(false)
-   const [endTime, setEndTime] = useState(null)
-   const [timezone, setTimezone] = useState(false)
-   const [maxMembers, setMaxMembers] = useState(6)
-   const [reward, setReward] = useState(false)
-   const [open, setOpen] = useState(true)
-   const [password, setPassword] = useState(null)
+const StudyCreate = ({ onSubmit, isAuthenticated, user, initialValues = {} }) => {
+   // 상태 초기화 (initialValues가 있으면 해당 값으로 초기화)
+   const [name, setName] = useState(initialValues.name || '')
+   const [description, setDescription] = useState(initialValues.description || '')
+   const [startDate, setStartDate] = useState(initialValues.startDate || '')
+   const [endDate, setEndDate] = useState(initialValues.endDate || '')
+   const [startTime, setStartTime] = useState(initialValues.startTime || '')
+   const [endTime, setEndTime] = useState(initialValues.endTime || '')
+   const [password, setPassword] = useState(initialValues.password || '')
+   const [timegoal, setTimegoal] = useState(initialValues.timeGoal || '')
+   const [capInterval, setCapInterval] = useState(initialValues.capInterval || '')
+   const [dayZone, setDayZone] = useState(!!initialValues.startDate) // 기간 적용 여부
+   const [timezone, setTimezone] = useState(!!initialValues.startTime) // 접속 시간대 적용 여부
+   const [maxMembers, setMaxMembers] = useState(initialValues.maxMembers || 6)
+   const [reward, setReward] = useState(initialValues.reward || false)
+   const [open, setOpen] = useState(initialValues.open || true)
    const [errorMsg, setErrorMsg] = useState(null)
-   const [timegoal, setTimegoal] = useState(null)
-   const [capInterval, setCapInterval] = useState(null)
-   const [capOnOff, setCapOnOff] = useState(false)
-   const [createdBy, setCreatedBy] = useState(null)
+   const [capOnOff, setCapOnOff] = useState(!!initialValues.capInterval) // 보안 문자 간격 적용 여부
+   const [goalOnOff, setGoalOnOff] = useState(!!initialValues.timeGoal) // 목표시간 적용 여부
+   const [createdBy, setCreatedBy] = useState(null) // 생성자 ID
+
+   // 해시태그 관련 상태
+   const [inputValue, setInputValue] = useState('#')
+   const [hashtags, setHashtags] = useState(initialValues.hashtags || [])
+
+   // composition 처리용 상태
+   const [isComposing, setIsComposing] = useState(false) // 조합 중 여부
+   const [disableFormatting, setDisableFormatting] = useState(false) // 포매팅 비활성화 여부
 
    useEffect(() => {
       setCreatedBy(user?.id)
-   }, [user])
+      // 수정 모드일 때 해시태그 초기화
+      console.log(initialValues.id)
+      if (initialValues.id && initialValues.hashtags) {
+         setInputValue('#' + initialValues.hashtags.join(' #'))
+      }
+   }, [user, initialValues.hashtags])
 
    const handleSubmit = (e) => {
       e.preventDefault()
@@ -45,18 +59,83 @@ const StudyCreate = ({ onSubmit, isAuthenticated, user }) => {
          reward,
          open,
          password: open ? '' : password,
-         timeGoal: timegoal ? timegoal : 0, // timegoal이 false면 0
+         timeGoal: goalOnOff ? timegoal : 0, // timegoal이 false면 0
          capInterval: capInterval ? capInterval : null,
          createdBy,
+         hashtags,
       }
 
       onSubmit(groupData) // onSubmit 호출
    }
 
+   // 포맷팅 헬퍼 함수
+   // - 맨 처음에 "#"이 없으면 추가하고
+   // - disableFormatting 플래그가 false일 때만 공백 뒤에 자동 "#" 삽입
+   const formatInput = (val) => {
+      let formatted = val
+      if (!formatted.startsWith('#')) {
+         formatted = '#' + formatted
+      }
+      if (!disableFormatting) {
+         formatted = formatted.replace(/(\s)(?!#)/g, '$1#')
+      }
+      return formatted
+   }
+
+   // 해시태그 배열 업데이트: 화면에 표시되는 포맷팅된 값에서 '#'를 제거하고 단어별로 분리
+   const updateHashtags = (formattedVal) => {
+      const words = formattedVal
+         .replace(/#/g, '')
+         .trim()
+         .split(/\s+/)
+         .filter((word) => word.length > 0)
+      setHashtags(words)
+   }
+
+   // onChange: composition 중이 아니라면 포맷팅 적용
+   const handleChange = (e) => {
+      const newValue = e.target.value
+      if (isComposing) {
+         // 조합 중일 때는 포맷팅 없이 원시값 그대로 업데이트
+         setInputValue(newValue)
+         return
+      }
+      if (disableFormatting) {
+         setInputValue(newValue)
+         updateHashtags(newValue)
+         setDisableFormatting(false)
+      } else {
+         const formatted = formatInput(newValue)
+         setInputValue(formatted)
+         updateHashtags(formatted)
+      }
+   }
+
+   // composition 이벤트 처리
+   const handleCompositionStart = () => {
+      setIsComposing(true)
+   }
+   const handleCompositionEnd = (e) => {
+      setIsComposing(false)
+      const finalValue = e.target.value
+      const formatted = formatInput(finalValue)
+      setInputValue(formatted)
+      updateHashtags(formatted)
+   }
+
+   // onKeyDown: Backspace가 눌렸을 때, 만약 커서가 끝에 있고 마지막 문자가 '#'이면 포맷팅 잠시 비활성화
+   const handleKeyDown = (e) => {
+      if (e.key === 'Backspace') {
+         const target = e.target
+         if (target.selectionStart === target.selectionEnd && target.selectionStart === inputValue.length && inputValue.endsWith('#')) {
+            setDisableFormatting(true)
+         }
+      }
+   }
    return (
       <Wrapper>
          <TitleContainer>
-            <Title>스터디 만들기</Title>
+            <Title>{initialValues.id ? '스터디 수정하기' : '스터디 만들기'}</Title>
             <StyledDivider />
          </TitleContainer>
 
@@ -87,10 +166,10 @@ const StudyCreate = ({ onSubmit, isAuthenticated, user }) => {
                <LabelText>공개여부</LabelText>
                <RadioGroup>
                   <label>
-                     <input type="radio" name="visibility" value="공개" checked={open} onChange={() => setOpen(true)} /> 공개
+                     <input type="radio" name="visibility" value="공개" checked={open === true} onChange={() => setOpen(true)} /> 공개
                   </label>
                   <label>
-                     <input type="radio" name="visibility" value="비공개" checked={!open} onChange={() => setOpen(false)} /> 비공개
+                     <input type="radio" name="visibility" value="비공개" checked={open === false} onChange={() => setOpen(false)} /> 비공개
                   </label>
                </RadioGroup>
             </Label>
@@ -105,7 +184,7 @@ const StudyCreate = ({ onSubmit, isAuthenticated, user }) => {
 
             <Label>
                <LabelText>해시태그</LabelText>
-               <Input type="text" placeholder="해시태그를 입력하세요" />
+               <Input type="text" placeholder="해시태그를 입력하세요 (예: 국어 수학)" value={inputValue} onChange={handleChange} onCompositionStart={handleCompositionStart} onCompositionEnd={handleCompositionEnd} onKeyDown={handleKeyDown} />
             </Label>
 
             <Label>
@@ -124,11 +203,11 @@ const StudyCreate = ({ onSubmit, isAuthenticated, user }) => {
             <Label>
                <LabelText>목표 시간</LabelText>
                <FlexContainer>
-                  <SmallSelect value={timegoal ? '적용' : '미적용'} onChange={(e) => setTimegoal(e.target.value === '적용')}>
+                  <SmallSelect value={goalOnOff ? '적용' : '미적용'} onChange={(e) => setGoalOnOff(e.target.value === '적용')}>
                      <option>적용</option>
                      <option>미적용</option>
                   </SmallSelect>
-                  <MediumInput type="number" placeholder="1시간" disabled={!timegoal} value={timegoal} onChange={(e) => setTimegoal(parseInt(e.target.value))} />
+                  <MediumInput type="number" placeholder="2시간" disabled={!goalOnOff} value={timegoal} onChange={(e) => setTimegoal(parseInt(e.target.value))} />
                </FlexContainer>
             </Label>
 
@@ -173,7 +252,7 @@ const StudyCreate = ({ onSubmit, isAuthenticated, user }) => {
                <TextArea placeholder="스터디 설명을 입력하세요" value={description} onChange={(e) => setDescription(e.target.value)} />
             </Label>
 
-            <SubmitButton type="submit">스터디 만들기</SubmitButton>
+            <SubmitButton type="submit">{initialValues.id ? '스터디 수정하기' : '스터디 만들기'}</SubmitButton>
          </Form>
       </Wrapper>
    )

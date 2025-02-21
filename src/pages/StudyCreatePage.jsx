@@ -1,9 +1,10 @@
 import { Container } from '@mui/material'
 import StudyCreate from '../components/Study/StudyCreate' // StudyCreate 컴포넌트 import
 import { useDispatch } from 'react-redux'
-import { createStudygroupThunk } from '../features/studygroupSlice' // thunk import
 import { useCallback } from 'react'
 import { useNavigate } from 'react-router-dom' // useNavigate import
+
+import { createStudygroupThunk } from '../features/studygroupSlice' // thunk import
 
 const StudyCreatePage = ({ isAuthenticated, user }) => {
    const dispatch = useDispatch()
@@ -15,7 +16,7 @@ const StudyCreatePage = ({ isAuthenticated, user }) => {
          dispatch(createStudygroupThunk(studygroupData))
             .unwrap()
             .then((studygroup) => {
-               navigate(`/studygroup/detail/${studygroup.id}`) // 생성된 스터디 그룹의 상세 페이지로 이동
+               navigate(`/study/detail/${studygroup.id}`) // 생성된 스터디 그룹의 상세 페이지로 이동
             })
             .catch((err) => {
                console.error('스터디 그룹 등록 실패 : ', err)

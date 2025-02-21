@@ -109,7 +109,7 @@ const Header = ({ isAuthenticated, user }) => {
                      {/* 📌 사용자 드롭다운 메뉴 */}
                      <Menu anchorEl={userAnchor} open={userOpen} onClose={handleUserClose} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} transformOrigin={{ vertical: 'top', horizontal: 'right' }}>
                         <CustomMenuItem onClick={handleUserClose}>
-                           <Link to="/profile">내 프로필</Link>
+                           <Link to="/mypage">내 프로필</Link>
                         </CustomMenuItem>
                         <CustomMenuItem onClick={handleUserClose}>
                            <Link to="/info">내 정보</Link>

@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { pointsForItemThunk, fetchUserPoints } from '../../features/pointSlice'
 import { useNavigate } from 'react-router-dom'
 
-const ItemList = ({ items }) => {
+const ItemList = ({ items, isAuthenticated, user }) => {
    const dispatch = useDispatch()
    const navigate = useNavigate()
    const userPoints = useSelector((state) => state.points.points)
@@ -20,6 +20,10 @@ const ItemList = ({ items }) => {
          alert('포인트가 부족합니다!')
          return
       }
+
+      // ✅ 구매 확인창 추가
+      const isConfirmed = window.confirm(`${item.name}을(를) ${item.price}밍으로 구매하시겠습니까?`)
+      if (!isConfirmed) return
 
       dispatch(pointsForItemThunk(item.id)) // ✅ useDispatch()로 실행
          .then(() => {
@@ -45,7 +49,16 @@ const ItemList = ({ items }) => {
                         <ItemPrice>
                            {item.price} {item.type === 'cash' ? '원' : '밍'}
                         </ItemPrice>
-                        {userRole === 'ADMIN' && <EditButton onClick={() => navigate(`/mingshop/edit/${item.id}`)}>수정</EditButton>}
+                        {isAuthenticated && user?.role === 'ADMIN' && (
+                           <EditButton
+                              variant="contained"
+                              color="primary"
+                              onClick={() => navigate(`/mingshop/edit/${item.id}`, { state: { user } })} // ✅ user 정보 함께 전달
+                              sx={{ marginLeft: '10px' }}
+                           >
+                              수정
+                           </EditButton>
+                        )}
                         <BuyButton onClick={() => handlePurchase(item)}>구매하기</BuyButton>
                      </PriceContainer>
                   </ItemCard>
