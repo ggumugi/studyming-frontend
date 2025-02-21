@@ -22,6 +22,18 @@ const StudyCreate = ({ onSubmit, isAuthenticated, user }) => {
    const [capOnOff, setCapOnOff] = useState(false)
    const [createdBy, setCreatedBy] = useState(null)
 
+   // 해시태그 관련 상태
+   // inputValue: 화면에 표시되는 값 (예: "#국어 #수학")
+   // hashtags: 순수 단어 배열 (예: ["국어", "수학"])
+   const [inputValue, setInputValue] = useState('#')
+   const [hashtags, setHashtags] = useState([])
+   const [hashtagsError, setHashtagsError] = useState(null)
+
+   // composition 처리용 상태
+   const [isComposing, setIsComposing] = useState(false)
+   // backspace 시 포매팅을 잠시 비활성화하는 플래그
+   const [disableFormatting, setDisableFormatting] = useState(false)
+
    useEffect(() => {
       setCreatedBy(user?.id)
    }, [user])
@@ -31,6 +43,10 @@ const StudyCreate = ({ onSubmit, isAuthenticated, user }) => {
 
       if (!user) {
          alert('로그인이 필요합니다.')
+         return
+      }
+      if (hashtagsError) {
+         alert('해시태그를 정확히 입력해주세요.')
          return
       }
 
@@ -48,11 +64,76 @@ const StudyCreate = ({ onSubmit, isAuthenticated, user }) => {
          timeGoal: timegoal ? timegoal : 0, // timegoal이 false면 0
          capInterval: capInterval ? capInterval : null,
          createdBy,
+         hashtags,
       }
 
       onSubmit(groupData) // onSubmit 호출
    }
 
+   // 포맷팅 헬퍼 함수
+   // - 맨 처음에 "#"이 없으면 추가하고
+   // - disableFormatting 플래그가 false일 때만 공백 뒤에 자동 "#" 삽입
+   const formatInput = (val) => {
+      let formatted = val
+      if (!formatted.startsWith('#')) {
+         formatted = '#' + formatted
+      }
+      if (!disableFormatting) {
+         formatted = formatted.replace(/(\s)(?!#)/g, '$1#')
+      }
+      return formatted
+   }
+
+   // 해시태그 배열 업데이트: 화면에 표시되는 포맷팅된 값에서 '#'를 제거하고 단어별로 분리
+   const updateHashtags = (formattedVal) => {
+      const words = formattedVal
+         .replace(/#/g, '')
+         .trim()
+         .split(/\s+/)
+         .filter((word) => word.length > 0)
+      setHashtags(words)
+   }
+
+   // onChange: composition 중이 아니라면 포맷팅 적용
+   const handleChange = (e) => {
+      const newValue = e.target.value
+      if (isComposing) {
+         // 조합 중일 때는 포맷팅 없이 원시값 그대로 업데이트
+         setInputValue(newValue)
+         return
+      }
+      if (disableFormatting) {
+         setInputValue(newValue)
+         updateHashtags(newValue)
+         setDisableFormatting(false)
+      } else {
+         const formatted = formatInput(newValue)
+         setInputValue(formatted)
+         updateHashtags(formatted)
+      }
+   }
+
+   // composition 이벤트 처리
+   const handleCompositionStart = () => {
+      setIsComposing(true)
+   }
+   const handleCompositionEnd = (e) => {
+      setIsComposing(false)
+      const finalValue = e.target.value
+      const formatted = formatInput(finalValue)
+      setInputValue(formatted)
+      updateHashtags(formatted)
+   }
+
+   // onKeyDown: Backspace가 눌렸을 때, 만약 커서가 끝에 있고 마지막 문자가 '#'이면 포맷팅 잠시 비활성화
+   const handleKeyDown = (e) => {
+      if (e.key === 'Backspace') {
+         const target = e.target
+         if (target.selectionStart === target.selectionEnd && target.selectionStart === inputValue.length && inputValue.endsWith('#')) {
+            setDisableFormatting(true)
+         }
+      }
+   }
    return (
       <Wrapper>
          <TitleContainer>
@@ -105,7 +186,8 @@ const StudyCreate = ({ onSubmit, isAuthenticated, user }) => {
 
             <Label>
                <LabelText>해시태그</LabelText>
-               <Input type="text" placeholder="해시태그를 입력하세요" />
+               <Input type="text" placeholder="해시태그를 입력하세요 (예: 국어 수학)" value={inputValue} onChange={handleChange} onCompositionStart={handleCompositionStart} onCompositionEnd={handleCompositionEnd} onKeyDown={handleKeyDown} />
+               {hashtagsError && <SmallText>{hashtagsError}</SmallText>}
             </Label>
 
             <Label>
