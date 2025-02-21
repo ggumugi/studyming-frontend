@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Select, MenuItem, Button, Pagination } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
-import { getPosts } from '../../features/postSlice'
+import { fetchPostsThunk } from '../../features/postSlice'
 import FreePostDetail from './FreePostDetail'
 import Report from '../shared/Report'
 
@@ -22,8 +22,8 @@ const FreeBoard = () => {
    }
 
    // 검색 기능
-   const filteredPosts = posts.filter((post) => post[filter]?.toLowerCase().includes(searchQuery.toLowerCase()))
-   const paginatedPosts = filteredPosts.slice((page - 1) * rowsPerPage, page * rowsPerPage)
+   const filteredPosts = posts?.filter((post) => post[filter]?.toLowerCase().includes(searchQuery.toLowerCase()))
+   const paginatedPosts = filteredPosts?.slice((page - 1) * rowsPerPage, page * rowsPerPage)
 
    const handleReportClick = () => {
       setIsModalOpen(true) // 신고 버튼 클릭 시 모달 열기
@@ -40,7 +40,7 @@ const FreeBoard = () => {
 
    // 🔥 백엔드에서 게시글 데이터 가져오기
    useEffect(() => {
-      dispatch(getPosts()) // Redux를 통해 서버에서 게시글 리스트 가져오기
+      dispatch(fetchPostsThunk()) // Redux를 통해 서버에서 게시글 리스트 가져오기
    }, [dispatch])
 
    return (
@@ -73,7 +73,7 @@ const FreeBoard = () => {
                               </TableRow>
                            </TableHead>
                            <TableBody>
-                              {paginatedPosts.map((post) => (
+                              {paginatedPosts?.map((post) => (
                                  <TableRow key={post.id}>
                                     <TableCell sx={{ width: '10%', textAlign: 'center' }}>
                                        <span style={{ cursor: 'pointer', display: 'inline' }} onClick={() => setSelectedPost(post)}>
@@ -101,7 +101,7 @@ const FreeBoard = () => {
 
                      {/* 페이지네이션 */}
                      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-                        <Pagination count={Math.ceil(filteredPosts.length / rowsPerPage)} page={page} onChange={handleChangePage} color="warning" shape="rounded" />
+                        <Pagination count={Math.ceil(filteredPosts?.length / rowsPerPage)} page={page} onChange={handleChangePage} color="warning" shape="rounded" />
                      </div>
 
                      {/* 검색 필터 */}

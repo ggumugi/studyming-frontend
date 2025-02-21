@@ -1,27 +1,33 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { TextField, Button } from '@mui/material'
-import { useDispatch } from 'react-redux'
-import { addPost } from '../../features/postSlice' // Redux 액션 가져오기
+import { useDispatch, useSelector } from 'react-redux'
+import { createPostThunk } from '../../features/postSlice'
 
-const CreateBoard = ({ setIsWriting }) => {
+const CreateBoard = ({ setIsWriting, user }) => {
    const dispatch = useDispatch()
    const [title, setTitle] = useState('')
    const [content, setContent] = useState('')
-   const [image, setImage] = useState(null)
-   const [imageFile, setImageFile] = useState(null) // 파일 데이터 저장
+   const [images, setImages] = useState([])
+   const [imageFiles, setImageFiles] = useState([])
 
-   // ✅ 이미지 업로드 핸들러 (파일 저장 추가)
+   // ✅ 이미지 업로드 핸들러
    const handleImageUpload = (event) => {
-      const file = event.target.files[0]
-      if (file) {
-         setImage(URL.createObjectURL(file)) // 미리보기용 URL 생성
-         setImageFile(file) // 파일 데이터 저장 (백엔드 전송용)
+      const files = Array.from(event.target.files)
+      if (files.length > 0) {
+         setImageFiles(files)
+         const previews = files.slice(0, 3).map((file) => URL.createObjectURL(file))
+         setImages(previews)
       }
    }
 
    // ✅ 글쓰기 버튼 클릭 시 API 요청
    const handleSubmit = async () => {
+      if (!user || !user.id) {
+         alert('로그인이 필요합니다.')
+         return
+      }
+
       if (!title.trim() || !content.trim()) {
          alert('제목과 내용을 입력해주세요!')
          return
@@ -30,19 +36,24 @@ const CreateBoard = ({ setIsWriting }) => {
       const formData = new FormData()
       formData.append('title', title)
       formData.append('content', content)
-      formData.append('category', '자유게시판') // 기본 카테고리 지정
-      if (imageFile) {
-         formData.append('image', imageFile) // 이미지 파일 추가
-      }
+      formData.append('category', 'free')
+      formData.append('userId', user.id)
+      imageFiles.forEach((file) => {
+         formData.append('images', file)
+      })
 
-      try {
-         await dispatch(addPost(formData)).unwrap() // Redux 액션 실행
-         alert('게시글이 등록되었습니다!')
-         setIsWriting(false) // 글쓰기 창 닫기
-      } catch (error) {
-         console.error('게시글 등록 실패:', error)
-         alert('게시글 등록에 실패했습니다.')
-      }
+      console.log(formData, '크리에이트보드')
+
+      dispatch(createPostThunk(formData))
+         .unwrap()
+         .then(() => {
+            alert('게시글이 등록되었습니다!')
+            setIsWriting(false)
+         })
+         .catch((error) => {
+            console.error('게시글 등록 실패:', error)
+            alert(`게시글 등록 실패: ${error?.message || '알 수 없는 오류'}`)
+         })
    }
 
    return (
@@ -60,13 +71,17 @@ const CreateBoard = ({ setIsWriting }) => {
          <ButtonContainer>
             <UploadContainer>
                <UploadButton>
-                  <input type="file" accept="image/*" onChange={handleImageUpload} />
+                  <input type="file" accept="image/*" multiple onChange={handleImageUpload} />
                   이미지 업로드
                </UploadButton>
-               {image && <img src={image} alt="미리보기" style={{ width: '100px', marginLeft: '10px' }} />}
+               {images.map((src, index) => (
+                  <img key={index} src={src} alt="미리보기" style={{ width: '100px', marginLeft: '10px' }} />
+               ))}
             </UploadContainer>
 
-            <SubmitButton onClick={handleSubmit}>글쓰기</SubmitButton>
+            <SubmitButton onClick={handleSubmit} disabled={!user}>
+               {user ? '글쓰기' : '로그인이 필요합니다'}
+            </SubmitButton>
          </ButtonContainer>
 
          <Button onClick={() => setIsWriting(false)}>← 뒤로가기</Button>
