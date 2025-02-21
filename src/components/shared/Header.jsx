@@ -5,27 +5,26 @@ import { Menu, MenuItem } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 import { FaRegBell } from 'react-icons/fa'
+import { useCallback } from 'react'
+import { useEffect } from 'react'
+import { useDispatch } from 'react-redux'
 
-import { useDispatch, useSelector } from 'react-redux'
-
-import { logoutUserThunk } from '../../features/authSlice'
+import { logoutUserThunk, checkAuthStatusThunk } from '../../features/authSlice'
 
 const Header = ({ isAuthenticated, user }) => {
    const dispatch = useDispatch()
    const navigate = useNavigate()
 
-   // 로그아웃 버튼 클릭 시 실행
-   const handleLogout = () => {
+   const handleLogout = useCallback(() => {
       dispatch(logoutUserThunk())
          .unwrap()
          .then(() => {
-            alert('로그아웃 되었습니다.')
-            navigate('/login') // ✅ 로그인 페이지로 이동
+            window.location.href = '/' // ✅ 로그아웃 후 강제 새로고침
          })
          .catch((error) => {
-            alert(error || '로그아웃 실패')
+            alert(`로그아웃 실패: ${error}`)
          })
-   }
+   }, [dispatch])
 
    // 📌 게시판 드롭다운 상태
    const [boardAnchor, setBoardAnchor] = useState(null)
