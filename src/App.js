@@ -86,6 +86,7 @@ function App() {
             <Route path="/studygroup/:id" element={<StudyGroupPage isAuthenticated={isAuthenticated} user={user} />} />
             <Route path="/mingshop" element={<MingShopPage isAuthenticated={isAuthenticated} user={user} />} />
             <Route path="/mingshop/create" element={<CreateMingShopPage isAuthenticated={isAuthenticated} user={user} />} />
+            <Route path="/mingshop/edit/:id" element={<EditMingShopPage isAuthenticated={isAuthenticated} user={user} />} />
             <Route path="/admin" element={<AdminPage isAuthenticated={isAuthenticated} user={user} />} />
             <Route path="/study/list" element={<StudyListPage isAuthenticated={isAuthenticated} user={user} />} />
             <Route path="/study/create" element={<StudyCreatePage isAuthenticated={isAuthenticated} user={user} />} />

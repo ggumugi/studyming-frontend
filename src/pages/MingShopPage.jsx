@@ -5,17 +5,15 @@ import { fetchItems } from '../features/itemSlice' // ✅ 상품 목록 가져�
 import { fetchUserPoints } from '../features/pointSlice' // ✅ 유저 포인트 조회
 import ItemList from '../components/shop/ItemList'
 import { useNavigate } from 'react-router-dom'
-import { checkAuthStatusThunk } from '../features/authSlice'
 import { Button } from '@mui/material'
 
-const MingShopPage = () => {
+const MingShopPage = ({ isAuthenticated, user }) => {
    const dispatch = useDispatch()
    const navigate = useNavigate()
    const [loading, setLoading] = useState(true)
 
-   // ✅ Redux에서 현재 로그인된 유저 정보 가져오기
-   const user = useSelector((state) => state.auth.user)
-   const userRole = user?.role ?? 'USER' // 'USER' 기본값 설정
+   // ✅ user가 없으면 기본값 설정
+   const userRole = user?.role ?? 'USER'
 
    // ✅ Redux에서 현재 보유 포인트 가져오기
    const userPoints = useSelector((state) => state.points?.points ?? 0)
@@ -26,7 +24,7 @@ const MingShopPage = () => {
    // ✅ 모든 API 요청을 한 번에 실행하여 로딩 시간 최적화
    useEffect(() => {
       setLoading(true)
-      Promise.all([dispatch(fetchItems()), dispatch(fetchUserPoints()), dispatch(checkAuthStatusThunk())]).finally(() => setLoading(false))
+      Promise.all([dispatch(fetchItems()), dispatch(fetchUserPoints())]).finally(() => setLoading(false))
    }, [dispatch])
 
    const titleList = ['이 모든 매력적인 상품을 쉽고 빠르게 구매할 수 있는 방법', '채팅방의 인싸템! 이모티콘', '삭막한 채팅창에 활력을! 채팅창 꾸미기', '이것만 있다면 당신도 될 수 있다 공부왕!']
@@ -47,19 +45,21 @@ const MingShopPage = () => {
                      '&:hover': { backgroundColor: '#E74C3C' },
                   }}
                   onClick={() => navigate('/mingshop/create')}
+                  isAuthenticated={isAuthenticated}
+                  user={user}
                >
                   등록하기
                </Button>
             )}
          </Title>
          <Title>{titleList[0]}</Title>
-         <ItemList items={items.filter((item) => item.type === 'cash')} />
+         <ItemList items={items.filter((item) => item.type === 'cash')} isAuthenticated={isAuthenticated} user={user} />
          <Title>{titleList[1]}</Title>
-         <ItemList items={items.filter((item) => item.type === 'emoticon')} />
+         <ItemList items={items.filter((item) => item.type === 'emoticon')} isAuthenticated={isAuthenticated} user={user} />
          <Title>{titleList[2]}</Title>
-         <ItemList items={items.filter((item) => item.type === 'decoration')} />
+         <ItemList items={items.filter((item) => item.type === 'decoration')} isAuthenticated={isAuthenticated} user={user} />
          <Title>{titleList[3]}</Title>
-         <ItemList items={items.filter((item) => item.type === 'studytool')} />
+         <ItemList items={items.filter((item) => item.type === 'studytool')} isAuthenticated={isAuthenticated} user={user} />
       </Container>
    )
 }

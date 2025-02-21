@@ -7,12 +7,17 @@ import Report from '../shared/Report'
 
 const FreeBoard = () => {
    const dispatch = useDispatch()
-   const { list: posts, loading } = useSelector((state) => state.posts) // Redux에서 게시글 리스트 가져오기
+   // Redux 상태 선택기 수정
+   const posts = useSelector((state) => state.posts.posts)
+   const pagination = useSelector((state) => state.posts.pagination)
 
+   console.log('현재 리덕스 상태:', { posts, pagination })
+
+   const loading = useSelector((state) => state.posts.loading)
    const [page, setPage] = useState(1)
    const [rowsPerPage] = useState(10)
-   const [searchQuery, setSearchQuery] = useState('')
-   const [filter, setFilter] = useState('title')
+   const [searchType, setSearchType] = useState('title') // 1. 변수명 변경
+   const [searchKeyword, setSearchKeyword] = useState('')
    const [isModalOpen, setIsModalOpen] = useState(false)
    const [selectedPost, setSelectedPost] = useState(null)
 
@@ -22,8 +27,11 @@ const FreeBoard = () => {
    }
 
    // 검색 기능
-   const filteredPosts = posts?.filter((post) => post[filter]?.toLowerCase().includes(searchQuery.toLowerCase()))
-   const paginatedPosts = filteredPosts?.slice((page - 1) * rowsPerPage, page * rowsPerPage)
+   const filteredPosts = posts || [] // 🔥 Redux에서 가져온 posts 그대로 사용
+
+   /* const filteredPosts = posts?.filter((post) => post[searchType]?.toLowerCase().includes(searchKeyword.toLowerCase())) */
+   /*
+   const paginatedPosts = filteredPosts?.slice((page - 1) * rowsPerPage, page * rowsPerPage) */
 
    const handleReportClick = () => {
       setIsModalOpen(true) // 신고 버튼 클릭 시 모달 열기
@@ -37,11 +45,30 @@ const FreeBoard = () => {
       console.log('사용자를 신고했습니다.')
       setIsModalOpen(false)
    }
+   const handleSearch = () => {
+      dispatch(
+         fetchPostsThunk({
+            page: 1,
+            category: 'free',
+            limit: 10,
+            searchType,
+            searchKeyword,
+         })
+      )
+   }
 
-   // 🔥 백엔드에서 게시글 데이터 가져오기
    useEffect(() => {
-      dispatch(fetchPostsThunk()) // Redux를 통해 서버에서 게시글 리스트 가져오기
-   }, [dispatch])
+      dispatch(
+         fetchPostsThunk({
+            page: page || 1, // ✅ 기본값 추가
+            category: 'free',
+            limit: rowsPerPage || 10, // ✅ 기본값 추가
+            searchType,
+            searchKeyword,
+         })
+      )
+   }, [dispatch, page, rowsPerPage, searchType, searchKeyword])
+   //rowsPerPage 추가
 
    return (
       <div style={{ width: '100%' }}>
@@ -73,7 +100,7 @@ const FreeBoard = () => {
                               </TableRow>
                            </TableHead>
                            <TableBody>
-                              {paginatedPosts?.map((post) => (
+                              {filteredPosts.map((post) => (
                                  <TableRow key={post.id}>
                                     <TableCell sx={{ width: '10%', textAlign: 'center' }}>
                                        <span style={{ cursor: 'pointer', display: 'inline' }} onClick={() => setSelectedPost(post)}>
@@ -82,12 +109,12 @@ const FreeBoard = () => {
                                     </TableCell>
                                     <TableCell sx={{ width: '60%', textAlign: 'center' }}>
                                        <span style={{ cursor: 'pointer', display: 'inline' }} onClick={() => setSelectedPost(post)}>
-                                          {post.title}
+                                          {post?.title}
                                        </span>
                                     </TableCell>
                                     <TableCell sx={{ width: '15%', textAlign: 'center' }}>
                                        <span style={{ cursor: 'pointer', display: 'inline' }} onClick={handleReportClick}>
-                                          {post.author}
+                                          {post?.User?.nickname}
                                        </span>
                                     </TableCell>
                                     <TableCell sx={{ width: '15%', textAlign: 'center' }}>
@@ -99,39 +126,37 @@ const FreeBoard = () => {
                         </Table>
                      </TableContainer>
 
-                     {/* 페이지네이션 */}
-                     <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-                        <Pagination count={Math.ceil(filteredPosts?.length / rowsPerPage)} page={page} onChange={handleChangePage} color="warning" shape="rounded" />
-                     </div>
+                     {/* 페이지네이션 수정 */}
+                     {pagination && (
+                        <Pagination
+                           count={Math.ceil(pagination.totalPosts / 10)} // ✅ 전체 게시물 개수를 기준으로 동적 계산
+                           page={pagination.currentPage}
+                           onChange={handleChangePage}
+                           color="warning"
+                           shape="rounded"
+                        />
+                     )}
 
                      {/* 검색 필터 */}
                      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-                        <Select value={filter} onChange={(e) => setFilter(e.target.value)} sx={{ height: '45px' }}>
+                        <Select value={searchType} onChange={(e) => setSearchType(e.target.value)}>
                            <MenuItem value="title">제목</MenuItem>
                            <MenuItem value="author">작성자</MenuItem>
                         </Select>
 
                         <TextField
-                           value={searchQuery}
-                           onChange={(e) => setSearchQuery(e.target.value)}
+                           value={searchKeyword}
+                           onChange={(e) => setSearchKeyword(e.target.value)}
                            placeholder="검색어 입력"
                            sx={{
                               maxWidth: '700px',
                               width: '100%',
                               marginLeft: '10px',
-                              '& .MuiInputBase-root': {
-                                 height: '45px',
-                                 display: 'flex',
-                                 alignItems: 'center',
-                              },
-                              '& .MuiInputBase-input': {
-                                 height: '100%',
-                                 padding: '10px',
-                              },
+                              '& .MuiInputBase-root': { height: '45px' },
                            }}
                         />
 
-                        <Button variant="contained" color="warning" sx={{ marginLeft: '10px', height: '45px' }}>
+                        <Button variant="contained" color="warning" sx={{ marginLeft: '10px', height: '45px' }} onClick={handleSearch}>
                            검색
                         </Button>
                      </div>

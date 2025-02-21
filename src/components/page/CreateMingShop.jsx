@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import { Container, Input, Button, Typography, RadioGroup, FormControlLabel, Radio, Box, Select, MenuItem } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { createItemThunk, updateItemThunk, fetchItems } from '../../features/itemSlice'
 
-const CreateMingShop = () => {
+const CreateMingShop = ({ isAuthenticated }) => {
    const { id } = useParams() // ✅ URL에서 ID 가져오기
+   const location = useLocation()
    const navigate = useNavigate()
    const dispatch = useDispatch()
    const isEditing = Boolean(id) // ✅ ID가 있으면 수정 모드
+   const user = location.state?.user
 
    const existingItem = useSelector((state) => state.items.items.find((i) => i.id === Number(id)))
 
@@ -52,6 +54,12 @@ const CreateMingShop = () => {
    }
 
    const handleSubmit = () => {
+      if (!isAuthenticated) {
+         alert('로그인이 필요합니다.')
+         navigate('/login')
+         return
+      }
+
       if (!formData.name.trim() || !String(formData.price).trim() || !formData.type || !formData.limit || (!formData.image && !isEditing)) {
          alert('모든 필드를 입력하세요.')
          return
@@ -71,7 +79,7 @@ const CreateMingShop = () => {
       }
 
       if (isEditing) {
-         dispatch(updateItemThunk({ id, updatedData: newFormData }))
+         dispatch(updateItemThunk({ id, updatedData: newFormData, token: user.token })) // ✅ 로그인 유지
             .then(() => {
                alert('상품이 수정되었습니다!')
                navigate('/mingshop')

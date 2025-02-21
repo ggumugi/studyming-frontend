@@ -29,7 +29,7 @@ const PostDetail = ({ post, onBack }) => {
 
    return (
       <>
-         <Paper elevation={0} sx={{ padding: '10px', margin: '20px auto', maxWidth: '100%', paddingLeft: '100px', borderBottom: '2px solid rgba(255, 122, 0, 0.5)' }}>
+         <Paper elevation={0} sx={{ margin: '20px auto', maxWidth: '100%', borderBottom: '2px solid rgba(255, 122, 0, 0.5)' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                {/* 제목 */}
                <Typography variant="body1" gutterBottom>
@@ -48,13 +48,13 @@ const PostDetail = ({ post, onBack }) => {
             </Box>
             {/* 작성자 & 작성일 */}
             <Typography variant="subtitle1" color="textSecondary" align="right" sx={{ paddingTop: '20px' }}>
-               작성자: {post.author} | {post.date}
+               작성자: {post.User.nickname} | {new Date(post.createdAt).toLocaleDateString()}
             </Typography>
          </Paper>
          {/* <Typography sx={{ marginTop: '20px', borderBottom: '2px solid #ff7a00' }}></Typography> */}
-         <Paper sx={{ padding: '20px', margin: '20px auto', maxWidth: '100%', paddingLeft: '100px' }}>
+         <Paper sx={{ margin: '20px auto', maxWidth: '100%' }}>
             {/* 본문 내용 */}
-            <Typography variant="body1" sx={{ height: '40px' }}>
+            <Typography variant="body1" sx={{ height: '100%' }}>
                {post.content}
             </Typography>
 
