@@ -121,7 +121,7 @@ const Timer = () => {
       @keyframes captchaTimer {
          0% { height: 40px; width: 0; }
          50% { height: 40px; width: 320px; }
-         100% { height: 300px; width: 320px; }
+         100% { height: 250px; width: 320px; }
       }
    `
 
@@ -208,13 +208,14 @@ const Container = styled.div`
 `
 
 const CaptchaImage = styled.img`
-   margin-top: 10px;
+   margin-top: 5px;
    margin-bottom: 5px; /* 이미지와 텍스트 간의 간격 */
    width: 100%; /* 이미지 크기 조정 */
    max-width: 280px; /* 최대 너비 설정 */
 `
 
 const CountText = styled.div`
+   transform: translateY(5px);
    font-size: 16px; /* 카운트 텍스트 크기 조정 */
 `
 
@@ -225,6 +226,7 @@ const CaptchaInput = styled.input`
    border: 1px solid #ddd;
    border-radius: 5px;
    outline: none;
+   transform: translateY(-17px);
    &:focus {
       border-color: orange;
    }
@@ -239,6 +241,7 @@ const CaptchaButton = styled.button`
    color: #ff8c00;
    cursor: pointer;
    transition: background-color 0.3s;
+   transform: translateY(-35px);
    &:hover {
       background-color: #f0f0f0; /* 호버 시 배경색 변화 */
    }

@@ -45,3 +45,14 @@ export const getItems = async () => {
       return { error: error.response?.data?.message || '아이템 조회 실패' }
    }
 }
+
+// ✅ 사용자의 아이템 목록 불러오기
+export const getMyItems = async () => {
+   try {
+      const response = await studymingApi.get('/item/myitems', { withCredentials: true })
+      return response.data.items
+   } catch (error) {
+      console.error('❌ API 요청 오류 (MyItem):', error.response?.data || error.message)
+      return { error: error.response?.data?.message || '아이템 조회 실패' }
+   }
+}
