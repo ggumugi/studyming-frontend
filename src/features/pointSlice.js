@@ -24,7 +24,10 @@ export const pointsForItemThunk = createAsyncThunk('points/usePointsForItem', as
 // 포인트 선물
 export const sendPointsThunk = createAsyncThunk('points/sendPoints', async (data, { rejectWithValue }) => {
    try {
-      const response = await sendPoints(data)
+      const response = await sendPoints({
+         receiverNickname: data.receiverNickname, // 닉네임으로 변경
+         amount: data.amount,
+      })
       return response.data
    } catch (error) {
       return rejectWithValue(error.response?.data?.message || '포인트 선물 실패')

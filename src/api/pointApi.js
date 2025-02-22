@@ -25,7 +25,10 @@ export const usePointsForItem = async (itemId) => {
 // 포인트 선물 API
 export const sendPoints = async (data) => {
    try {
-      const response = await studymingApi.post('/point/send', data)
+      const response = await studymingApi.post('/point/send', {
+         receiverNickname: data.receiverNickname, // 닉네임으로 요청
+         amount: data.amount,
+      })
       return response
    } catch (error) {
       console.error(`API 요청 오류: ${error.message}`)
