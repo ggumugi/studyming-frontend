@@ -15,7 +15,6 @@ export const fetchStudygroupsThunk = createAsyncThunk('studygroups/fetchAll', as
 export const createStudygroupThunk = createAsyncThunk('studygroups/create', async (studygroupData, { rejectWithValue }) => {
    try {
       const response = await createStudygroup(studygroupData)
-      console.log(response.data)
       return response.data
    } catch (error) {
       return rejectWithValue(error.response?.data?.message || '스터디 그룹 생성 실패')
@@ -23,7 +22,7 @@ export const createStudygroupThunk = createAsyncThunk('studygroups/create', asyn
 })
 
 // 특정 스터디 그룹 가져오기
-export const fetchStudygroupByIdThunk = createAsyncThunk('studygroups/fetchById', async (id, { rejectWithValue }) => {
+export const fetchStudygroupByIdThunk = createAsyncThunk('studygroups/fetchStudygroupById', async (id, { rejectWithValue }) => {
    try {
       const response = await getStudygroupById(id)
       return response.data

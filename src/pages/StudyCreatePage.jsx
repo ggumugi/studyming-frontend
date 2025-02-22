@@ -16,7 +16,7 @@ const StudyCreatePage = ({ isAuthenticated, user }) => {
          dispatch(createStudygroupThunk(studygroupData))
             .unwrap()
             .then((studygroup) => {
-               navigate(`/study/detail/${studygroup.id}`) // 생성된 스터디 그룹의 상세 페이지로 이동
+               navigate(`/study/detail/${studygroup.studygroup.id}`) // 생성된 스터디 그룹의 상세 페이지로 이동
             })
             .catch((err) => {
                console.error('스터디 그룹 등록 실패 : ', err)

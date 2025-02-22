@@ -11,12 +11,15 @@ const StudyEditPage = ({ isAuthenticated, user }) => {
    const { id } = useParams() // URL에서 스터디 그룹 ID 추출
 
    // useSelector로 스터디 그룹 데이터 가져오기
-   const studygroup = useSelector((state) => state.studygroups.studygroup)
+   const { studygroup } = useSelector((state) => state.studygroups)
 
    // 스터디 그룹 데이터 불러오기
    useEffect(() => {
       dispatch(fetchStudygroupByIdThunk(id))
          .unwrap()
+         .then((data) => {
+            console.log('Fetched studygroup:', data)
+         })
          .catch((err) => {
             console.error('스터디 그룹 불러오기 실패: ', err)
             alert('스터디 그룹을 불러올 수 없습니다.')
@@ -27,8 +30,8 @@ const StudyEditPage = ({ isAuthenticated, user }) => {
       (studygroupData) => {
          dispatch(updateStudygroupThunk({ id, updateData: studygroupData }))
             .unwrap()
-            .then(() => {
-               navigate(`/study/detail/${id}`) // 수정 후 상세 페이지로 이동
+            .then((studygroup) => {
+               navigate(`/study/detail/${studygroup.studygroup.id}`) // 수정 후 상세 페이지로 이동
             })
             .catch((err) => {
                console.error('스터디 그룹 수정 실패: ', err)
@@ -37,10 +40,6 @@ const StudyEditPage = ({ isAuthenticated, user }) => {
       },
       [dispatch, navigate, id]
    )
-
-   if (!studygroup) {
-      return <div>Loading...</div> // 데이터 로딩 중
-   }
 
    return <Container maxWidth="lg">{studygroup && <StudyCreate onSubmit={handleSubmit} isAuthenticated={isAuthenticated} user={user} initialValues={studygroup} />}</Container>
 }
