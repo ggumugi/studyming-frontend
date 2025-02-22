@@ -1,16 +1,25 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { TextField, Button, Typography } from '@mui/material'
 import { useDispatch } from 'react-redux'
-import { createPostThunk } from '../../features/postSlice'
+import { createPostThunk, updatePostThunk } from '../../features/postSlice'
 
-const CreateBoard = ({ setIsWriting, user }) => {
+const CreateBoard = ({ setIsWriting, user, post = null }) => {
    const dispatch = useDispatch()
    const [title, setTitle] = useState('')
    const [content, setContent] = useState('')
    const [images, setImages] = useState([])
    const [imageFiles, setImageFiles] = useState([])
    const [titleError, setTitleError] = useState(false) // 제목 길이 초과 여부
+
+   // ✅ 수정 모드일 경우 기존 데이터 로드
+   useEffect(() => {
+      if (post) {
+         setTitle(post.title)
+         setContent(post.content)
+         setImages(post.images || [])
+      }
+   }, [post])
 
    // ✅ 제목 입력 핸들러
    const handleTitleChange = (e) => {
@@ -35,11 +44,6 @@ const CreateBoard = ({ setIsWriting, user }) => {
 
    // ✅ 글쓰기 버튼 클릭 시 API 요청
    const handleSubmit = async () => {
-      if (!user || !user.id) {
-         alert('로그인이 필요합니다.')
-         return
-      }
-
       if (!title.trim() || !content.trim()) {
          alert('제목과 내용을 입력해주세요!')
          return
@@ -53,18 +57,33 @@ const CreateBoard = ({ setIsWriting, user }) => {
          formData.append('images', file)
       })
 
-      console.log(formData, '크리에이트보드')
+      console.log('🔥 FormData 확인:', [...formData.entries()])
 
-      dispatch(createPostThunk(formData))
-         .unwrap()
-         .then(() => {
-            alert('게시글이 등록되었습니다!')
-            setIsWriting(false)
-         })
-         .catch((error) => {
-            console.error('게시글 등록 실패:', error)
-            alert(`게시글 등록 실패: ${error?.message || '알 수 없는 오류'}`)
-         })
+      if (post) {
+         // ✅ 수정 모드 (기존 게시글 수정)
+         dispatch(updatePostThunk({ id: post.id, postData: formData }))
+            .unwrap()
+            .then(() => {
+               alert('게시글이 수정되었습니다!')
+               setIsWriting(false)
+            })
+            .catch((error) => {
+               console.error('게시글 수정 실패:', error)
+               alert(`게시글 수정 실패: ${error?.message || '알 수 없는 오류'}`)
+            })
+      } else {
+         // ✅ 새 글 작성 모드
+         dispatch(createPostThunk(formData))
+            .unwrap()
+            .then(() => {
+               alert('게시글이 등록되었습니다!')
+               setIsWriting(false)
+            })
+            .catch((error) => {
+               console.error('게시글 등록 실패:', error)
+               alert(`게시글 등록 실패: ${error?.message || '알 수 없는 오류'}`)
+            })
+      }
    }
 
    return (
@@ -103,9 +122,7 @@ const CreateBoard = ({ setIsWriting, user }) => {
                ))}
             </UploadContainer>
 
-            <SubmitButton onClick={handleSubmit} disabled={!user}>
-               {user ? '글쓰기' : '로그인이 필요합니다'}
-            </SubmitButton>
+            <SubmitButton onClick={handleSubmit} /* disabled={!user} */>{post ? '수정하기' : '글쓰기'}</SubmitButton>
          </ButtonContainer>
 
          <Button onClick={() => setIsWriting(false)}>← 뒤로가기</Button>
