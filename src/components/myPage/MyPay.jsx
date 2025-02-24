@@ -26,6 +26,13 @@ const MyPay = () => {
       setRowsPerPage(parseInt(event.target.value, 10))
       setPage(0)
    }
+
+   // 🔹 포인트 선물 내역에서 금액을 추출하는 함수
+   const extractAmountFromTitle = (title) => {
+      const match = title.match(/(\d+)밍/) // 정규식으로 "100밍" 같은 숫자 추출
+      return match ? `${match[1]}밍` : 'N/A'
+   }
+
    return (
       <>
          <TableContainer component={Paper} sx={{ maxWidth: '100%', margin: 'auto' }}>
@@ -71,7 +78,8 @@ const MyPay = () => {
                         <TableRow key={his.id}>
                            <TableCell sx={{ width: '10%', textAlign: 'center' }}>{(page - 1) * rowsPerPage + index + 1}</TableCell>
                            <TableCell sx={{ width: '30%', textAlign: 'center' }}>{his.itemName || his.history}</TableCell>
-                           <TableCell sx={{ width: '15%', textAlign: 'center' }}>{his.itemPrice !== null ? `${his.itemPrice}밍` : 'N/A'}</TableCell>
+                           {/* 🔹 포인트 컬럼에서 값이 없을 경우, 제목에서 금액을 자동 추출 */}
+                           <TableCell sx={{ width: '15%', textAlign: 'center' }}>{his.itemPrice !== null ? `${his.itemPrice}밍` : extractAmountFromTitle(his.history)}</TableCell>
                            <TableCell sx={{ width: '15%', textAlign: 'center' }}>{his.restPoint || 'N/A'}</TableCell>
                            <TableCell sx={{ width: '10%', textAlign: 'center' }}>{typeMapping[his.type] || '기타'}</TableCell>
                            <TableCell sx={{ width: '20%', textAlign: 'center' }}>{new Date(his.createdAt).toLocaleString()}</TableCell>
