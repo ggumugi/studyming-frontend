@@ -9,7 +9,7 @@ export const createComment = async (commentData) => {
    try {
       const config = {
          headers: {
-            'Content-Type': 'multipart/form-data', // 파일 전송 시 필요
+            'Content-Type': 'application/json', // ✅ JSON으로 전송
          },
       }
 

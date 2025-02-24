@@ -9,12 +9,11 @@ import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
 import BoardListPage from './pages/BoardListPage'
 import BoardCreatePage from './pages/BoardCreatePage'
-import BoardEditPage from './pages/BoardEditPage'
-import BoardDetailPage from './pages/BoardDetailPage'
+//import BoardEditPage from './pages/BoardEditPage'
+//import BoardDetailPage from './pages/BoardDetailPage'
 import MyPage from './pages/MyPage'
 import FindIdPage from './pages/FindIdPage'
 import FindPasswordPage from './pages/FindPasswordPage'
-import FindPwquestionPage from './pages/FindPwquestionPage'
 import StudyListPage from './pages/StudyListPage'
 import StudyGroupPage from './pages/StudyGroupPage'
 import MingShopPage from './pages/MingShopPage'
@@ -54,7 +53,7 @@ function App() {
             <Route path="/board" element={<BoardListPage isAuthenticated={isAuthenticated} user={user} />} />
             <Route path="/board/create" element={<BoardCreatePage isAuthenticated={isAuthenticated} user={user} />} />
             {/* <Route path="/board/edit/:id" element={<BoardEditPage />} /> */}
-            {/* <Route path="/board/detail/:id" element={<BoardDetailPage />} /> */}
+            {/*<Route path="/board/detail/:id" element={<BoardDetailPage />} />*/}
             <Route path="/mypage" element={<MyPage isAuthenticated={isAuthenticated} user={user} />} />
             <Route path="/studygroup/:id" element={<StudyGroupPage isAuthenticated={isAuthenticated} user={user} />} />
             <Route path="/mingshop" element={<MingShopPage isAuthenticated={isAuthenticated} user={user} />} />

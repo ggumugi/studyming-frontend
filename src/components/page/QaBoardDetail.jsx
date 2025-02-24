@@ -33,7 +33,7 @@ const PostDetail = ({ post, onBack }) => {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                {/* 제목 */}
                <Typography variant="body1" gutterBottom>
-                  {post.title}
+                  {post?.title || '제목 없음'}
                </Typography>
 
                {/* 수정/삭제 버튼 */}
@@ -48,14 +48,14 @@ const PostDetail = ({ post, onBack }) => {
             </Box>
             {/* 작성자 & 작성일 */}
             <Typography variant="subtitle1" color="textSecondary" align="right" sx={{ paddingTop: '20px' }}>
-               작성자: {post.author} | {post.date}
+               작성자: {post?.author} | {post?.date}
             </Typography>
          </Paper>
          {/* <Typography sx={{ marginTop: '20px', borderBottom: '2px solid #ff7a00' }}></Typography> */}
          <Paper sx={{ padding: '20px', margin: '20px auto', maxWidth: '100%', paddingLeft: '100px' }}>
             {/* 본문 내용 */}
             <Typography variant="body1" sx={{ height: '40px' }}>
-               {post.content}
+               {post?.content || '내용 없음'}
             </Typography>
 
             {/* 댓글 입력 */}

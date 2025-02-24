@@ -4,6 +4,7 @@ import { createComment, updateComment, fetchComments, fetchCommentById, deleteCo
 //  댓글 생성 Thunk (이미지 업로드 가능)
 export const createCommentThunk = createAsyncThunk('comments/createComment', async (commentData, { rejectWithValue }) => {
    try {
+      console.log('🔥 백엔드로 보낼 데이터:', commentData) // ✅ 확인 로그 추가
       const response = await createComment(commentData)
       return response.comment // ✅ API 응답에서 comment 데이터만 반환
    } catch (err) {

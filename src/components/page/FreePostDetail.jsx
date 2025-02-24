@@ -1,30 +1,65 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchCommentsThunk, createCommentThunk, updateCommentThunk, deleteCommentThunk } from '../../features/commentSlice'
 import { Paper, Typography, Button, TextField, Box } from '@mui/material'
 
-const PostDetail = ({ post, onBack }) => {
-   console.log('PostDetail에서 받은 post 데이터:', post)
-   const [comments, setComments] = useState([
-      { id: 1, author: '수험박', text: '정신차리세요... 32년 동안 공부하셨다면서요', date: '2025.01.06. 15:30' },
-      { id: 2, author: '희경이', text: '어? 기사시험 그저께였는데요?', date: '2025.01.06. 15:35' },
-   ])
-   const [newComment, setNewComment] = useState('')
+const FreePostDetail = ({ post, onBack }) => {
+   const dispatch = useDispatch()
+   const { comments, loading, error } = useSelector((state) => state.comments)
+   const { user } = useSelector((state) => state.auth) // ✅ 현재 로그인된 사용자 정보 가져오기
 
-   // ✅ 댓글 추가 기능
+   const [newComment, setNewComment] = useState('')
+   const [editCommentId, setEditCommentId] = useState(null) // ✅ 수정 중인 댓글 ID
+   const [editText, setEditText] = useState('') // ✅ 수정할 댓글 내용
+
+   // ✅ 특정 게시물의 댓글 불러오기
+   useEffect(() => {
+      if (post?.id) {
+         dispatch(fetchCommentsThunk({ postId: post.id, page: 1, limit: 5 }))
+      }
+   }, [dispatch, post?.id])
+
+   // ✅ 댓글 추가
    const handleAddComment = () => {
       if (!newComment.trim()) return
-      const newEntry = {
-         id: comments.length + 1,
-         author: '익명',
-         text: newComment,
-         date: new Date().toISOString().replace('T', ' ').slice(0, 16),
-      }
-      setComments([...comments, newEntry])
-      setNewComment('') // 입력 필드 초기화
+      const commentData = new FormData()
+      commentData.append('postId', post.id)
+      commentData.append('content', newComment)
+
+      dispatch(createCommentThunk(commentData)).then(() => {
+         setNewComment('')
+      })
    }
 
-   // ✅ 댓글 삭제 기능
-   const handleDeleteComment = (id) => {
-      setComments(comments.filter((comment) => comment.id !== id))
+   // ✅ 수정 버튼 클릭 시 (본인 댓글만 가능)
+   const handleEditClick = (comment) => {
+      if (comment.userId !== user?.id) {
+         alert('댓글을 수정할 수 없습니다!') // 🚨 본인이 아닐 경우 알림창 띄우기
+         return
+      }
+      setEditCommentId(comment.id)
+      setEditText(comment.content)
+   }
+
+   // ✅ 댓글 수정 요청
+   const handleEditSubmit = (id) => {
+      if (!editText.trim()) return
+      const commentData = new FormData()
+      commentData.append('content', editText)
+
+      dispatch(updateCommentThunk({ id, commentData })).then(() => {
+         setEditCommentId(null) // 수정 완료 후 ID 초기화
+         setEditText('')
+      })
+   }
+
+   // ✅ 댓글 삭제 (본인 또는 관리자만 가능)
+   const handleDeleteComment = (id, userId) => {
+      if (user?.role !== 'ADMIN' && user?.id !== userId) {
+         alert('댓글을 삭제할 권한이 없습니다!')
+         return
+      }
+      dispatch(deleteCommentThunk(id))
    }
 
    return (
@@ -51,14 +86,14 @@ const PostDetail = ({ post, onBack }) => {
                작성자: {post.author} | {post.date}
             </Typography>
          </Paper>
-         {/* <Typography sx={{ marginTop: '20px', borderBottom: '2px solid #ff7a00' }}></Typography> */}
+
          <Paper sx={{ padding: '20px', margin: '20px auto', maxWidth: '100%', paddingLeft: '100px' }}>
             {/* 본문 내용 */}
             <Typography variant="body1" sx={{ height: '40px' }}>
                {post.content}
             </Typography>
 
-            {/* 댓글 입력 */}
+            {/* ✅ 댓글 입력 필드 */}
             <Box sx={{ display: 'flex', alignItems: 'center', marginTop: '20px' }}>
                <TextField fullWidth placeholder="댓글을 입력해주세요." value={newComment} onChange={(e) => setNewComment(e.target.value)} />
                <Button variant="contained" color="warning" sx={{ marginLeft: '10px', height: '56px' }} onClick={handleAddComment}>
@@ -66,7 +101,7 @@ const PostDetail = ({ post, onBack }) => {
                </Button>
             </Box>
 
-            {/* 댓글 목록 */}
+            {/* ✅ 댓글 목록 */}
             {comments.map((comment) => (
                <Box
                   key={comment.id}
@@ -75,37 +110,50 @@ const PostDetail = ({ post, onBack }) => {
                      borderBottom: '1px solid #eee',
                      paddingBottom: '10px',
                      display: 'flex',
-                     justifyContent: 'space-between', // 내용과 버튼을 양쪽 정렬
-                     alignItems: 'center', // 수직 정렬
+                     justifyContent: 'space-between',
+                     alignItems: 'center',
                   }}
                >
                   {/* 왼쪽: 댓글 내용 */}
                   <Box>
                      <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '5px' }}>
-                        {comment.author}
+                        {comment.User?.nickname || '익명'}
                      </Typography>
-                     <Typography variant="body2" sx={{ marginLeft: '20px' }}>
-                        {comment.text}
-                     </Typography>
+
+                     {/* ✅ 수정 중일 경우 입력 필드 활성화 */}
+                     {editCommentId === comment.id ? (
+                        <TextField fullWidth value={editText} onChange={(e) => setEditText(e.target.value)} autoFocus sx={{ marginBottom: '5px' }} />
+                     ) : (
+                        <Typography variant="body2" sx={{ marginLeft: '20px' }}>
+                           {comment.content}
+                        </Typography>
+                     )}
+
                      <Typography variant="caption" color="textSecondary" sx={{ marginLeft: '20px' }}>
                         {comment.date}
                      </Typography>
                   </Box>
 
-                  {/* 오른쪽: 수정/삭제 버튼 */}
+                  {/* ✅ 관리자(role=ADMIN)일 경우 "삭제"만 보이게 */}
                   <Box sx={{ display: 'flex', gap: '10px' }}>
-                     {' '}
-                     {/* 버튼 간격 최소화 */}
-                     <Button size="small" color="primary" sx={{ padding: '0', minWidth: 'auto' }}>
-                        수정
-                     </Button>
-                     <Button size="small" color="error" sx={{ padding: '0', minWidth: 'auto' }} onClick={() => handleDeleteComment(comment.id)}>
+                     {user?.role !== 'ADMIN' && editCommentId !== comment.id && (
+                        <Button size="small" color="primary" sx={{ padding: '0', minWidth: 'auto' }} onClick={() => handleEditClick(comment)}>
+                           수정
+                        </Button>
+                     )}
+
+                     {editCommentId === comment.id && (
+                        <Button size="small" color="success" sx={{ padding: '0', minWidth: 'auto' }} onClick={() => handleEditSubmit(comment.id)}>
+                           완료
+                        </Button>
+                     )}
+
+                     <Button size="small" color="error" sx={{ padding: '0', minWidth: 'auto' }} onClick={() => handleDeleteComment(comment.id, comment.userId)}>
                         삭제
                      </Button>
                   </Box>
                </Box>
             ))}
-
             {/* 목록 버튼 */}
             <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
                <Button
@@ -135,4 +183,4 @@ const PostDetail = ({ post, onBack }) => {
    )
 }
 
-export default PostDetail
+export default FreePostDetail
