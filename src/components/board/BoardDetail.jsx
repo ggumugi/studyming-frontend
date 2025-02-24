@@ -1,3 +1,5 @@
+/*!!! 디자인 꼭 다듬기 !! */
+
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -75,15 +77,18 @@ const BoardDetail = ({ category }) => {
          <Header>
             <Title>{category}게시판</Title>
          </Header>
+         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Label>{post.title}</Label>
+            <SubInfo>
+               <ButtonGroup>
+                  <EditButton onClick={() => navigate(`/board/edit/${post.id}`)}>수정</EditButton>
 
-         <Title>{post.title}</Title>
-         <SubInfo>
-            <ButtonGroup>
-               <EditButton onClick={() => setIsEditing(true)}>수정</EditButton>
-               <DeleteButton onClick={handleDelete}>삭제</DeleteButton>
-            </ButtonGroup>
-            작성자: {post?.User?.nickname} | {new Date(post.createdAt).toLocaleDateString()}
-         </SubInfo>
+                  <DeleteButton onClick={handleDelete}>삭제</DeleteButton>
+               </ButtonGroup>
+               작성자: {post?.User?.nickname} | {new Date(post.createdAt).toLocaleDateString()}
+            </SubInfo>
+         </div>
+
          <Content>{post.content}</Content>
 
          <CommentSection>
@@ -118,10 +123,7 @@ export default BoardDetail
 //
 const Container = styled.div`
    width: 100%;
-   max-width: 900px;
-   margin: 20px auto;
-   padding: 20px;
-   background-color: #fff;
+   padding: 70px 70px 0 70px;
 `
 
 const Header = styled.div`
@@ -129,15 +131,20 @@ const Header = styled.div`
    justify-content: space-between;
    align-items: center;
    padding-bottom: 10px;
+   border-bottom: 2px solid #ff7a00;
+   margin-bottom: 20px;
 `
 
-const Title = styled.h1`
-   font-size: 24px;
-   font-weight: bold;
+const Title = styled.h2`
+   font-weight: 300;
+   font-size: 32px;
+`
+const Label = styled.h2`
+   font-weight: 300;
+   font-size: 20px;
 `
 
 const ButtonGroup = styled.div`
-   display: flex;
    gap: 10px;
 `
 
@@ -165,18 +172,18 @@ const DeleteButton = styled.button`
    }
 `
 
-const SubInfo = styled.p`
+const SubInfo = styled.div`
    text-align: right;
    color: #666;
    font-size: 14px;
 `
 
-const Divider = styled.hr`
+/* const Divider = styled.hr`
    margin: 20px 0;
    border: 0;
    height: 1px;
    background: #ff7a00;
-`
+` */
 
 const Content = styled.p`
    font-size: 16px;

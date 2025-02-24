@@ -1,29 +1,38 @@
-import React, { useState } from 'react'
+import React from 'react'
 import styled from 'styled-components'
-import { Link } from 'react-router-dom'
-import FreeBoard from '../page/FreeBoard'
-import InquiryBoard from '../page/InquiryBoard'
-import NotiBoard from '../page/NotiBoard'
-import QaBoard from '../page/QaBoard'
-import { Paper, Typography, Button, TextField, Box } from '@mui/material'
-import { useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 
-import CreateBoard from '../page/CreateBoard'
+// 한글 카테고리 <-> 백엔드 enum 매핑
+const categoryMap = {
+   자유: 'free',
+   질문: 'QnA',
+   정보: 'noti',
+   문의: 'inquiry',
+}
 
-/* 각 페이지 불러오기 (테스트로 채팅만 불러봄봄) */
-// import ChatPage from './ChatPage'
+const reverseCategoryMap = {
+   free: '자유',
+   QnA: '질문',
+   noti: '정보',
+   inquiry: '문의',
+}
 
-const BoardSidebar = ({ selectedCategory, setSelectedCategory }) => {
-   const categories = ['자유', '질문', '정보', '문의']
+const BoardSidebar = () => {
+   const navigate = useNavigate()
+   const { category } = useParams() // ✅ URL에서 현재 카테고리 가져오기
+
+   const handleCategoryClick = (selectedCategory) => {
+      navigate(`/board/${categoryMap[selectedCategory]}`) // ✅ 선택된 카테고리를 백엔드 enum 값으로 변환 후 이동
+   }
 
    return (
       <Container>
          <SidebarContainer>
             <MenuList>
-               {categories.map((item) => (
-                  <MenuItem key={item} $isActive={selectedCategory === item} onClick={() => setSelectedCategory(item)}>
+               {Object.keys(categoryMap).map((item) => (
+                  <MenuItem key={item} $isActive={categoryMap[item] === category} onClick={() => handleCategoryClick(item)}>
                      <StyledButton>{item}</StyledButton>
-                     {selectedCategory === item && <ActiveIndicator />}
+                     {categoryMap[item] === category && <ActiveIndicator />}
                   </MenuItem>
                ))}
             </MenuList>
@@ -42,12 +51,13 @@ const Container = styled.div`
 `
 
 const SidebarContainer = styled.nav`
-   width: 200px;
+   width: 220px;
    height: 100vh;
    padding: 20px;
    display: flex;
    flex-direction: column;
    border-right: 1px solid #ddd;
+   align-items: flex-end;
 `
 
 const MenuList = styled.ul`
@@ -61,10 +71,8 @@ const MenuList = styled.ul`
 `
 
 const MenuItem = styled.li`
-   flex-direction: column;
    position: relative;
    display: flex;
-   margin-right: 20px;
    justify-content: center;
    font-size: 20px;
    font-weight: ${(props) => (props.$isActive ? '500' : '300')};
@@ -82,15 +90,7 @@ const StyledButton = styled.button`
       color: #ff7f00;
    }
 `
-/* 
-const SubText = styled.span`
-   font-size: 12px;
-   color: #888;
-   margin-top: 4px;
-   width: 100%;
-`
- */
-// 🔥 활성화된 메뉴 오른쪽에 동그라미 표시
+
 const ActiveIndicator = styled.div`
    position: absolute;
    right: -44px; /* ✅ 오른쪽에 동그라미 위치 */
@@ -99,19 +99,3 @@ const ActiveIndicator = styled.div`
    background-color: #ff7f00;
    border-radius: 50%;
 `
-
-// 🔥 오른쪽 콘텐츠 영역 스타일
-/* const ContentArea = styled.div`
-   flex: 1;
-   padding: 70px 70px 0 70px;
-   background-color: #fff;
-
-   h2 {
-      font-weight: 300;
-      font-size: 32px;
-      border-bottom: 2px solid #ff7a00;
-      padding-bottom: 10px;
-      margin-bottom: 20px;
-   }
-`
- */

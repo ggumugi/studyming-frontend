@@ -13,7 +13,7 @@ import QaBoardtDetail from './components/page/QaBoardDetail'
 import FreePostDetail from './components/page/FreePostDetail'
 import InquiryBoardDetail from './components/page/InquiryBoardDetail'
 import NotiBoardDetail from './components/page/NotiBoardDetail'
-//import BoardEditPage from './pages/BoardEditPage'
+import BoardEditPage from './pages/BoardEditPage'
 import BoardDetailPage from './pages/BoardDetailPage'
 import MyPage from './pages/MyPage'
 import FindIdPage from './pages/FindIdPage'
@@ -88,7 +88,7 @@ function App() {
             <Route path="/board/free/:postId" element={<FreePostDetail />} />
             <Route path="/board/inquiry/:postId" element={<InquiryBoardDetail />} />
             <Route path="/board/noti/:postId" element={<NotiBoardDetail />} /> {/* ✅ Noti는 관리자 전용 */}
-            {/* <Route path="/board/edit/:id" element={<BoardEditPage />} /> */}
+            <Route path="/board/edit/:id" element={<BoardEditPage />} />
             <Route path="/board/detail/:id" element={<BoardDetailPage />} />
             <Route path="/mypage" element={<MyPage isAuthenticated={isAuthenticated} user={user} />} />
             <Route path="/studygroup/:id" element={<StudyGroupPage isAuthenticated={isAuthenticated} user={user} />} />
