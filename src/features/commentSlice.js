@@ -4,6 +4,7 @@ import { createComment, updateComment, fetchComments, fetchCommentById, deleteCo
 //  댓글 생성 Thunk (이미지 업로드 가능)
 export const createCommentThunk = createAsyncThunk('comments/createComment', async (commentData, { rejectWithValue }) => {
    try {
+      console.log('🔥 백엔드로 보낼 데이터:', commentData) // ✅ 확인 로그 추가
       const response = await createComment(commentData)
       return response.comment // ✅ API 응답에서 comment 데이터만 반환
    } catch (err) {
@@ -71,7 +72,7 @@ const commentSlice = createSlice({
          })
          .addCase(createCommentThunk.fulfilled, (state, action) => {
             state.loading = false
-            state.comments = [...state.comments, action.payload] // 리스트에 추가
+            state.comments = [action.payload, ...state.comments] // ✅ 최신 댓글을 맨 위로 추가 두 항목 거꾸로 바꾸면 입력순으로 쌓임
          })
          .addCase(createCommentThunk.rejected, (state, action) => {
             state.loading = false
@@ -117,8 +118,7 @@ const commentSlice = createSlice({
          })
          .addCase(updateCommentThunk.fulfilled, (state, action) => {
             state.loading = false
-            const index = state.comments.findIndex((comment) => comment.id === action.payload.id)
-            if (index !== -1) state.comments[index] = action.payload
+            state.comments = state.comments.map((comment) => (comment.id === action.payload.id ? action.payload : comment))
          })
          .addCase(updateCommentThunk.rejected, (state, action) => {
             state.loading = false
