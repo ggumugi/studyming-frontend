@@ -56,7 +56,7 @@ const BoardList = ({ category }) => {
                      </TableHead>
                      <TableBody>
                         {posts.map((post) => (
-                           <StyledTableRow key={post.id}>
+                           <StyledTableRow key={post.id} onClick={() => navigate(`/board/detail/${post.id}`)} style={{ cursor: 'pointer' }}>
                               <StyledTableCell>{post.id}</StyledTableCell>
                               <StyledTableCell>{post.title}</StyledTableCell>
                               <StyledTableCell>{post?.User?.nickname}</StyledTableCell>
