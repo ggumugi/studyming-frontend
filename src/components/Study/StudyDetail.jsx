@@ -14,11 +14,16 @@ const StudyDetail = ({ isAuthenticated, user }) => {
 
    // 스터디 그룹 데이터 불러오기
    useEffect(() => {
+      if (!isAuthenticated) {
+         alert('로그인이 필요합니다.')
+         navigate('/login')
+         return
+      }
       dispatch(fetchStudygroupByIdThunk(id))
    }, [dispatch, id])
 
    // 스터디 수정 버튼 클릭 시 이동
-   const handleStudyCreateClick = () => {
+   const handleStudyEditClick = () => {
       navigate(`/study/edit/${id}`)
    }
 
@@ -38,6 +43,13 @@ const StudyDetail = ({ isAuthenticated, user }) => {
                   </DetailRow>
 
                   <DetailRow>
+                     <LabelText>인원</LabelText>
+                     <DetailText>
+                        {studygroup.countMembers} / {studygroup.maxMembers}
+                     </DetailText>
+                  </DetailRow>
+
+                  <DetailRow>
                      <LabelText>공개여부</LabelText>
                      <DetailText>{studygroup.open ? '공개' : '비공개'}</DetailText>
                   </DetailRow>
@@ -53,21 +65,17 @@ const StudyDetail = ({ isAuthenticated, user }) => {
 
                   <DetailRow>
                      <LabelText>기간</LabelText>
-                     <DetailText>
-                        {studygroup.startDate} ~ {studygroup.endDate}
-                     </DetailText>
+                     <DetailText>{studygroup.startDate && studygroup.endDate ? `${studygroup.startDate} ~ ${studygroup.endDate}` : '미정'}</DetailText>
                   </DetailRow>
 
                   <DetailRow>
                      <LabelText>목표 시간</LabelText>
-                     <DetailText>{studygroup.timeGoal}시간</DetailText>
+                     <DetailText>{studygroup.timeGoal !== 0 ? `${studygroup.timeGoal}시간` : '없음'}</DetailText>
                   </DetailRow>
 
                   <DetailRow>
                      <LabelText>접속 시간대</LabelText>
-                     <DetailText>
-                        {studygroup.startTime} ~ {studygroup.endTime}
-                     </DetailText>
+                     <DetailText>{studygroup.startTime && studygroup.endTime ? `${studygroup.startTime} ~ ${studygroup.endTime}` : '자유'}</DetailText>
                   </DetailRow>
 
                   <DetailRow>
@@ -76,7 +84,7 @@ const StudyDetail = ({ isAuthenticated, user }) => {
                   </DetailRow>
 
                   <DetailRow>
-                     <LabelText>스터디 에티켓</LabelText>
+                     <LabelText>스터디 설명</LabelText>
                      <EtiquetteText>{studygroup.description}</EtiquetteText>
                   </DetailRow>
                </Content>
@@ -84,7 +92,7 @@ const StudyDetail = ({ isAuthenticated, user }) => {
                {/* 조건부 렌더링: 가입 상태에 따라 다른 버튼 표시 */}
                {/* 예시로 가입 전 상태만 표시 */}
                <SubmitButton>스터디 가입하기</SubmitButton>
-               {studygroup.createdBy === user?.id && <SubmitButton onClick={handleStudyCreateClick}>스터디 정보 수정하기</SubmitButton>}
+               {studygroup.createdBy === user?.id && <SubmitButton2 onClick={handleStudyEditClick}>스터디 정보 수정하기</SubmitButton2>}
             </Wrapper>
          )}
       </>
@@ -204,18 +212,17 @@ const SubmitButton = styled.button`
 `
 
 const SubmitButton2 = styled.button`
-   font-size: 14px;
-   color: #ff7a00;
-   text-decoraiton: under;
-   background-color: transparent;
-   border: 1px solid transparent;
-   border-radius: 4px;
-   margin-top: 20px;
-   padding: 8px 16px;
+   padding: 12px 20px;
+   background-color: #3498db;
+   color: white;
+   font-size: 16px;
+   border: none;
+   border-radius: 5px;
    cursor: pointer;
+   margin-top: 30px; /* 버튼과 마지막 항목 사이 간격 추가 */
+   width: 70%;
 
    &:hover {
-      background-color: #f0f0f0;
-      border-color: #ccc;
+      background-color: #2980b9;
    }
 `

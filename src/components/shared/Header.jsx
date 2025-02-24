@@ -54,7 +54,7 @@ const Header = ({ isAuthenticated, user }) => {
                {/* 🔥 로그인한 사용자만 메뉴 표시 */}
                {isAuthenticated && (
                   <NavMenu>
-                     <Link to="/study">
+                     <Link to="/study/list">
                         <NavItem>스터디</NavItem>
                      </Link>
                      <Link to="/mingshop">

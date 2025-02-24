@@ -37,6 +37,11 @@ const StudyEditPage = ({ isAuthenticated, user }) => {
       },
       [dispatch, navigate, id]
    )
+   // studygroup.createdBy와 user.id가 다르면 렌더링하지 않음
+   if (!studygroup || user?.id !== studygroup.createdBy) {
+      alert('스터디를 수정할 수 있는 권한이 없습니다.')
+      navigate('/study/list')
+   }
 
    return <Container maxWidth="lg">{studygroup && <StudyCreate onSubmit={handleSubmit} isAuthenticated={isAuthenticated} user={user} initialValues={studygroup} />}</Container>
 }

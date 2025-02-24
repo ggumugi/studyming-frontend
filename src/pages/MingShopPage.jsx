@@ -59,9 +59,28 @@ const MingShopPage = ({ isAuthenticated, user }) => {
       <Container>
          <Title>
             현재 보유 포인트: {userPoints} 밍
-            <Button variant="contained" sx={{ borderRadius: '20px', backgroundColor: '#FF5733', color: '#fff' }} onClick={() => setOpen(true)}>
-               선물하기
-            </Button>
+            <div>
+               <Button variant="contained" sx={{ borderRadius: '20px', backgroundColor: '#FF5733', color: '#fff', marginRight: '10px' }} onClick={() => setOpen(true)}>
+                  선물하기
+               </Button>
+               {userRole === 'ADMIN' && (
+                  <Button
+                     variant="contained"
+                     sx={{
+                        borderRadius: '20px',
+                        backgroundColor: '#FF5733',
+                        color: '#fff',
+                        marginRight: '10px',
+                        '&:hover': { backgroundColor: '#E74C3C' },
+                     }}
+                     onClick={() => navigate('/mingshop/create')}
+                     isAuthenticated={isAuthenticated}
+                     user={user}
+                  >
+                     등록하기
+                  </Button>
+               )}
+            </div>
             {/* 선물하기 모달 */}
             <Modal open={open} onClose={() => setOpen(false)}>
                <ModalContent>
@@ -79,23 +98,6 @@ const MingShopPage = ({ isAuthenticated, user }) => {
                   </Button>
                </ModalContent>
             </Modal>
-            {userRole === 'ADMIN' && (
-               <Button
-                  variant="contained"
-                  sx={{
-                     borderRadius: '20px',
-                     backgroundColor: '#FF5733',
-                     color: '#fff',
-                     marginRight: '10px',
-                     '&:hover': { backgroundColor: '#E74C3C' },
-                  }}
-                  onClick={() => navigate('/mingshop/create')}
-                  isAuthenticated={isAuthenticated}
-                  user={user}
-               >
-                  등록하기
-               </Button>
-            )}
          </Title>
          <Title>{titleList[0]}</Title>
          <ItemList items={items.filter((item) => item.type === 'cash')} isAuthenticated={isAuthenticated} user={user} />
