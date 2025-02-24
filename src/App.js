@@ -9,6 +9,10 @@ import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
 import BoardListPage from './pages/BoardListPage'
 import BoardCreatePage from './pages/BoardCreatePage'
+import QaBoardtDetail from './components/page/QaBoardDetail'
+import FreePostDetail from './components/page/FreePostDetail'
+import InquiryBoardDetail from './components/page/InquiryBoardDetail'
+import NotiBoardDetail from './components/page/NotiBoardDetail'
 //import BoardEditPage from './pages/BoardEditPage'
 //import BoardDetailPage from './pages/BoardDetailPage'
 import MyPage from './pages/MyPage'
@@ -79,6 +83,11 @@ function App() {
             <Route path="/find/password" element={<FindPasswordPage />} />
             <Route path="/board" element={<BoardListPage isAuthenticated={isAuthenticated} user={user} />} />
             <Route path="/board/create" element={<BoardCreatePage isAuthenticated={isAuthenticated} user={user} />} />
+            {/* ✅ 카테고리별 게시글 상세 페이지 */}
+            <Route path="/board/qna/:postId" element={<QaBoardtDetail />} />
+            <Route path="/board/free/:postId" element={<FreePostDetail />} />
+            <Route path="/board/inquiry/:postId" element={<InquiryBoardDetail />} />
+            <Route path="/board/noti/:postId" element={<NotiBoardDetail />} /> {/* ✅ Noti는 관리자 전용 */}
             {/* <Route path="/board/edit/:id" element={<BoardEditPage />} /> */}
             {/*<Route path="/board/detail/:id" element={<BoardDetailPage />} />*/}
             <Route path="/mypage" element={<MyPage isAuthenticated={isAuthenticated} user={user} />} />
