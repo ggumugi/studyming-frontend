@@ -10,6 +10,7 @@ import studygroupReducer from '../features/studygroupSlice'
 import itemReducer from '../features/itemSlice'
 import postReducer from '../features/postSlice'
 import conmmetReducer from '../features/commentSlice'
+import adminpostReducer from '../features/adminpostSlice'
 
 const store = configureStore({
    reducer: {
@@ -23,6 +24,7 @@ const store = configureStore({
       items: itemReducer,
       posts: postReducer,
       comments: conmmetReducer,
+      adminpost: adminpostReducer,
    },
 })
 
