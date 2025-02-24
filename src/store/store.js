@@ -19,7 +19,7 @@ const store = configureStore({
       points: pointReducer,
       captcha: captchaReducer,
       goals: goalsReducer,
-      studygroup: studygroupReducer,
+      studygroups: studygroupReducer,
       items: itemReducer,
       posts: postReducer,
       comments: conmmetReducer,

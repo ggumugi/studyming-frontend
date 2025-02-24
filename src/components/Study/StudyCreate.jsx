@@ -17,7 +17,7 @@ const StudyCreate = ({ onSubmit, isAuthenticated, user, initialValues = {} }) =>
    const [timezone, setTimezone] = useState(!!initialValues.startTime) // 접속 시간대 적용 여부
    const [maxMembers, setMaxMembers] = useState(initialValues.maxMembers || 6)
    const [reward, setReward] = useState(initialValues.reward || false)
-   const [open, setOpen] = useState(initialValues.open || true)
+   const [open, setOpen] = useState(initialValues.open && true)
    const [errorMsg, setErrorMsg] = useState(null)
    const [capOnOff, setCapOnOff] = useState(!!initialValues.capInterval) // 보안 문자 간격 적용 여부
    const [goalOnOff, setGoalOnOff] = useState(!!initialValues.timeGoal) // 목표시간 적용 여부
@@ -25,7 +25,7 @@ const StudyCreate = ({ onSubmit, isAuthenticated, user, initialValues = {} }) =>
 
    // 해시태그 관련 상태
    const [inputValue, setInputValue] = useState('#')
-   const [hashtags, setHashtags] = useState(initialValues.hashtags || [])
+   const [hashtags, setHashtags] = useState(initialValues.Hashtaged || [])
 
    // composition 처리용 상태
    const [isComposing, setIsComposing] = useState(false) // 조합 중 여부
@@ -33,10 +33,12 @@ const StudyCreate = ({ onSubmit, isAuthenticated, user, initialValues = {} }) =>
 
    useEffect(() => {
       setCreatedBy(user?.id)
+      console.log(initialValues)
       // 수정 모드일 때 해시태그 초기화
-      console.log(initialValues.id)
-      if (initialValues.id && initialValues.hashtags) {
-         setInputValue('#' + initialValues.hashtags.join(' #'))
+      if (initialValues.id && initialValues.Hashtaged) {
+         const hashtagsString = initialValues.Hashtaged.map((tag) => `#${tag.name}`).join(' ')
+         setInputValue(hashtagsString)
+         setHashtags(initialValues.Hashtaged)
       }
    }, [user, initialValues.hashtags])
 
@@ -166,10 +168,10 @@ const StudyCreate = ({ onSubmit, isAuthenticated, user, initialValues = {} }) =>
                <LabelText>공개여부</LabelText>
                <RadioGroup>
                   <label>
-                     <input type="radio" name="visibility" value="공개" checked={open === true} onChange={() => setOpen(true)} /> 공개
+                     <input type="radio" name="visibility" value="공개" checked={open} onChange={() => setOpen(true)} /> 공개
                   </label>
                   <label>
-                     <input type="radio" name="visibility" value="비공개" checked={open === false} onChange={() => setOpen(false)} /> 비공개
+                     <input type="radio" name="visibility" value="비공개" checked={!open} onChange={() => setOpen(false)} /> 비공개
                   </label>
                </RadioGroup>
             </Label>
