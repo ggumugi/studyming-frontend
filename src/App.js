@@ -37,6 +37,33 @@ function App() {
    const { isAuthenticated, user } = useSelector((state) => state.auth)
 
    useEffect(() => {
+      // 매일 자정마다 실행할 함수
+      const runAtMidnight = () => {
+         console.log('매일 자정 실행')
+         // 유저 상태변경
+      }
+
+      // 현재 시간과 다음 자정까지의 시간을 계산하는 함수
+      const getTimeUntilMidnight = () => {
+         const now = new Date()
+         const midnight = new Date(now)
+         midnight.setHours(24, 0, 0, 0) // 다음 자정 시간 설정
+         return midnight - now // 다음 자정까지의 밀리초 단위 시간
+      }
+
+      // 첫 실행을 위한 타이머 설정
+      const timeoutId = setTimeout(() => {
+         runAtMidnight() // 첫 실행
+         setInterval(runAtMidnight, 24 * 60 * 60 * 1000) // 이후 24시간마다 실행
+      }, getTimeUntilMidnight())
+
+      // 컴포넌트 언마운트 시 타이머 제거
+      return () => {
+         clearTimeout(timeoutId)
+      }
+   }, [])
+
+   useEffect(() => {
       dispatch(checkAuthStatusThunk())
    }, [dispatch])
    return (

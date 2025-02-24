@@ -49,7 +49,8 @@ export const updateComment = async (id, commentData) => {
    try {
       const config = {
          headers: {
-            'Content-Type': 'multipart/form-data',
+            'Content-Type': 'application/json', //텍스트만 있을 때 사용
+            //'Content-Type': 'multipart/form-data', //이미지가 포함되어있을 때 사용
          },
       }
 
