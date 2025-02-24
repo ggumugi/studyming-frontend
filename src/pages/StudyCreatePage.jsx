@@ -12,6 +12,11 @@ const StudyCreatePage = ({ isAuthenticated, user }) => {
 
    const handleSubmit = useCallback(
       (studygroupData) => {
+         if (!isAuthenticated) {
+            alert('로그인이 필요합니다.')
+            navigate('/login')
+            return
+         }
          // studygroupData - 사용자가 입력한 스터디 그룹 데이터
          dispatch(createStudygroupThunk(studygroupData))
             .unwrap()

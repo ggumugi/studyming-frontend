@@ -17,9 +17,6 @@ const StudyEditPage = ({ isAuthenticated, user }) => {
    useEffect(() => {
       dispatch(fetchStudygroupByIdThunk(id))
          .unwrap()
-         .then((data) => {
-            console.log('Fetched studygroup:', data)
-         })
          .catch((err) => {
             console.error('스터디 그룹 불러오기 실패: ', err)
             alert('스터디 그룹을 불러올 수 없습니다.')
@@ -30,8 +27,8 @@ const StudyEditPage = ({ isAuthenticated, user }) => {
       (studygroupData) => {
          dispatch(updateStudygroupThunk({ id, updateData: studygroupData }))
             .unwrap()
-            .then((studygroup) => {
-               navigate(`/study/detail/${studygroup.studygroup.id}`) // 수정 후 상세 페이지로 이동
+            .then(() => {
+               navigate(`/study/detail/${id}`) // 수정 후 상세 페이지로 이동
             })
             .catch((err) => {
                console.error('스터디 그룹 수정 실패: ', err)
@@ -40,6 +37,11 @@ const StudyEditPage = ({ isAuthenticated, user }) => {
       },
       [dispatch, navigate, id]
    )
+   // studygroup.createdBy와 user.id가 다르면 렌더링하지 않음
+   if (!studygroup || user?.id !== studygroup.createdBy) {
+      alert('스터디를 수정할 수 있는 권한이 없습니다.')
+      navigate('/study/list')
+   }
 
    return <Container maxWidth="lg">{studygroup && <StudyCreate onSubmit={handleSubmit} isAuthenticated={isAuthenticated} user={user} initialValues={studygroup} />}</Container>
 }
