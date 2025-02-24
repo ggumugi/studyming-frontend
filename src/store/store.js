@@ -10,6 +10,9 @@ import studygroupReducer from '../features/studygroupSlice'
 import itemReducer from '../features/itemSlice'
 import postReducer from '../features/postSlice'
 import conmmetReducer from '../features/commentSlice'
+import bannedReducer from '../features/bannedSlice'
+import adminpostReducer from '../features/adminpostSlice'
+import studyLikeSliceReducer from '../features/likedSlice'
 
 const store = configureStore({
    reducer: {
@@ -19,10 +22,13 @@ const store = configureStore({
       points: pointReducer,
       captcha: captchaReducer,
       goals: goalsReducer,
-      studygroup: studygroupReducer,
+      studygroups: studygroupReducer,
       items: itemReducer,
       posts: postReducer,
       comments: conmmetReducer,
+      banned: bannedReducer,
+      adminpost: adminpostReducer,
+      studyLike: studyLikeSliceReducer,
    },
 })
 

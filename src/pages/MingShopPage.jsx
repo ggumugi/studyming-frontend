@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchItems } from '../features/itemSlice' // ✅ 상품 목록 가져오기 액션
-import { fetchUserPoints } from '../features/pointSlice' // ✅ 유저 포인트 조회
+import { fetchUserPoints, sendPointsThunk } from '../features/pointSlice' // ✅ 유저 포인트 조회
 import ItemList from '../components/shop/ItemList'
 import { useNavigate } from 'react-router-dom'
-import { Button } from '@mui/material'
+import { Button, Modal, TextField, MenuItem } from '@mui/material'
 
 const MingShopPage = ({ isAuthenticated, user }) => {
    const dispatch = useDispatch()
@@ -29,28 +29,75 @@ const MingShopPage = ({ isAuthenticated, user }) => {
 
    const titleList = ['이 모든 매력적인 상품을 쉽고 빠르게 구매할 수 있는 방법', '채팅방의 인싸템! 이모티콘', '삭막한 채팅창에 활력을! 채팅창 꾸미기', '이것만 있다면 당신도 될 수 있다 공부왕!']
 
+   // 모달 상태 관리
+   const [open, setOpen] = useState(false)
+   const [receiver, setReceiver] = useState('')
+   const [amount, setAmount] = useState(100)
+
+   const pointOptions = [100, 200, 300, 400, 500]
+
+   const handleSendPoints = () => {
+      if (!receiver) {
+         alert('받는 사람을 입력하세요.')
+         return
+      }
+
+      dispatch(sendPointsThunk({ receiverNickname: receiver, amount }))
+         .unwrap()
+         .then(() => {
+            alert('포인트 선물 성공!')
+            setOpen(false)
+            dispatch(fetchUserPoints())
+         })
+         .catch((error) => {
+            alert(`포인트 선물 실패: ${error}`)
+         })
+   }
+
    if (loading) return <Container>상품을 불러오는 중...</Container> // ✅ 로딩 중 화면 표시
    return (
       <Container>
          <Title>
             현재 보유 포인트: {userPoints} 밍
-            {userRole === 'ADMIN' && (
-               <Button
-                  variant="contained"
-                  sx={{
-                     borderRadius: '20px',
-                     backgroundColor: '#FF5733',
-                     color: '#fff',
-                     marginRight: '10px',
-                     '&:hover': { backgroundColor: '#E74C3C' },
-                  }}
-                  onClick={() => navigate('/mingshop/create')}
-                  isAuthenticated={isAuthenticated}
-                  user={user}
-               >
-                  등록하기
+            <div>
+               <Button variant="contained" sx={{ borderRadius: '20px', backgroundColor: '#FF5733', color: '#fff', marginRight: '10px' }} onClick={() => setOpen(true)}>
+                  선물하기
                </Button>
-            )}
+               {userRole === 'ADMIN' && (
+                  <Button
+                     variant="contained"
+                     sx={{
+                        borderRadius: '20px',
+                        backgroundColor: '#FF5733',
+                        color: '#fff',
+                        marginRight: '10px',
+                        '&:hover': { backgroundColor: '#E74C3C' },
+                     }}
+                     onClick={() => navigate('/mingshop/create')}
+                     isAuthenticated={isAuthenticated}
+                     user={user}
+                  >
+                     등록하기
+                  </Button>
+               )}
+            </div>
+            {/* 선물하기 모달 */}
+            <Modal open={open} onClose={() => setOpen(false)}>
+               <ModalContent>
+                  <h3 style={{ paddingBottom: '10px' }}>포인트 선물</h3>
+                  <TextField label="받는 사람 닉네임" fullWidth value={receiver} onChange={(e) => setReceiver(e.target.value)} sx={{ marginBottom: '10px' }} />
+                  <TextField select label="보낼 포인트" fullWidth value={amount} onChange={(e) => setAmount(e.target.value)} sx={{ marginBottom: '10px' }}>
+                     {pointOptions.map((option) => (
+                        <MenuItem key={option} value={option}>
+                           {option} 밍
+                        </MenuItem>
+                     ))}
+                  </TextField>
+                  <Button variant="contained" color="primary" fullWidth onClick={handleSendPoints}>
+                     확인
+                  </Button>
+               </ModalContent>
+            </Modal>
          </Title>
          <Title>{titleList[0]}</Title>
          <ItemList items={items.filter((item) => item.type === 'cash')} isAuthenticated={isAuthenticated} user={user} />
@@ -87,6 +134,19 @@ const Title = styled.h2`
    border-bottom: 2px solid #ff7a00;
    padding-bottom: 10px;
    margin-bottom: 40px; /* 아이템과 간격 추가 */
+`
+const ModalContent = styled.div`
+   position: absolute;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+   background: white;
+   padding: 20px;
+   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+   border-radius: 10px;
+   width: 300px;
+   display: flex;
+   flex-direction: column;
 `
 
 const ItemGrid = styled.div`

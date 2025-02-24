@@ -11,7 +11,7 @@ const StudyEditPage = ({ isAuthenticated, user }) => {
    const { id } = useParams() // URL에서 스터디 그룹 ID 추출
 
    // useSelector로 스터디 그룹 데이터 가져오기
-   const studygroup = useSelector((state) => state.studygroups.studygroup)
+   const { studygroup } = useSelector((state) => state.studygroups)
 
    // 스터디 그룹 데이터 불러오기
    useEffect(() => {
@@ -37,9 +37,10 @@ const StudyEditPage = ({ isAuthenticated, user }) => {
       },
       [dispatch, navigate, id]
    )
-
-   if (!studygroup) {
-      return <div>Loading...</div> // 데이터 로딩 중
+   // studygroup.createdBy와 user.id가 다르면 렌더링하지 않음
+   if (!studygroup || user?.id !== studygroup.createdBy) {
+      alert('스터디를 수정할 수 있는 권한이 없습니다.')
+      navigate('/study/list')
    }
 
    return <Container maxWidth="lg">{studygroup && <StudyCreate onSubmit={handleSubmit} isAuthenticated={isAuthenticated} user={user} initialValues={studygroup} />}</Container>

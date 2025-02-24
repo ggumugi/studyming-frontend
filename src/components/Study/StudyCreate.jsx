@@ -15,9 +15,12 @@ const StudyCreate = ({ onSubmit, isAuthenticated, user, initialValues = {} }) =>
    const [capInterval, setCapInterval] = useState(initialValues.capInterval || '')
    const [dayZone, setDayZone] = useState(!!initialValues.startDate) // 기간 적용 여부
    const [timezone, setTimezone] = useState(!!initialValues.startTime) // 접속 시간대 적용 여부
-   const [maxMembers, setMaxMembers] = useState(initialValues.maxMembers || 6)
+   const [maxMembers, setMaxMembers] = useState(initialValues.maxMembers ?? 6)
+   const countMembers = initialValues.countMembers ?? 1
+
    const [reward, setReward] = useState(initialValues.reward || false)
-   const [open, setOpen] = useState(initialValues.open || true)
+   const [open, setOpen] = useState(initialValues.open ?? true)
+
    const [errorMsg, setErrorMsg] = useState(null)
    const [capOnOff, setCapOnOff] = useState(!!initialValues.capInterval) // 보안 문자 간격 적용 여부
    const [goalOnOff, setGoalOnOff] = useState(!!initialValues.timeGoal) // 목표시간 적용 여부
@@ -25,7 +28,7 @@ const StudyCreate = ({ onSubmit, isAuthenticated, user, initialValues = {} }) =>
 
    // 해시태그 관련 상태
    const [inputValue, setInputValue] = useState('#')
-   const [hashtags, setHashtags] = useState(initialValues.hashtags || [])
+   const [hashtags, setHashtags] = useState(initialValues.Hashtaged || [])
 
    // composition 처리용 상태
    const [isComposing, setIsComposing] = useState(false) // 조합 중 여부
@@ -33,12 +36,22 @@ const StudyCreate = ({ onSubmit, isAuthenticated, user, initialValues = {} }) =>
 
    useEffect(() => {
       setCreatedBy(user?.id)
+
       // 수정 모드일 때 해시태그 초기화
-      console.log(initialValues.id)
-      if (initialValues.id && initialValues.hashtags) {
-         setInputValue('#' + initialValues.hashtags.join(' #'))
+      if (initialValues.id && initialValues.Hashtaged) {
+         // initialValues.Hashtaged를 문자열로 변환
+         const hashtagsString = initialValues.Hashtaged.map((tag) => `#${tag.name}`).join(' ')
+         setInputValue(hashtagsString)
+
+         // updateHashtags와 동일한 로직 적용
+         const words = hashtagsString
+            .replace(/#/g, '')
+            .trim()
+            .split(/\s+/)
+            .filter((word) => word.length > 0)
+         setHashtags(words)
       }
-   }, [user, initialValues.hashtags])
+   }, [user, initialValues.Hashtaged])
 
    const handleSubmit = (e) => {
       e.preventDefault()
@@ -150,15 +163,26 @@ const StudyCreate = ({ onSubmit, isAuthenticated, user, initialValues = {} }) =>
 
             <Label>
                <LabelText>최대 인원</LabelText>
-               <SmallSelect
-                  value={maxMembers} // 현재 선택된 값을 표시
-                  onChange={(e) => setMaxMembers(parseInt(e.target.value))} // 선택된 값을 정수로 변환하여 상태 업데이트
-               >
-                  <option value={2}>2</option>
-                  <option value={3}>3</option>
-                  <option value={4}>4</option>
-                  <option value={5}>5</option>
-                  <option value={6}>6</option>
+               <SmallSelect value={maxMembers} onChange={(e) => setMaxMembers(parseInt(e.target.value))}>
+                  {countMembers === 1
+                     ? // countMembers가 1인 경우: 2부터 6까지 표시
+                       Array.from({ length: 5 }, (_, i) => {
+                          const value = 2 + i
+                          return (
+                             <option key={value} value={value}>
+                                {value}
+                             </option>
+                          )
+                       })
+                     : // 그 외의 경우: countMembers부터 6까지 표시
+                       Array.from({ length: 7 - (initialValues.countMembers || 0) }, (_, i) => {
+                          const value = initialValues.countMembers + i
+                          return (
+                             <option key={value} value={value} disabled={value < initialValues.countMembers}>
+                                {value}
+                             </option>
+                          )
+                       })}
                </SmallSelect>
             </Label>
 
@@ -166,10 +190,10 @@ const StudyCreate = ({ onSubmit, isAuthenticated, user, initialValues = {} }) =>
                <LabelText>공개여부</LabelText>
                <RadioGroup>
                   <label>
-                     <input type="radio" name="visibility" value="공개" checked={open === true} onChange={() => setOpen(true)} /> 공개
+                     <input type="radio" name="visibility" value="공개" checked={open} onChange={() => setOpen(true)} /> 공개
                   </label>
                   <label>
-                     <input type="radio" name="visibility" value="비공개" checked={open === false} onChange={() => setOpen(false)} /> 비공개
+                     <input type="radio" name="visibility" value="비공개" checked={!open} onChange={() => setOpen(false)} /> 비공개
                   </label>
                </RadioGroup>
             </Label>

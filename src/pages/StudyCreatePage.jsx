@@ -12,11 +12,16 @@ const StudyCreatePage = ({ isAuthenticated, user }) => {
 
    const handleSubmit = useCallback(
       (studygroupData) => {
+         if (!isAuthenticated) {
+            alert('로그인이 필요합니다.')
+            navigate('/login')
+            return
+         }
          // studygroupData - 사용자가 입력한 스터디 그룹 데이터
          dispatch(createStudygroupThunk(studygroupData))
             .unwrap()
             .then((studygroup) => {
-               navigate(`/study/detail/${studygroup.id}`) // 생성된 스터디 그룹의 상세 페이지로 이동
+               navigate(`/study/detail/${studygroup.studygroup.id}`) // 생성된 스터디 그룹의 상세 페이지로 이동
             })
             .catch((err) => {
                console.error('스터디 그룹 등록 실패 : ', err)
