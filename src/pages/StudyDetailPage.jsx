@@ -1,13 +1,9 @@
-// 스터디 생성
+import React, { useEffect } from 'react'
 import StudyDetail from '../components/Study/StudyDetail'
-//ui툴만 구현.
 
 const StudyDetailPage = ({ isAuthenticated, user }) => {
-   return (
-      <>
-         <StudyDetail isAuthenticated={isAuthenticated} user={user} />
-      </>
-   )
+   // isAuthenticated가 true인 경우에만 StudyDetail 렌더링
+   return <>{isAuthenticated && <StudyDetail isAuthenticated={isAuthenticated} user={user} />}</>
 }
 
 export default StudyDetailPage

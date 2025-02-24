@@ -56,3 +56,14 @@ export const getMyItems = async () => {
       return { error: error.response?.data?.message || '아이템 조회 실패' }
    }
 }
+
+// ✅ 아이템 삭제 API
+export const deleteItem = async (id) => {
+   try {
+      const response = await studymingApi.delete(`/item/${id}`, { withCredentials: true })
+      return response.data
+   } catch (error) {
+      console.error('❌ 아이템 삭제 오류:', error.response?.data || error.message)
+      return { error: error.response?.data?.message || '아이템 삭제 실패' }
+   }
+}

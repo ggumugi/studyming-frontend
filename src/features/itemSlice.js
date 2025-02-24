@@ -1,4 +1,4 @@
-import { createItem, getItems, updateItem, getMyItems } from '../api/itemApi'
+import { createItem, getItems, updateItem, getMyItems, deleteItem } from '../api/itemApi'
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
 // ✅ 상품 등록
@@ -27,6 +27,13 @@ export const fetchMyItems = createAsyncThunk('items/fetchMyItems', async (_, { r
    const response = await getMyItems()
    if (response.error) return rejectWithValue(response.error)
    return response
+})
+
+// ✅ 아이템 삭제 Thunk
+export const deleteItemThunk = createAsyncThunk('items/deleteItem', async (id, { rejectWithValue }) => {
+   const response = await deleteItem(id)
+   if (response.error) return rejectWithValue(response.error)
+   return id // 삭제된 아이템의 ID 반환
 })
 
 const itemSlice = createSlice({
@@ -96,6 +103,20 @@ const itemSlice = createSlice({
             state.myItems = action.payload
          })
          .addCase(fetchMyItems.rejected, (state, action) => {
+            state.loading = false
+            state.error = action.payload
+         })
+
+         // ✅ 아이템 삭제 처리
+         .addCase(deleteItemThunk.pending, (state) => {
+            state.loading = true
+            state.error = null
+         })
+         .addCase(deleteItemThunk.fulfilled, (state, action) => {
+            state.loading = false
+            state.items = state.items.filter((item) => item.id !== action.payload) // ✅ 삭제된 아이템 제거
+         })
+         .addCase(deleteItemThunk.rejected, (state, action) => {
             state.loading = false
             state.error = action.payload
          })

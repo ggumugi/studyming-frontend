@@ -14,7 +14,7 @@ import FreePostDetail from './components/page/FreePostDetail'
 import InquiryBoardDetail from './components/page/InquiryBoardDetail'
 import NotiBoardDetail from './components/page/NotiBoardDetail'
 //import BoardEditPage from './pages/BoardEditPage'
-//import BoardDetailPage from './pages/BoardDetailPage'
+import BoardDetailPage from './pages/BoardDetailPage'
 import MyPage from './pages/MyPage'
 import FindIdPage from './pages/FindIdPage'
 import FindPasswordPage from './pages/FindPasswordPage'
@@ -89,7 +89,7 @@ function App() {
             <Route path="/board/detail/:postId" element={<InquiryBoardDetail />} />
             <Route path="/board/detail/:postId" element={<NotiBoardDetail />} /> {/* ✅ Noti는 관리자 전용 */}
             {/* <Route path="/board/edit/:id" element={<BoardEditPage />} /> */}
-            {/*<Route path="/board/detail/:id" element={<BoardDetailPage />} />*/}
+            <Route path="/board/detail/:id" element={<BoardDetailPage />} />
             <Route path="/mypage" element={<MyPage isAuthenticated={isAuthenticated} user={user} />} />
             <Route path="/studygroup/:id" element={<StudyGroupPage isAuthenticated={isAuthenticated} user={user} />} />
             <Route path="/mingshop" element={<MingShopPage isAuthenticated={isAuthenticated} user={user} />} />

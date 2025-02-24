@@ -3,12 +3,13 @@ import styled from 'styled-components'
 import { useDispatch, useSelector } from 'react-redux'
 import { pointsForItemThunk, fetchUserPoints } from '../../features/pointSlice'
 import { useNavigate } from 'react-router-dom'
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
+import { deleteItemThunk } from '../../features/itemSlice'
 
 const ItemList = ({ items, isAuthenticated, user }) => {
    const dispatch = useDispatch()
    const navigate = useNavigate()
    const userPoints = useSelector((state) => state.points.points)
-   const userRole = useSelector((state) => state.auth.user?.role)
 
    const handlePurchase = (item) => {
       if (item.type === 'cash') {
@@ -30,6 +31,21 @@ const ItemList = ({ items, isAuthenticated, user }) => {
             dispatch(fetchUserPoints()) // ✅ 포인트 정보 갱신
          })
    }
+
+   // ✅ 아이템 삭제 함수
+   const handleDelete = (itemId) => {
+      const isConfirmed = window.confirm('정말로 이 아이템을 삭제하시겠습니까?')
+      if (!isConfirmed) return
+
+      dispatch(deleteItemThunk(itemId))
+         .then(() => {
+            alert('아이템이 삭제되었습니다.')
+         })
+         .catch((error) => {
+            alert(`삭제 실패: ${error.message}`)
+         })
+   }
+
    return (
       <Container>
          <Grid>
@@ -44,7 +60,15 @@ const ItemList = ({ items, isAuthenticated, user }) => {
                         />
                      </ImageWrapper>
                      <ItemTitle>{item.title}</ItemTitle>
-                     <ItemDescription>{item.detail}</ItemDescription>
+                     <ItemDescriptionContainer>
+                        <ItemDescription>{item.detail}</ItemDescription>
+                        {isAuthenticated && user?.role === 'ADMIN' && (
+                           <DeleteButton onClick={() => handleDelete(item.id)}>
+                              <DeleteForeverIcon style={{ fontSize: '16px' }} />
+                           </DeleteButton>
+                        )}
+                     </ItemDescriptionContainer>
+
                      <PriceContainer>
                         <ItemPrice>
                            {item.price} {item.type === 'cash' ? '원' : '밍'}
@@ -94,7 +118,7 @@ const ItemCard = styled.div`
    display: flex;
    flex-direction: column;
    justify-content: space-between;
-   height: 350px; /* 고정된 높이 */
+   height: 320px; /* 고정된 높이 */
    max-width: 325px;
    text-align: left;
    overflow: hidden;
@@ -140,6 +164,7 @@ const ItemDescription = styled.p`
    color: #999;
    padding: 0px 3px 3px 10px;
    margin-bottom: 2px; /* 설명과 가격 간격 좁힘 */
+   flex: 1;
 `
 
 const PriceContainer = styled.div`
@@ -180,4 +205,22 @@ const EditButton = styled(BuyButton)`
    &:hover {
       background-color: #2980b9;
    }
+`
+const DeleteButton = styled(BuyButton)`
+   background-color: #e74c3c;
+   &:hover {
+      background-color: #c0392b;
+   }
+   height: 27px;
+   width: 35px;
+   padding: 5px;
+`
+
+const ItemDescriptionContainer = styled.div`
+   display: flex;
+   align-items: center;
+   justify-content: space-between; /* 🔹 왼쪽: item.detail / 오른쪽: 삭제 버튼 */
+   padding: 0px 10px 5px 0px;
+   gap: 10px; /* 요소 간격 */
+   width: 100%;
 `
