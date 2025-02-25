@@ -1,9 +1,9 @@
 import AdminBoardSidebar from '../components/sidebar/AdminBoardSidebar'
 
-function AdminPage() {
+function AdminPage({ isAuthenticated, user }) {
    return (
       <>
-         <AdminBoardSidebar />
+         <AdminBoardSidebar isAuthenticated={isAuthenticated} user={user} />
       </>
    )
 }

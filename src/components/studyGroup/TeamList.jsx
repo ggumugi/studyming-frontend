@@ -2,17 +2,7 @@ import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { FaCrown } from 'react-icons/fa'
 
-// Mock 데이터
-const teamMembers = [
-   { id: 1, name: '닉네임1', isLeader: true, isOnline: true },
-   { id: 2, name: '닉네임2', isLeader: false, isOnline: false },
-   { id: 3, name: '닉네임3', isLeader: false, isOnline: true },
-   { id: 4, name: '닉네임44', isLeader: false, isOnline: true },
-   { id: 5, name: '닉네임길어도', isLeader: false, isOnline: false },
-   { id: 6, name: '닉네임길어도', isLeader: false, isOnline: false },
-]
-
-const TeamList = () => {
+const TeamList = ({ groupmembers }) => {
    const [isFixed, setIsFixed] = useState(true)
    const [position, setPosition] = useState({ top: 0, bottom: 0 })
 
@@ -52,14 +42,14 @@ const TeamList = () => {
             <Title>스터디원 목록</Title>
          </TitleWrapper>
          <TeamMembers>
-            {teamMembers.map((member) => (
+            {groupmembers?.map((member) => (
                <Member key={member.id}>
                   <MemberGrid>
-                     <CrownWrapper>{member.isLeader && <FaCrown />}</CrownWrapper>
+                     <CrownWrapper>{member.role === 'leader' && <FaCrown />}</CrownWrapper>
                      <ProfileWrapper>
-                        <ProfileIcon src={member.isOnline ? '/img/happyMing.png' : '/img/cryingMing.png'} />
+                        <ProfileIcon src={member.status === 'on' ? '/img/happyMing.png' : '/img/cryingMing.png'} />
                      </ProfileWrapper>
-                     <MemberName $isOnline={member.isOnline}>{member.name}</MemberName>
+                     <MemberName $isOnline={member.isOnline}>{member.User.nickname}</MemberName>
                   </MemberGrid>
                </Member>
             ))}

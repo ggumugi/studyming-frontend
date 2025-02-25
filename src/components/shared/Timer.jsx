@@ -107,7 +107,7 @@ const Timer = () => {
 
    const timerAnimation = `
       @keyframes minimizeTimer {
-         0% { height: 50px; width: 300px; }
+         0% { height: 90px; width: 300px; }
          50% { height: 40px; width: 300px; }
          100% { height: 40px; width: 0; }
       }

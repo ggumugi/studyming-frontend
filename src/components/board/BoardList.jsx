@@ -1,24 +1,29 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-
 import styled from 'styled-components'
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Select, MenuItem, Button, Pagination } from '@mui/material'
-
 import { fetchPostsThunk } from '../../features/postSlice'
+
+// 🔹 백엔드 enum 값을 프론트 한글명으로 변환
+const reverseCategoryMap = {
+   free: '자유',
+   QnA: '질문',
+   noti: '정보',
+   inquiry: '문의',
+}
 
 const BoardList = ({ category }) => {
    const dispatch = useDispatch()
    const posts = useSelector((state) => state.posts.posts)
    const pagination = useSelector((state) => state.posts.pagination)
    const loading = useSelector((state) => state.posts.loading)
-   const navigate = useNavigate() // ✅ 추가 (페이지 이동용)
+   const navigate = useNavigate()
 
    const [page, setPage] = useState(1)
    const [rowsPerPage] = useState(10)
    const [searchType, setSearchType] = useState('title')
    const [searchKeyword, setSearchKeyword] = useState('')
-   // const [isWriting, setIsWriting] = useState(false)
 
    useEffect(() => {
       dispatch(fetchPostsThunk({ page, category, limit: rowsPerPage, searchType, searchKeyword }))
@@ -36,8 +41,8 @@ const BoardList = ({ category }) => {
       <Container>
          {/* ✅ 게시판 제목 + 글쓰기 버튼 */}
          <Header>
-            <Title>{category} 게시판</Title>
-            <WriteButton onClick={() => navigate('/board/create')}>글쓰기</WriteButton> {/* ✅ BoardCreate.jsx로 이동 */}
+            <Title>{reverseCategoryMap[category]} 게시판</Title> {/* ✅ 한글 변환하여 표시 */}
+            <WriteButton onClick={() => navigate(`/board/create`)}>글쓰기</WriteButton> {/* ✅ 선택된 카테고리에 맞게 이동 */}
          </Header>
 
          {loading ? (
@@ -57,6 +62,7 @@ const BoardList = ({ category }) => {
                      <TableBody>
                         {posts.map((post) => (
                            <StyledTableRow key={post.id} onClick={() => navigate(`/board/detail/${post.id}`)} style={{ cursor: 'pointer' }}>
+                              {/* ✅ 카테고리를 포함한 URL로 이동 */}
                               <StyledTableCell>{post.id}</StyledTableCell>
                               <StyledTableCell>{post.title}</StyledTableCell>
                               <StyledTableCell>{post?.User?.nickname}</StyledTableCell>

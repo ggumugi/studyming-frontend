@@ -64,11 +64,16 @@ const postSlice = createSlice({
    initialState: {
       posts: [],
       post: null,
+      category: 'free',
       pagination: null,
       loading: false,
       error: null,
    },
-   reducers: {},
+   reducers: {
+      setCategory: (state, action) => {
+         state.category = action.payload
+      },
+   },
    extraReducers: (builder) => {
       //게시물 등록
       builder
@@ -153,3 +158,4 @@ const postSlice = createSlice({
 })
 
 export default postSlice.reducer
+export const { setCategory } = postSlice.actions // ✅ setCategory 액션 추가

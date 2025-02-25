@@ -1,20 +1,15 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 
-const Report = ({ isOpen, onClose, onReport }) => {
+const Report = ({ isOpen, onClose, onReport, targetUser }) => {
    const [selectedReason, setSelectedReason] = useState('')
 
-   const handleReasonChange = (event) => {
-      setSelectedReason(event.target.value)
-   }
-
    const handleReportSubmit = () => {
-      if (selectedReason) {
-         console.log(`Selected reason: ${selectedReason}`)
-         onReport()
-      } else {
+      if (!selectedReason) {
          alert('신고 사유를 선택해주세요.')
+         return
       }
+      onReport(selectedReason) // ✅ 선택한 신고 사유 전달
    }
 
    if (!isOpen) return null
@@ -24,40 +19,14 @@ const Report = ({ isOpen, onClose, onReport }) => {
          <ModalContent>
             <CloseButton onClick={onClose}>×</CloseButton> {/* X 버튼 추가 */}
             <Title>신고하기</Title>
-            <Nickname>닉네임 : 포켓몬마스터</Nickname>
+            <Nickname>닉네임 : {targetUser?.nickname}</Nickname>
             <ReasonList>
-               <Reason>
-                  <input type="radio" value="스팸홍보/도배입니다." checked={selectedReason === '스팸홍보/도배입니다.'} onChange={handleReasonChange} />
-                  스팸홍보/도배입니다.
-               </Reason>
-               <Reason>
-                  <input type="radio" value="음란물입니다." checked={selectedReason === '음란물입니다.'} onChange={handleReasonChange} />
-                  음란물입니다.
-               </Reason>
-               <Reason>
-                  <input type="radio" value="불법정보를 포함하고 있습니다." checked={selectedReason === '불법정보를 포함하고 있습니다.'} onChange={handleReasonChange} />
-                  불법정보를 포함하고 있습니다.
-               </Reason>
-               <Reason>
-                  <input type="radio" value="욕설/생명경시/혐오/차별적 표현입니다." checked={selectedReason === '욕설/생명경시/혐오/차별적 표현입니다.'} onChange={handleReasonChange} />
-                  욕설/생명경시/혐오/차별적 표현입니다.
-               </Reason>
-               <Reason>
-                  <input type="radio" value="개인정보가 노출되었습니다." checked={selectedReason === '개인정보가 노출되었습니다.'} onChange={handleReasonChange} />
-                  개인정보가 노출되었습니다.
-               </Reason>
-               <Reason>
-                  <input type="radio" value="불쾌한 표현이 있습니다." checked={selectedReason === '불쾌한 표현이 있습니다.'} onChange={handleReasonChange} />
-                  불쾌한 표현이 있습니다.
-               </Reason>
-               <Reason>
-                  <input type="radio" value="명예훼손 또는 저작권이 침해되었습니다." checked={selectedReason === '명예훼손 또는 저작권이 침해되었습니다.'} onChange={handleReasonChange} />
-                  명예훼손 또는 저작권이 침해되었습니다.
-               </Reason>
-               <Reason>
-                  <input type="radio" value="불법촬영물등이 포함되어 있습니다." checked={selectedReason === '불법촬영물등이 포함되어 있습니다.'} onChange={handleReasonChange} />
-                  불법촬영물등이 포함되어 있습니다.
-               </Reason>
+               {['스팸홍보/도배입니다.', '음란물입니다.', '불법정보 포함', '욕설/혐오 표현', '개인정보 노출', '불쾌한 표현', '명예훼손/저작권 침해', '불법촬영물'].map((reason) => (
+                  <Reason key={reason}>
+                     <input type="radio" value={reason} checked={selectedReason === reason} onChange={() => setSelectedReason(reason)} />
+                     {reason}
+                  </Reason>
+               ))}
             </ReasonList>
             <Button onClick={handleReportSubmit}>신고하기</Button>
          </ModalContent>
@@ -164,6 +133,25 @@ const Button = styled.button`
    &:hover {
       background-color: #e55a00;
    }
+`
+const SuccessModal = styled.div`
+   position: absolute;
+   bottom: 20px;
+   left: 50%;
+   transform: translateX(-50%);
+   background-color: #2ecc71;
+   color: white;
+   padding: 10px 20px;
+   border-radius: 5px;
+   font-size: 16px;
+   font-weight: bold;
+   text-align: center;
+   animation: fadeIn 0.5s;
+`
+const ErrorText = styled.p`
+   color: red;
+   text-align: center;
+   margin-top: 10px;
 `
 
 // 사용 방법

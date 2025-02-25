@@ -13,7 +13,7 @@ import CreateBoard from '../page/CreateBoard'
 /* 각 페이지 불러오기 (테스트로 채팅만 불러봄봄) */
 // import ChatPage from './ChatPage'
 
-const AdminBoardSidebar = () => {
+const AdminBoardSidebar = ({ isAuthenticated, user }) => {
    const [isWriting, setIsWriting] = useState(false)
    const [selectedMenu, setSelectedMenu] = useState('회원정보') // 기본 선택된 메뉴
 
@@ -27,9 +27,9 @@ const AdminBoardSidebar = () => {
 
    const boardContent = {
       회원정보: <MemberRecordsBoard category="회원정보" />, // 회원내역 게시판
-      신고내역: <ReportsBoard category="신고내역" />, // 신고내역 게시판
-      처리내역: <ActionsTakenBoard category="처리내역" />, // 처리내역 게시판
-      정지내역: <BanRecordsBoard category="정지내역" />, // 정지내역 게시판
+      신고내역: <ReportsBoard category="신고내역" isAuthenticated={isAuthenticated} user={user} />, // 신고내역 게시판
+      처리내역: <ActionsTakenBoard v="처리내역" isAuthenticated={isAuthenticated} user={user} />, // 처리내역 게시판
+      정지내역: <BanRecordsBoard category="정지내역" isAuthenticated={isAuthenticated} user={user} />, // 정지내역 게시판
    }
 
    return (

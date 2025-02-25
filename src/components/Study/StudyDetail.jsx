@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchStudygroupByIdThunk } from '../../features/studygroupSlice'
+import { createGroupMemberThunk, fetchGroupMembersThunk, participateInGroupThunk } from '../../features/groupmemberSlice'
 
 const StudyDetail = ({ isAuthenticated, user }) => {
    const dispatch = useDispatch()
@@ -11,6 +12,8 @@ const StudyDetail = ({ isAuthenticated, user }) => {
 
    // Redux에서 스터디 그룹 데이터 가져오기
    const { studygroup } = useSelector((state) => state.studygroups)
+   const { groupmembers } = useSelector((state) => state.groupmembers.groupmember) // 그룹 멤버 데이터
+   const [isMember, setIsMember] = useState(false) // 멤버 여부 상태
 
    // 스터디 그룹 데이터 불러오기
    useEffect(() => {
@@ -20,16 +23,61 @@ const StudyDetail = ({ isAuthenticated, user }) => {
          return
       }
       dispatch(fetchStudygroupByIdThunk(id))
-   }, [dispatch, id])
+      dispatch(fetchGroupMembersThunk(id))
+   }, [dispatch, id, isAuthenticated])
+
+   useEffect(() => {
+      if (groupmembers?.length > 0) {
+         const memberExists = groupmembers.some((member) => member.userId === user.id)
+
+         setIsMember(memberExists)
+      }
+   }, [groupmembers, user])
 
    // 스터디 수정 버튼 클릭 시 이동
    const handleStudyEditClick = () => {
       navigate(`/study/edit/${id}`)
    }
 
+   const handleStudyJoinClick = () => {
+      if (!isAuthenticated) {
+         alert('로그인이 필요합니다.')
+         navigate('/login')
+         return
+      }
+
+      dispatch(createGroupMemberThunk({ groupId: id })) // API 요청
+         .unwrap()
+         .then(() => {
+            alert('스터디에 성공적으로 가입했습니다.')
+            window.location.reload()
+         })
+         .catch((err) => {
+            console.error('스터디 그룹 가입 실패 : ', err)
+            alert('스터디 그룹에 가입할 수 없습니다.')
+         })
+   }
+
+   // 스터디 입장 버튼 클릭 시
+   const handleStudyEnterClick = () => {
+      if (!isAuthenticated) {
+         alert('로그인이 필요합니다.')
+         navigate('/login')
+         return
+      }
+
+      dispatch(participateInGroupThunk({ groupId: id, status: 'on' })) // 참여 상태 업데이트 API 요청
+         .unwrap()
+         .then(() => navigate(`/studygroup/${id}`))
+         .catch((err) => {
+            console.error('스터디 참여 실패: ', err)
+            alert('스터디에 참여할 수 없습니다.')
+         })
+   }
+
    return (
       <>
-         {studygroup && (
+         {studygroup && groupmembers && (
             <Wrapper>
                <TitleContainer>
                   <Title>스터디 상세</Title>
@@ -91,7 +139,14 @@ const StudyDetail = ({ isAuthenticated, user }) => {
 
                {/* 조건부 렌더링: 가입 상태에 따라 다른 버튼 표시 */}
                {/* 예시로 가입 전 상태만 표시 */}
-               <SubmitButton>스터디 가입하기</SubmitButton>
+               {/* 조건부 렌더링: 가입 상태에 따라 다른 버튼 표시 */}
+               {isMember ? (
+                  <SubmitButton onClick={handleStudyEnterClick}>스터디 입장하기</SubmitButton>
+               ) : (
+                  <SubmitButton onClick={handleStudyJoinClick} disabled={studygroup.countMembers == studygroup.maxMembers}>
+                     스터디 가입하기
+                  </SubmitButton>
+               )}
                {studygroup.createdBy === user?.id && <SubmitButton2 onClick={handleStudyEditClick}>스터디 정보 수정하기</SubmitButton2>}
             </Wrapper>
          )}

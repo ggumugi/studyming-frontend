@@ -25,7 +25,11 @@ export const createStudygroupThunk = createAsyncThunk('studygroups/create', asyn
 export const fetchStudygroupByIdThunk = createAsyncThunk('studygroups/fetchStudygroupById', async (id, { rejectWithValue }) => {
    try {
       const response = await getStudygroupById(id)
-      return response.data
+      console.log('📢 API 응답 데이터:', response.data) // 🔥 응답 데이터 확인
+      return {
+         id: response.data.studygroup.id,
+         hashtags: response.data.studygroup.Hashtaged || [], // ✅ Hashtaged를 Redux에 저장
+      }
    } catch (error) {
       return rejectWithValue(error.response?.data?.message || '스터디 그룹 불러오기 실패')
    }
