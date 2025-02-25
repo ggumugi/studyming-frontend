@@ -1,40 +1,112 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchItems } from '../features/itemSlice' // ✅ 상품 목록 가져오기 액션
+import { fetchUserPoints, sendPointsThunk } from '../features/pointSlice' // ✅ 유저 포인트 조회
 import ItemList from '../components/shop/ItemList'
+import { useNavigate } from 'react-router-dom'
+import { Button, Modal, TextField, MenuItem } from '@mui/material'
 
-const MingShopPage = () => {
-   const items = [
-      { id: 1, title: '50밍', detail: '50밍 구매', price: '500', img: '/img/50ming.png', limit: null, type: 'cash' },
-      { id: 2, title: '150밍', detail: '150밍 구매', price: '1400', img: '/img/150ming.png', limit: null, type: 'cash' },
-      { id: 3, title: '250밍', detail: '250밍 구매', price: '2300', img: '/img/250ming.png', limit: null, type: 'cash' },
-      { id: 4, title: '550밍', detail: '550밍 구매', price: '4500', img: '/img/550ming.png', limit: null, type: 'cash' },
-      { id: 5, title: '웃는 토끼 콘', detail: '진심을 다해 응원하는 토끼 이모티콘', price: '100', img: '/img/sebin.png', limit: 7, type: 'emoticon' },
-      { id: 6, title: '소금뿌리는 토끼 콘 (GIF)', detail: '소금을 뿌려 액운을 막아주는 토끼 이모티콘', price: '100', img: '/img/salt.gif', limit: 7, type: 'emoticon' },
-      { id: 7, title: '혼내는 토끼 콘1 (GIF)', detail: '거대당근으로 혼내주는 토끼 이모티콘', price: '100', img: '/img/carrotsmash.gif', limit: 7, type: 'emoticon' },
-      { id: 8, title: '혼내는 토끼 콘2 (GIF)', detail: '회전 회오리로 혼내주는 토끼 이모티콘', price: '100', img: '/img/tornado.gif', limit: 7, type: 'emoticon' },
-      { id: 9, title: '보라돌이 이모티콘', detail: '텔레토비 보라돌이의 안녕 이모티콘', price: '100', img: '/img/purple.png', limit: 7, type: 'emoticon' },
-      { id: 10, title: '뚜비 이모티콘', detail: '텔레토비 뚜비의 안녕 이모티콘', price: '100', img: '/img/green.png', limit: 7, type: 'emoticon' },
-      { id: 11, title: '나나 이모티콘', detail: '텔레토비 나나의 안녕 이모티콘', price: '100', img: '/img/yellow.png', limit: 7, type: 'emoticon' },
-      { id: 12, title: '뽀 이모티콘', detail: '텔레토비 뽀의 안녕 이모티콘', price: '100', img: '/img/red.png', limit: 7, type: 'emoticon' },
-      { id: 13, title: '채팅방 당근 세트', detail: '주황주황 채팅방 테마~', price: '100', img: '/img/carrot.png', limit: 7, type: 'decoration' },
-      { id: 14, title: '채팅방 토마토 세트', detail: '빨강빨강 채팅방 테마~', price: '100', img: '/img/tomato.png', limit: 7, type: 'decoration' },
-      { id: 15, title: '채팅방 가지 세트', detail: '보라보라 채팅방 테마~', price: '100', img: '/img/eggplant.png', limit: 7, type: 'decoration' },
-      { id: 16, title: '채팅방 자색고구마 세트', detail: '핑크핑크 채팅방 테마~', price: '100', img: '/img/sweetpotato.png', limit: 7, type: 'decoration' },
-      { id: 17, title: '백색소음', detail: 'comming soon~', price: '100', img: '/img/whitenoise.png', limit: 7, type: 'studytool' },
-      { id: 18, title: '뽀모도로 타이머', detail: 'comming soon~', price: '100', img: '/img/timer.png', limit: 7, type: 'studytool' },
-   ]
+const MingShopPage = ({ isAuthenticated, user }) => {
+   const dispatch = useDispatch()
+   const navigate = useNavigate()
+   const [loading, setLoading] = useState(true)
+
+   // ✅ user가 없으면 기본값 설정
+   const userRole = user?.role ?? 'USER'
+
+   // ✅ Redux에서 현재 보유 포인트 가져오기
+   const userPoints = useSelector((state) => state.points?.points ?? 0)
+
+   // ✅ Redux에서 상품 목록 가져오기
+   const items = useSelector((state) => state.items.items)
+
+   // ✅ 모든 API 요청을 한 번에 실행하여 로딩 시간 최적화
+   useEffect(() => {
+      setLoading(true)
+      Promise.all([dispatch(fetchItems()), dispatch(fetchUserPoints())]).finally(() => setLoading(false))
+   }, [dispatch])
+
    const titleList = ['이 모든 매력적인 상품을 쉽고 빠르게 구매할 수 있는 방법', '채팅방의 인싸템! 이모티콘', '삭막한 채팅창에 활력을! 채팅창 꾸미기', '이것만 있다면 당신도 될 수 있다 공부왕!']
 
+   // 모달 상태 관리
+   const [open, setOpen] = useState(false)
+   const [receiver, setReceiver] = useState('')
+   const [amount, setAmount] = useState(100)
+
+   const pointOptions = [100, 200, 300, 400, 500]
+
+   const handleSendPoints = () => {
+      if (!receiver) {
+         alert('받는 사람을 입력하세요.')
+         return
+      }
+
+      dispatch(sendPointsThunk({ receiverNickname: receiver, amount }))
+         .unwrap()
+         .then(() => {
+            alert('포인트 선물 성공!')
+            setOpen(false)
+            dispatch(fetchUserPoints())
+         })
+         .catch((error) => {
+            alert(`포인트 선물 실패: ${error}`)
+         })
+   }
+
+   if (loading) return <Container>상품을 불러오는 중...</Container> // ✅ 로딩 중 화면 표시
    return (
       <Container>
+         <Title>
+            현재 보유 포인트: {userPoints} 밍
+            <div>
+               <Button variant="contained" sx={{ borderRadius: '20px', backgroundColor: '#FF5733', color: '#fff', marginRight: '10px' }} onClick={() => setOpen(true)}>
+                  선물하기
+               </Button>
+               {userRole === 'ADMIN' && (
+                  <Button
+                     variant="contained"
+                     sx={{
+                        borderRadius: '20px',
+                        backgroundColor: '#FF5733',
+                        color: '#fff',
+                        marginRight: '10px',
+                        '&:hover': { backgroundColor: '#E74C3C' },
+                     }}
+                     onClick={() => navigate('/mingshop/create')}
+                     isAuthenticated={isAuthenticated}
+                     user={user}
+                  >
+                     등록하기
+                  </Button>
+               )}
+            </div>
+            {/* 선물하기 모달 */}
+            <Modal open={open} onClose={() => setOpen(false)}>
+               <ModalContent>
+                  <h3 style={{ paddingBottom: '10px' }}>포인트 선물</h3>
+                  <TextField label="받는 사람 닉네임" fullWidth value={receiver} onChange={(e) => setReceiver(e.target.value)} sx={{ marginBottom: '10px' }} />
+                  <TextField select label="보낼 포인트" fullWidth value={amount} onChange={(e) => setAmount(e.target.value)} sx={{ marginBottom: '10px' }}>
+                     {pointOptions.map((option) => (
+                        <MenuItem key={option} value={option}>
+                           {option} 밍
+                        </MenuItem>
+                     ))}
+                  </TextField>
+                  <Button variant="contained" color="primary" fullWidth onClick={handleSendPoints}>
+                     확인
+                  </Button>
+               </ModalContent>
+            </Modal>
+         </Title>
          <Title>{titleList[0]}</Title>
-         <ItemList items={items.filter((item) => item.type === 'cash')} />
+         <ItemList items={items.filter((item) => item.type === 'cash')} isAuthenticated={isAuthenticated} user={user} />
          <Title>{titleList[1]}</Title>
-         <ItemList items={items.filter((item) => item.type === 'emoticon')} />
+         <ItemList items={items.filter((item) => item.type === 'emoticon')} isAuthenticated={isAuthenticated} user={user} />
          <Title>{titleList[2]}</Title>
-         <ItemList items={items.filter((item) => item.type === 'decoration')} />
+         <ItemList items={items.filter((item) => item.type === 'decoration')} isAuthenticated={isAuthenticated} user={user} />
          <Title>{titleList[3]}</Title>
-         <ItemList items={items.filter((item) => item.type === 'studytool')} />
+         <ItemList items={items.filter((item) => item.type === 'studytool')} isAuthenticated={isAuthenticated} user={user} />
       </Container>
    )
 }
@@ -51,6 +123,9 @@ const Container = styled.div`
 `
 
 const Title = styled.h2`
+   display: flex;
+   justify-content: space-between; /* 🔹 좌우 정렬 */
+   align-items: center; /* 🔹 세로 정렬 */
    width: 100%; /* 컨테이너의 전체 길이 */
    max-width: 1200px; /* 최대 너비 설정 */
    text-align: left; /* 왼쪽 정렬 */
@@ -59,6 +134,19 @@ const Title = styled.h2`
    border-bottom: 2px solid #ff7a00;
    padding-bottom: 10px;
    margin-bottom: 40px; /* 아이템과 간격 추가 */
+`
+const ModalContent = styled.div`
+   position: absolute;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+   background: white;
+   padding: 20px;
+   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+   border-radius: 10px;
+   width: 300px;
+   display: flex;
+   flex-direction: column;
 `
 
 const ItemGrid = styled.div`

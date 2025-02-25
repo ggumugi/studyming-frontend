@@ -1,12 +1,31 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Menu, MenuItem } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 import { FaRegBell } from 'react-icons/fa'
+import { useCallback } from 'react'
+import { useEffect } from 'react'
+import { useDispatch } from 'react-redux'
 
-const Header = () => {
+import { logoutUserThunk, checkAuthStatusThunk } from '../../features/authSlice'
+
+const Header = ({ isAuthenticated, user }) => {
+   const dispatch = useDispatch()
+   const navigate = useNavigate()
+
+   const handleLogout = useCallback(() => {
+      dispatch(logoutUserThunk())
+         .unwrap()
+         .then(() => {
+            window.location.href = '/' // ✅ 로그아웃 후 강제 새로고침
+         })
+         .catch((error) => {
+            alert(`로그아웃 실패: ${error}`)
+         })
+   }, [dispatch])
+
    // 📌 게시판 드롭다운 상태
    const [boardAnchor, setBoardAnchor] = useState(null)
    const boardOpen = Boolean(boardAnchor)
@@ -26,85 +45,91 @@ const Header = () => {
    return (
       <HeaderContainer>
          <HeaderContent>
+            {/* 📌 왼쪽 영역: 로고 + 네비게이션 메뉴 */}
             <LeftSection>
                <Link to="/">
                   <Logo src="/img/studyming-logo.png" alt="스터디밍 로고" />
                </Link>
-               <NavMenu>
-                  <Link to="/study">
-                     <NavItem>스터디</NavItem>
-                  </Link>
-                  <Link to="/mingshop">
-                     <NavItem>밍샵</NavItem>
-                  </Link>
 
-                  {/* 📌 게시판 드롭다운 버튼 */}
-                  <NavItem onClick={handleBoardClick} $isOpen={boardOpen}>
-                     게시판 {boardOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                  </NavItem>
+               {/* 🔥 로그인한 사용자만 메뉴 표시 */}
+               {isAuthenticated && (
+                  <NavMenu>
+                     <Link to="/study/list">
+                        <NavItem>스터디</NavItem>
+                     </Link>
+                     <Link to="/mingshop">
+                        <NavItem>밍샵</NavItem>
+                     </Link>
 
-                  {/* 📌 게시판 드롭다운 메뉴 */}
-                  <Menu anchorEl={boardAnchor} open={boardOpen} onClose={handleBoardClose} anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }} transformOrigin={{ vertical: 'top', horizontal: 'left' }}>
-                     <CustomMenuItem onClick={handleBoardClose}>
-                        <Link to="/board/general">
-                           자유
-                           <br /> <span>유저간의 자유로운 소통</span>
-                        </Link>
-                     </CustomMenuItem>
-                     <CustomMenuItem onClick={handleBoardClose}>
-                        <Link to="/board/qna">
-                           질문
-                           <br /> <span>유저간의 Q & A</span>
-                        </Link>
-                     </CustomMenuItem>
-                     <CustomMenuItem onClick={handleBoardClose}>
-                        <Link to="/board/study">
-                           정보
-                           <br /> <span>시험 정보 안내</span>
-                        </Link>
-                     </CustomMenuItem>
-                     <CustomMenuItem onClick={handleBoardClose}>
-                        <Link to="/board/inquiry">
-                           문의
-                           <br /> <span>관리자와 Q & A</span>
-                        </Link>
-                     </CustomMenuItem>
-                  </Menu>
+                     {/* 📌 게시판 드롭다운 버튼 */}
+                     <NavItem onClick={handleBoardClick} $isOpen={boardOpen}>
+                        게시판 {boardOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                     </NavItem>
 
-                  <Link to="/admin">
-                     <NavItem>관리</NavItem>
-                  </Link>
-               </NavMenu>
+                     {/* 📌 게시판 드롭다운 메뉴 */}
+                     <Menu anchorEl={boardAnchor} open={boardOpen} onClose={handleBoardClose} anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }} transformOrigin={{ vertical: 'top', horizontal: 'left' }}>
+                        <CustomMenuItem onClick={handleBoardClose}>
+                           <Link to="/board/general">자유</Link>
+                        </CustomMenuItem>
+                        <CustomMenuItem onClick={handleBoardClose}>
+                           <Link to="/board/qna">질문</Link>
+                        </CustomMenuItem>
+                        <CustomMenuItem onClick={handleBoardClose}>
+                           <Link to="/board/study">정보</Link>
+                        </CustomMenuItem>
+                        <CustomMenuItem onClick={handleBoardClose}>
+                           <Link to="/board/inquiry">문의</Link>
+                        </CustomMenuItem>
+                     </Menu>
+
+                     {/* 🔥 관리자만 "관리" 메뉴 표시 */}
+                     {user?.role === 'ADMIN' && (
+                        <Link to="/admin">
+                           <NavItem>관리</NavItem>
+                        </Link>
+                     )}
+                  </NavMenu>
+               )}
             </LeftSection>
+
+            {/* 📌 오른쪽 영역: 알림 아이콘 + 유저 메뉴 + 로그아웃 버튼 */}
             <RightSection>
-               <NotificationIcon />
+               {isAuthenticated ? (
+                  <>
+                     <NotificationIcon />
 
-               {/* 📌 사용자 드롭다운 버튼 */}
-               <UserMenu onClick={handleUserClick} $isOpen={userOpen}>
-                  Lee 님 {userOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-               </UserMenu>
+                     {/* 📌 유저 닉네임 + 로그아웃 버튼 추가 */}
+                     <UserWrapper>
+                        <UserMenu onClick={handleUserClick} $isOpen={userOpen}>
+                           {user?.nickname} 님 {userOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                        </UserMenu>
+                        <LogoutButton onClick={handleLogout}>로그아웃</LogoutButton> {/* ✅ 유저 닉네임 옆에 로그아웃 버튼 추가 */}
+                     </UserWrapper>
 
-               {/* 📌 사용자 드롭다운 메뉴 */}
-               <Menu anchorEl={userAnchor} open={userOpen} onClose={handleUserClose} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} transformOrigin={{ vertical: 'top', horizontal: 'right' }}>
-                  <CustomMenuItem onClick={handleUserClose}>
-                     <span style={{ color: '#FF7A00', fontSize: '16px', fontWeight: 300 }}>0 밍</span>
-                  </CustomMenuItem>
-                  <CustomMenuItem onClick={handleUserClose}>
-                     <Link to="/profile">내 프로필</Link>
-                  </CustomMenuItem>
-                  <CustomMenuItem onClick={handleUserClose}>
-                     <Link to="/info">내 정보</Link>
-                  </CustomMenuItem>
-                  <CustomMenuItem onClick={handleUserClose}>
-                     <Link to="/items">내 아이템</Link>
-                  </CustomMenuItem>
-                  <CustomMenuItem onClick={handleUserClose}>
-                     <Link to="/payment">결제 및 밍 내역</Link>
-                  </CustomMenuItem>
-                  <CustomMenuItem onClick={handleUserClose}>
-                     <span style={{ color: 'red', fontSize: '16px', fontWeight: 300 }}>회원 탈퇴</span>
-                  </CustomMenuItem>
-               </Menu>
+                     {/* 📌 사용자 드롭다운 메뉴 */}
+                     <Menu anchorEl={userAnchor} open={userOpen} onClose={handleUserClose} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} transformOrigin={{ vertical: 'top', horizontal: 'right' }}>
+                        <CustomMenuItem onClick={handleUserClose}>
+                           <Link to="/mypage">내 프로필</Link>
+                        </CustomMenuItem>
+                        <CustomMenuItem onClick={handleUserClose}>
+                           <Link to="/info">내 정보</Link>
+                        </CustomMenuItem>
+                        <CustomMenuItem onClick={handleUserClose}>
+                           <Link to="/items">내 아이템</Link>
+                        </CustomMenuItem>
+                        <CustomMenuItem onClick={handleUserClose}>
+                           <Link to="/payment">결제 및 밍 내역</Link>
+                        </CustomMenuItem>
+                        <CustomMenuItem onClick={handleUserClose}>
+                           <span style={{ color: 'red' }}>회원 탈퇴</span> {/* ✅ 회원 탈퇴 메뉴 유지 */}
+                        </CustomMenuItem>
+                     </Menu>
+                  </>
+               ) : (
+                  <Link to="/login">
+                     <NavItem>로그인</NavItem>
+                  </Link>
+               )}
             </RightSection>
          </HeaderContent>
       </HeaderContainer>
@@ -214,5 +239,21 @@ const CustomMenuItem = styled(MenuItem)`
       display: block;
       width: 100%;
       text-align: center;
+   }
+`
+const UserWrapper = styled.div`
+   display: flex;
+   align-items: center;
+   gap: 15px; /* 닉네임과 로그아웃 버튼 사이 간격 */
+`
+
+const LogoutButton = styled.button`
+   background: none;
+   border: none;
+   font-size: 16px;
+   color: red;
+   cursor: pointer;
+   &:hover {
+      text-decoration: underline;
    }
 `

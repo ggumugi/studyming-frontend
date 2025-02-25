@@ -1,26 +1,95 @@
 import React from 'react'
 import styled from 'styled-components'
+import { useDispatch, useSelector } from 'react-redux'
+import { pointsForItemThunk, fetchUserPoints } from '../../features/pointSlice'
+import { useNavigate } from 'react-router-dom'
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
+import { deleteItemThunk } from '../../features/itemSlice'
 
-const ItemList = ({ items }) => {
+const ItemList = ({ items, isAuthenticated, user }) => {
+   const dispatch = useDispatch()
+   const navigate = useNavigate()
+   const userPoints = useSelector((state) => state.points.points)
+
+   const handlePurchase = (item) => {
+      if (item.type === 'cash') {
+         alert('포인트 충전은 결제 페이지에서 진행해주세요!')
+         return
+      }
+
+      if (userPoints < item.price) {
+         alert('포인트가 부족합니다!')
+         return
+      }
+
+      // ✅ 구매 확인창 추가
+      const isConfirmed = window.confirm(`${item.name}을(를) ${item.price}밍으로 구매하시겠습니까?`)
+      if (!isConfirmed) return
+
+      dispatch(pointsForItemThunk(item.id)) // ✅ useDispatch()로 실행
+         .then(() => {
+            dispatch(fetchUserPoints()) // ✅ 포인트 정보 갱신
+         })
+   }
+
+   // ✅ 아이템 삭제 함수
+   const handleDelete = (itemId) => {
+      const isConfirmed = window.confirm('정말로 이 아이템을 삭제하시겠습니까?')
+      if (!isConfirmed) return
+
+      dispatch(deleteItemThunk(itemId))
+         .then(() => {
+            alert('아이템이 삭제되었습니다.')
+         })
+         .catch((error) => {
+            alert(`삭제 실패: ${error.message}`)
+         })
+   }
+
    return (
       <Container>
          <Grid>
-            {items.map((item) => (
-               <ItemCard key={item.id}>
-                  <ImageWrapper>
-                     {item.type !== 'cash' && <Tag>7일</Tag>}
-                     <Image src={item.img} alt={item.title} />
-                  </ImageWrapper>
-                  <ItemTitle>{item.title}</ItemTitle>
-                  <ItemDescription>{item.detail}</ItemDescription>
-                  <PriceContainer>
-                     <ItemPrice>
-                        {item.price} {item.type === 'cash' ? '원' : '밍'}
-                     </ItemPrice>
-                     <BuyButton>구매하기</BuyButton>
-                  </PriceContainer>
-               </ItemCard>
-            ))}
+            {items.length > 0 ? ( // ✅ 데이터가 있을 때만 출력
+               items.map((item) => (
+                  <ItemCard key={item.id}>
+                     <ImageWrapper>
+                        {item.type !== 'cash' && <Tag>7일</Tag>}
+                        <Image
+                           src={item.img ? `http://localhost:8000${item.img}` : '/img/default.png'} // ✅ 기본 이미지 추가
+                           alt={item.title}
+                        />
+                     </ImageWrapper>
+                     <ItemTitle>{item.title}</ItemTitle>
+                     <ItemDescriptionContainer>
+                        <ItemDescription>{item.detail}</ItemDescription>
+                        {isAuthenticated && user?.role === 'ADMIN' && (
+                           <DeleteButton onClick={() => handleDelete(item.id)}>
+                              <DeleteForeverIcon style={{ fontSize: '16px' }} />
+                           </DeleteButton>
+                        )}
+                     </ItemDescriptionContainer>
+
+                     <PriceContainer>
+                        <ItemPrice>
+                           {item.price} {item.type === 'cash' ? '원' : '밍'}
+                        </ItemPrice>
+                        {isAuthenticated && user?.role === 'ADMIN' && (
+                           <EditButton
+                              variant="contained"
+                              color="primary"
+                              onClick={() => navigate(`/mingshop/edit/${item.id}`, { state: { user } })} // ✅ user 정보 함께 전달
+                              sx={{ marginLeft: '10px' }}
+                           >
+                              수정
+                           </EditButton>
+                        )}
+                        <BuyButton onClick={() => handlePurchase(item)}>구매하기</BuyButton>
+                     </PriceContainer>
+                  </ItemCard>
+               ))
+            ) : (
+               <p>상품이 없습니다.</p> // ✅ 데이터가 없을 때 메시지 표시
+            )}
          </Grid>
       </Container>
    )
@@ -49,7 +118,7 @@ const ItemCard = styled.div`
    display: flex;
    flex-direction: column;
    justify-content: space-between;
-   height: 350px; /* 고정된 높이 */
+   height: 320px; /* 고정된 높이 */
    max-width: 325px;
    text-align: left;
    overflow: hidden;
@@ -95,6 +164,7 @@ const ItemDescription = styled.p`
    color: #999;
    padding: 0px 3px 3px 10px;
    margin-bottom: 2px; /* 설명과 가격 간격 좁힘 */
+   flex: 1;
 `
 
 const PriceContainer = styled.div`
@@ -120,4 +190,37 @@ const BuyButton = styled.button`
    cursor: pointer;
    font-weight: bold;
    height: 30px; /* 가격 크기에 맞춤 */
+`
+const EditButton = styled(BuyButton)`
+   font-size: 12px;
+   padding: 5px 15px;
+
+   color: white;
+   border: none;
+   border-radius: 15px;
+   cursor: pointer;
+   font-weight: bold;
+   height: 30px; /* 가격 크기에 맞춤 */
+   background-color: #3498db;
+   &:hover {
+      background-color: #2980b9;
+   }
+`
+const DeleteButton = styled(BuyButton)`
+   background-color: #e74c3c;
+   &:hover {
+      background-color: #c0392b;
+   }
+   height: 27px;
+   width: 35px;
+   padding: 5px;
+`
+
+const ItemDescriptionContainer = styled.div`
+   display: flex;
+   align-items: center;
+   justify-content: space-between; /* 🔹 왼쪽: item.detail / 오른쪽: 삭제 버튼 */
+   padding: 0px 10px 5px 0px;
+   gap: 10px; /* 요소 간격 */
+   width: 100%;
 `

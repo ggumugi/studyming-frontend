@@ -1,50 +1,97 @@
 import React, { useState } from 'react'
-import { TextField, Button } from '@mui/material'
+import { TextField, Button, CircularProgress } from '@mui/material'
+import { checkIdExistsThunk, checkEmailMatchesThunk, verifyCodepwThunk, updatePasswordThunk } from '../../features/authSlice' // Thunk 액션 불러오기
 import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
 import '../../styles/authFind.css'
 
 const FindPassword = () => {
-   const [step, setStep] = useState(1)
+   const navigate = useNavigate()
+   const dispatch = useDispatch()
+
+   const { loading, successMessage, error } = useSelector((state) => state.auth) // Redux 상태 가져오기
+
+   // Step 상태 관리 (현재 단계를 나타내는 상태)
+   const [step, setStep] = useState(1) // Step 1부터 시작
+
    const [id, setId] = useState('')
    const [email, setEmail] = useState('')
-   const [verificationCode, setVerificationCode] = useState('')
    const [inputCode, setInputCode] = useState('')
+   const [verificationCode, setVerificationCode] = useState('') // 실제로 받은 코드
    const [newPassword, setNewPassword] = useState('')
    const [confirmPassword, setConfirmPassword] = useState('')
    const [isPasswordMatch, setIsPasswordMatch] = useState(true)
 
-   const handleSubmit = () => {
-      if (step === 1) {
-         if (!id) {
-            alert('아이디를 입력해주세요.')
-         } else {
-            setStep(2)
-            alert('아이디 확인 완료.')
-         }
-      } else if (step === 2) {
-         if (!email) {
-            alert('이메일을 입력해주세요.')
-         } else {
-            setVerificationCode('1234')
-            setStep(3)
-            alert('이메일로 인증번호가 전송되었습니다.')
-         }
-      } else if (step === 3) {
-         if (inputCode !== verificationCode) {
-            alert('인증번호가 일치하지 않습니다.')
-         } else {
-            setStep(4)
-            alert('인증 완료! 새로운 비밀번호를 설정해주세요.')
-         }
-      } else if (step === 4) {
-         if (!newPassword || !confirmPassword) {
-            alert('새로운 비밀번호와 확인 비밀번호를 입력해주세요.')
-         } else if (newPassword !== confirmPassword) {
-            alert('비밀번호가 일치하지 않습니다.')
-         } else {
-            alert('비밀번호가 성공적으로 재설정되었습니다.')
-         }
+   // 아이디 검증
+   const handleIdCheck = () => {
+      dispatch(checkIdExistsThunk(id))
+         .unwrap()
+         .then((result) => {
+            if (result.success) {
+               setStep(2) // 이메일 입력 필드로 이동
+            }
+         })
+         .catch((error) => {
+            alert(error.message || '아이디 확인 실패')
+         })
+   }
+
+   // 이메일 및 아이디 검증 후 인증 코드 전송
+   const handleEmailCheck = () => {
+      dispatch(checkEmailMatchesThunk({ loginId: id, email }))
+         .unwrap()
+         .then((result) => {
+            if (result.success) {
+               setStep(3) // 인증 코드 입력 필드로 이동
+            }
+         })
+         .catch((error) => {
+            alert(error.message || '아이디와 이메일 검증 실패')
+         })
+   }
+
+   // 인증 코드 검증
+   const handleCodeVerify = () => {
+      console.log('📡 인증 코드 검증 요청:', email, inputCode) // ✅ 디버깅 로그 추가
+
+      dispatch(verifyCodepwThunk({ email, verificationCodepw: inputCode }))
+         .unwrap()
+         .then((result) => {
+            if (result.success) {
+               setStep(4) // 비밀번호 변경 페이지로 이동
+            }
+         })
+         .catch((error) => {
+            alert(error.message || '인증 코드 검증 실패')
+         })
+   }
+
+   const handlePasswordUpdate = () => {
+      if (!newPassword || !confirmPassword) {
+         alert('새 비밀번호를 입력해주세요.')
+         return
       }
+
+      if (newPassword !== confirmPassword) {
+         alert('비밀번호가 일치하지 않습니다.')
+         return
+      }
+
+      console.log('📡 비밀번호 변경 요청:', { email, newPassword }) // ✅ 디버깅 로그 추가
+
+      dispatch(updatePasswordThunk({ email: email, newPassword: newPassword })) // 🔥 중첩되지 않도록 수정!
+         .unwrap()
+         .then((result) => {
+            if (result.success) {
+               alert('비밀번호가 성공적으로 변경되었습니다. 로그인 페이지로 이동합니다.')
+               setStep(5) // ✅ 비밀번호 변경 완료
+               navigate('/login')
+            }
+         })
+         .catch((error) => {
+            alert(error.message || '비밀번호 변경 실패')
+         })
    }
 
    return (
@@ -53,36 +100,40 @@ const FindPassword = () => {
             <h2 className="title">비밀번호 찾기</h2>
             <div className="styled-divider"></div>
 
+            {/* Step 1: 아이디 확인 */}
             {step === 1 && (
                <>
-                  <TextField className="styled-textfield" label="아이디" type="text" value={id} onChange={(e) => setId(e.target.value)} />
+                  <TextField className="styled-textfield" label="아이디" value={id} onChange={(e) => setId(e.target.value)} />
                   <p className="small-text">가입하신 아이디를 입력해주세요</p>
-                  <Button className="styled-button" onClick={handleSubmit}>
+                  <Button className="styled-button" onClick={handleIdCheck} disabled={loading}>
                      확인
                   </Button>
                </>
             )}
 
+            {/* Step 2: 이메일 입력 */}
             {step === 2 && (
                <>
-                  <TextField className="styled-textfield" label="이메일" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                  <TextField className="styled-textfield" label="이메일" value={email} onChange={(e) => setEmail(e.target.value)} />
                   <p className="small-text">가입하신 이메일을 입력해주세요</p>
-                  <Button className="styled-button" onClick={handleSubmit}>
+                  <Button className="styled-button" onClick={handleEmailCheck} disabled={loading}>
                      확인
                   </Button>
                </>
             )}
 
+            {/* Step 3: 인증 코드 입력 */}
             {step === 3 && (
                <>
-                  <TextField className="styled-textfield" label="인증번호 입력" type="text" value={inputCode} onChange={(e) => setInputCode(e.target.value)} />
+                  <TextField className="styled-textfield" label="인증번호 입력" value={inputCode} onChange={(e) => setInputCode(e.target.value)} />
                   <p className="small-text">이메일로 발송하신 인증번호를 입력해주세요</p>
-                  <Button className="styled-button" onClick={handleSubmit}>
-                     인증 완료
+                  <Button className="styled-button" onClick={handleCodeVerify} disabled={loading}>
+                     확인
                   </Button>
                </>
             )}
 
+            {/* Step 4: 새 비밀번호 입력 */}
             {step === 4 && (
                <>
                   <TextField className="styled-textfield" label="새 비밀번호" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
@@ -91,9 +142,13 @@ const FindPassword = () => {
                   <TextField className="styled-textfield" label="비밀번호 확인" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
                   {!isPasswordMatch && <p className="error-text">비밀번호가 일치하지 않습니다.</p>}
 
-                  <Button className="styled-button" onClick={handleSubmit}>
-                     비밀번호 재설정
+                  <Button className="styled-button" onClick={handlePasswordUpdate} disabled={loading}>
+                     확인
                   </Button>
+
+                  {/* 성공 또는 실패 메시지 */}
+                  {successMessage && <div>{successMessage}</div>}
+                  {error && <div>{error}</div>}
                </>
             )}
 
@@ -106,7 +161,3 @@ const FindPassword = () => {
 }
 
 export default FindPassword
-
-/* 아이디찾기 비밀번호찾기 스타일 중복되어서
-외부 css파일에 저장해뒀어요
-*/

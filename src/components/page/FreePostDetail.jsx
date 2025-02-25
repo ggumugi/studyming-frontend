@@ -1,8 +1,42 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
+
 import { Paper, Typography, Button, TextField, Box } from '@mui/material'
 
+import CreateBoard from './CreateBoard'
+import { fetchPostsThunk, deletePostThunk } from '../../features/postSlice'
+
 const PostDetail = ({ post, onBack }) => {
-   console.log('PostDetail에서 받은 post 데이터:', post)
+   //삭제버튼
+   const navigate = useNavigate()
+
+   const handleDelete = () => {
+      if (window.confirm('정말 삭제하시겠습니까?')) {
+         dispatch(deletePostThunk(post.id))
+            .unwrap()
+            .then(() => {
+               alert('게시글이 삭제되었습니다!')
+               navigate('/board') // ✅ 삭제 후 게시판 목록으로 이동
+            })
+            .catch((error) => {
+               console.error('게시글 삭제 실패:', error)
+               alert(`게시글 삭제 실패: ${error?.message || '알 수 없는 오류'}`)
+            })
+      }
+   }
+
+   const dispatch = useDispatch()
+
+   // ✅ Redux에서 최신 게시글 상태 가져오기
+   const updatedPost = useSelector((state) => state.posts.posts.find((p) => p.id === post.id)) || post
+
+   useEffect(() => {
+      // ✅ 수정 후 데이터 불러오기
+      dispatch(fetchPostsThunk({ page: 1 }))
+   }, [dispatch])
+
+   const [isEditing, setIsEditing] = useState(false) // 수정 모드 상태 추가
    const [comments, setComments] = useState([
       { id: 1, author: '수험박', text: '정신차리세요... 32년 동안 공부하셨다면서요', date: '2025.01.06. 15:30' },
       { id: 2, author: '희경이', text: '어? 기사시험 그저께였는데요?', date: '2025.01.06. 15:35' },
@@ -27,35 +61,44 @@ const PostDetail = ({ post, onBack }) => {
       setComments(comments.filter((comment) => comment.id !== id))
    }
 
+   // 🔥 **수정 모드일 경우 `CreateBoard` 렌더링**
+   if (isEditing) {
+      return <CreateBoard post={post} setIsWriting={setIsEditing} />
+   }
+
    return (
       <>
-         <Paper elevation={0} sx={{ padding: '10px', margin: '20px auto', maxWidth: '100%', paddingLeft: '100px', borderBottom: '2px solid rgba(255, 122, 0, 0.5)' }}>
+         <Paper elevation={0} sx={{ margin: '20px auto', maxWidth: '100%', borderBottom: '2px solid rgba(255, 122, 0, 0.5)' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                {/* 제목 */}
                <Typography variant="body1" gutterBottom>
-                  {post.title}
+                  {updatedPost.title}
                </Typography>
 
                {/* 수정/삭제 버튼 */}
                <Box sx={{ display: 'flex', gap: '10px' }}>
-                  <Button variant="contained" sx={{ borderRadius: '20px', backgroundColor: '#FFCC99', color: '#fff', '&:hover': { backgroundColor: '#FFB266' } }}>
+                  <Button
+                     variant="contained"
+                     sx={{ borderRadius: '20px', backgroundColor: '#FFCC99', color: '#fff', '&:hover': { backgroundColor: '#FFB266' } }}
+                     onClick={() => setIsEditing(true)} // 🔥 수정 버튼 클릭 시 수정 모드 활성화
+                  >
                      수정
                   </Button>
-                  <Button variant="contained" sx={{ borderRadius: '20px', backgroundColor: '#FF5733', color: '#fff', '&:hover': { backgroundColor: '#E74C3C' } }}>
+                  <Button variant="contained" sx={{ borderRadius: '20px', backgroundColor: '#FF5733', color: '#fff', '&:hover': { backgroundColor: '#E74C3C' } }} onClick={handleDelete}>
                      삭제
                   </Button>
                </Box>
             </Box>
             {/* 작성자 & 작성일 */}
             <Typography variant="subtitle1" color="textSecondary" align="right" sx={{ paddingTop: '20px' }}>
-               작성자: {post.author} | {post.date}
+               작성자: {post?.User?.nickname} | {new Date(post.createdAt).toLocaleDateString()}
             </Typography>
          </Paper>
          {/* <Typography sx={{ marginTop: '20px', borderBottom: '2px solid #ff7a00' }}></Typography> */}
-         <Paper sx={{ padding: '20px', margin: '20px auto', maxWidth: '100%', paddingLeft: '100px' }}>
+         <Paper sx={{ margin: '20px auto', maxWidth: '100%' }}>
             {/* 본문 내용 */}
-            <Typography variant="body1" sx={{ height: '40px' }}>
-               {post.content}
+            <Typography variant="body1" sx={{ height: '100%' }}>
+               {updatedPost.content}
             </Typography>
 
             {/* 댓글 입력 */}

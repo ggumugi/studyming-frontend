@@ -1,100 +1,171 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { format, addDays, startOfWeek, subWeeks, addWeeks } from 'date-fns'
-import { AiOutlineLeft, AiOutlineRight } from 'react-icons/ai' // ⬅️ 아이콘 추가
-const MAX_LENGTH = 10 // ⬅️ 개별 일정 최대 글자 수 제한
-const MAX_SCHEDULES = 3 // ⬅️ 하루에 최대 3개 일정
+import { AiOutlineLeft, AiOutlineRight } from 'react-icons/ai'
+import { fetchGoals, addGoalAsync, updateGoalAsync, deleteGoalAsync } from '../../features/goalsSlice'
+
+const DAYS = ['sunGoal', 'monGoal', 'tueGoal', 'wedGoal', 'thuGoal', 'friGoal', 'satGoal']
+const MAX_LENGTH = 10
+const MAX_SCHEDULES = 4
 
 const WeeklyCalendar = () => {
-   const [currentWeek, setCurrentWeek] = useState(new Date())
+   const dispatch = useDispatch()
+   const { goals } = useSelector((state) => state.goals || { goals: [] })
+
+   const [currentWeek] = useState(new Date())
    const [selectedDate, setSelectedDate] = useState(new Date())
-   const [schedule, setSchedule] = useState({})
-   const [tempSchedule, setTempSchedule] = useState('')
-   const [editingIndex, setEditingIndex] = useState(null)
-   const [error, setError] = useState('')
+   // const [tempSchedule, setTempSchedule] = useState('')
+   const [editingGoalId, setEditingGoalId] = useState(null)
+   const [errorMsg, setErrorMsg] = useState('')
+   const [weeklyGoals, setWeeklyGoals] = useState({}) // :압정: 요일별 목표 리스트
+   // 수정된 코드 부분 (상단 상태 추가)
+   const [justSaved, setJustSaved] = useState(false)
+
+   useEffect(() => {
+      dispatch(fetchGoals())
+   }, [dispatch])
+
+   // 주간 목표 구조 개선 (useEffect 내부 수정)
+   useEffect(() => {
+      if (goals.length > 0) {
+         const organizedGoals = DAYS.reduce((acc, day) => {
+            acc[day] = goals
+               .filter((goal) => goal[day]) // null 값 사전 필수링
+               .map((goal) => ({
+                  id: goal.id,
+                  text: goal[day],
+                  date: goal.date, // 날짜 정보 추가
+               }))
+            return acc
+         }, {})
+
+         setWeeklyGoals(organizedGoals)
+      }
+   }, [goals])
 
    const startWeek = startOfWeek(currentWeek, { weekStartsOn: 0 })
    const weekDays = Array.from({ length: 7 }, (_, i) => addDays(startWeek, i))
 
+   // 새로운 로컬 상태 추가
+   const [localSchedule, setLocalSchedule] = useState('')
+
+   // 입력값 동기화 핸들러
+   const syncInputWithSelection = () => {
+      const selectedDayKey = DAYS[selectedDate.getDay()]
+      const goal = weeklyGoals[selectedDayKey]?.find((g) => g.date === format(selectedDate, 'yyyy-MM-dd'))
+      setLocalSchedule(goal?.text || '')
+   }
+
+   // 선택 날짜 변경 시 동기화
+   useEffect(() => {
+      if (!editingGoalId) syncInputWithSelection()
+   }, [selectedDate])
+
+   // 주간 목표 업데이트 시 동기화
+   useEffect(() => {
+      if (!editingGoalId) syncInputWithSelection()
+   }, [weeklyGoals])
+
+   // 수정된 useEffect (justSaved 상태가 변경될 때마다 실행)
+   useEffect(() => {
+      if (justSaved) {
+         const timer = setTimeout(() => setJustSaved(false), 300) // 300ms로 변경
+         return () => clearTimeout(timer)
+      }
+   }, [justSaved])
+
+   // 2. 저장 로직 개선 (handleSaveSchedule 함수 전체 수정)
    const handleSaveSchedule = () => {
-      const dateKey = format(selectedDate, 'yyyy-MM-dd')
-      const currentSchedules = schedule[dateKey] || []
+      const trimmed = localSchedule.trim()
+      if (!trimmed) return
 
-      if (tempSchedule.trim().length > MAX_LENGTH) {
-         setError(`각 일정은 최대 ${MAX_LENGTH}자까지 입력 가능합니다.`)
+      if (trimmed.length > MAX_LENGTH) {
+         setErrorMsg(`최대 ${MAX_LENGTH}자까지 입력 가능합니다.`)
          return
       }
 
-      if (!tempSchedule.trim()) return
+      const selectedDayKey = DAYS[selectedDate.getDay()]
+      const selectedDateFormatted = format(selectedDate, 'yyyy-MM-dd')
 
-      if (currentSchedules.length >= MAX_SCHEDULES) {
-         setError(`하루에 최대 ${MAX_SCHEDULES}개까지 입력 가능합니다.`)
+      const existingSchedules = weeklyGoals[selectedDayKey] || []
+
+      if (!editingGoalId && existingSchedules.length >= MAX_SCHEDULES) {
+         setErrorMsg(`하루 최대 ${MAX_SCHEDULES}개까지 입력 가능합니다.`)
          return
       }
 
-      setSchedule({
-         ...schedule,
-         [dateKey]: [...currentSchedules, tempSchedule], // 기존 일정 유지
-      })
+      // 저장 즉시 초기화
+      setLocalSchedule('')
+      setEditingGoalId(null)
 
-      setTempSchedule('')
-      setError('')
-   }
+      const newGoal = {
+         date: selectedDateFormatted,
+         [selectedDayKey]: trimmed,
+      }
 
-   const handleInputChange = (e) => {
-      const value = e.target.value
-      if (value.length > MAX_LENGTH) {
-         setError(`각 일정은 최대 ${MAX_LENGTH}자까지 입력 가능합니다.`)
+      if (editingGoalId) {
+         dispatch(updateGoalAsync({ id: editingGoalId, updatedGoal: newGoal })).then(() => {
+            dispatch(fetchGoals()) // 데이터 최신화
+         })
       } else {
-         setTempSchedule(value)
-         setError('')
+         dispatch(addGoalAsync(newGoal)).then(() => {
+            dispatch(fetchGoals()) // 데이터 최신화
+         })
       }
    }
 
-   const handleEditSchedule = (dateKey, index, value) => {
-      if (value.length > MAX_LENGTH) return
-      const updatedSchedules = [...schedule[dateKey]]
-      updatedSchedules[index] = value
+   // 일정 클릭 핸들러 수정
+   const handleEditSchedule = (goal, day) => {
+      setLocalSchedule(goal.text) // localSchedule로 변경
+      setSelectedDate(day)
+      setEditingGoalId(goal.id)
+   }
+   const handleDeleteSchedule = (id, dayKey) => {
+      dispatch(deleteGoalAsync(id))
 
-      if (value.trim() === '') {
-         updatedSchedules.splice(index, 1) // 빈 값이면 삭제
-      }
-
-      setSchedule({ ...schedule, [dateKey]: updatedSchedules })
+      // ✅ 삭제 후 weeklyGoals 업데이트
+      setWeeklyGoals((prev) => ({
+         ...prev,
+         [dayKey]: (prev[dayKey] || []).filter((goal) => goal.id !== id), // undefined일 경우 빈 배열로 처리
+      }))
    }
 
    return (
       <Container>
          <Header>
-            <Button onClick={() => setCurrentWeek(subWeeks(currentWeek, 1))}>
-               <StyledLeftIcon />
-            </Button>
-            <h3>
+            <h3 style={{ fontSize: '20px', fontWeight: '300' }}>
                {format(startWeek, 'yyyy년 MM월 dd일')} ~ {format(addDays(startWeek, 6), 'MM월 dd일')}
             </h3>
-            <Button onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))}>
-               <StyledRightIcon />
-            </Button>
          </Header>
 
          <WeekContainer>
             {weekDays.map((day) => {
                const dateKey = format(day, 'yyyy-MM-dd')
-               const isSelected = format(day, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
+               const isSelected = dateKey === format(selectedDate, 'yyyy-MM-dd')
+               const dayKey = DAYS[day.getDay()]
+               const dayGoals = goals.filter((goal) => goal[dayKey])
 
                return (
                   <DayBox key={dateKey} selected={isSelected} onClick={() => setSelectedDate(day)}>
-                     {format(day, 'EEE')}
-                     <br />
+                     {format(day, 'EEE')} <br />
                      {format(day, 'dd')}
                      <ScheduleList>
-                        {(schedule[dateKey] || []).map((item, index) => (
-                           <ScheduleItem key={index} selected={isSelected}>
-                              {editingIndex === `${dateKey}-${index}` ? (
-                                 <ScheduleInput type="text" value={item} maxLength={MAX_LENGTH} autoFocus onChange={(e) => handleEditSchedule(dateKey, index, e.target.value)} onBlur={() => setEditingIndex(null)} onKeyDown={(e) => e.key === 'Enter' && setEditingIndex(null)} />
-                              ) : (
-                                 <ScheduleText onClick={() => setEditingIndex(`${dateKey}-${index}`)}>{item}</ScheduleText>
-                              )}
+                        {dayGoals.map((goal) => (
+                           <ScheduleItem
+                              key={goal.id}
+                              isEditing={editingGoalId === goal.id} // 수정 중인 일정인지 확인
+                              onClick={() => handleEditSchedule(goal, day)}
+                           >
+                              <span>{goal[dayKey]}</span>
+                              <DeleteButton
+                                 onClick={(e) => {
+                                    e.stopPropagation() // 삭제 버튼 클릭 시 일정 수정 방지
+                                    handleDeleteSchedule(goal.id)
+                                 }}
+                              >
+                                 X
+                              </DeleteButton>
                            </ScheduleItem>
                         ))}
                      </ScheduleList>
@@ -104,20 +175,29 @@ const WeeklyCalendar = () => {
          </WeekContainer>
 
          <ScheduleInputSection>
-            <Input type="text" placeholder="일정 입력 (최대 10자, 1일 3개)" value={tempSchedule} maxLength={MAX_LENGTH} onChange={handleInputChange} onKeyDown={(e) => e.key === 'Enter' && handleSaveSchedule()} />
-            <SaveButton onClick={handleSaveSchedule}>등록</SaveButton>
+            <Input
+               type="text"
+               placeholder="일정 입력 (최대 10자)"
+               value={localSchedule} // localSchedule로 변경
+               maxLength={MAX_LENGTH}
+               onChange={(e) => {
+                  setLocalSchedule(e.target.value)
+                  setErrorMsg('')
+               }}
+               onKeyDown={(e) => e.key === 'Enter' && handleSaveSchedule()}
+            />
+            <SaveButton onClick={handleSaveSchedule}>{editingGoalId ? '수정' : '등록'}</SaveButton>
          </ScheduleInputSection>
-         {error && <ErrorText>{error}</ErrorText>}
+         {errorMsg && <ErrorText>{errorMsg}</ErrorText>}
       </Container>
    )
 }
 
-// 🎨 Styled Components
+// ✅ 스타일 유지
 const Container = styled.div`
-   // max-width: 1150px;
    width: 94%;
    text-align: center;
-   padding: 15px 20px 15px 20px;
+   padding: 15px 20px;
    background: white;
    border: 1px solid #eaeaea;
    box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.07);
@@ -129,10 +209,6 @@ const Header = styled.div`
    justify-content: space-between;
    align-items: center;
    margin-bottom: 30px;
-   h3 {
-      font-size: 20px;
-      font-weight: 300;
-   }
 `
 
 const Button = styled.button`
@@ -159,9 +235,8 @@ const DayBox = styled.div`
    border-radius: 5px;
    cursor: pointer;
    text-align: center;
-   background: ${({ selected }) => (selected ? '#e66900' : '#f9f9f9')};
+   background: ${({ selected }) => (selected ? '#e66900 !important' : '#f9f9f9')};
    color: ${({ selected }) => (selected ? 'white' : '#666')};
-
    &:hover {
       background: #ffa654;
    }
@@ -172,29 +247,24 @@ const ScheduleList = styled.div`
    display: flex;
    flex-direction: column;
    gap: 4px;
+   color: #666 !important;
 `
 
 const ScheduleItem = styled.div`
-   font-size: 12px;
-   color: ${({ selected }) => (selected ? 'white' : 'black')};
+   display: flex;
+   justify-content: space-between;
+   padding: 5px;
+   background: ${({ isEditing }) => (isEditing ? '#ffe0b2' : '#f9f9f9')}; // 수정 중일 때 배경색 변경
+   border-radius: 5px;
+   transition: background 0.3s ease;
 `
 
-const ScheduleText = styled.span`
-   cursor: pointer;
-   padding: 2px 4px;
-   border-radius: 3px;
-   &:hover {
-      background: rgba(0, 0, 0, 0.1);
-   }
-`
-
-const ScheduleInput = styled.input`
-   font-size: 12px;
-   padding: 2px;
+const DeleteButton = styled.button`
+   background: none;
    border: none;
-   border-radius: 3px;
-   outline: none;
-   width: 100%;
+   color: red;
+   cursor: pointer;
+   font-size: 12px;
 `
 
 const ScheduleInputSection = styled.div`
@@ -212,7 +282,7 @@ const Input = styled.input`
    border-radius: 5px;
    outline: none;
    &:focus {
-      border-color: #ff7a00; /* 포커스 시 테두리 색 변경 */
+      border-color: #ff7a00;
    }
 `
 
@@ -235,12 +305,11 @@ const ErrorText = styled.p`
 `
 
 const StyledLeftIcon = styled(AiOutlineLeft)`
-   font-size: 24px; /* 원하는 크기로 설정 */
+   font-size: 24px;
 `
 
 const StyledRightIcon = styled(AiOutlineRight)`
    font-size: 24px;
 `
-/* 글자수 초과 오류문구 가끔 안뜨는데 계속 그러면 코드 수정하겟음다.LEE  */
 
 export default WeeklyCalendar

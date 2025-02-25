@@ -1,50 +1,76 @@
-import React, { useState } from 'react'
+/* 화살표 사용 해서 일주일(월~일)까지만 넘길 수 있게  */
+
+import React, { useState, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { format, addDays, subDays } from 'date-fns'
 import { AiOutlineLeft, AiOutlineRight } from 'react-icons/ai' // ⬅️ 아이콘 추가
 import { FiX } from 'react-icons/fi'
 
-const MAX_LENGTH = 10 // ⬅️ 일정 최대 글자 수
-const MAX_TODOS = 4 // ⬅️ 하루 최대 일정 개수
+import { fetchGoals, addGoalAsync, updateGoalAsync, deleteGoalAsync } from '../../features/goalsSlice'
+
+const MAX_LENGTH = 10 // 일정 최대 글자 수
+const MAX_TODOS = 4 // 하루 최대 일정 개수
+
+const DAYS = ['sunGoal', 'monGoal', 'tueGoal', 'wedGoal', 'thuGoal', 'friGoal', 'satGoal']
 
 const CalendarTodo = () => {
-   const [selectedDate, setSelectedDate] = useState(new Date())
-   const [todos, setTodos] = useState({})
-   const [input, setInput] = useState('')
-   const [error, setError] = useState('')
+   const dispatch = useDispatch()
+   const { goals, loading, error } = useSelector((state) => state.goals || { goals: [] })
 
-   const dateKey = format(selectedDate, 'yyyy-MM-dd')
+   const [selectedDate, setSelectedDate] = useState(new Date())
+   const [input, setInput] = useState('')
+   const [errorMsg, setErrorMsg] = useState('')
+
+   useEffect(() => {
+      dispatch(fetchGoals()) // ✅ 서버에서 목표 데이터 가져오기
+   }, [dispatch])
+
+   const currentDayIndex = selectedDate.getDay() // 0: 일요일, 1: 월요일, ..., 6: 토요일
+   const currentDayGoalKey = DAYS[currentDayIndex] // ex) 월요일이면 'monGoal'
+   const todayGoal = goals.filter((goal) => goal[currentDayGoalKey]) // ✅ 해당 요일 목표 전체 가져오기
+   const currentTodos = todayGoal.map((goal) => goal[currentDayGoalKey]) // ✅ 여러 개의 목표 리스트로 변환
 
    const handleAddTodo = () => {
       if (!input.trim()) return
 
       if (input.length > MAX_LENGTH) {
-         setError('최대 10자까지 입력 가능합니다.') // ⬅️ 글자 수 초과 경고
+         setErrorMsg('최대 10자까지 입력 가능합니다.')
          return
       }
 
-      const currentTodos = todos[dateKey] || []
       if (currentTodos.length >= MAX_TODOS) {
-         setError(`하루에 최대 ${MAX_TODOS}개까지 입력 가능합니다.`)
+         setErrorMsg(`하루에 최대 ${MAX_TODOS}개까지 입력 가능합니다.`)
          return
       }
 
-      setTodos({
-         ...todos,
-         [dateKey]: [...currentTodos, { text: input, completed: false }],
-      })
+      const newGoal = { [currentDayGoalKey]: input } // ✅ 요일별 필드만 포함
+
+      if (todayGoal && todayGoal.id) {
+         dispatch(updateGoalAsync({ id: todayGoal.id, updatedGoal: newGoal })) // ✅ 기존 목표 업데이트
+      } else {
+         dispatch(addGoalAsync(newGoal)) // ✅ 목표가 없으면 새로 추가
+      }
+
       setInput('')
-      setError('')
+      setErrorMsg('')
    }
 
-   const handleToggleTodo = (index) => {
-      const updatedTodos = todos[dateKey].map((todo, i) => (i === index ? { ...todo, completed: !todo.completed } : todo))
-      setTodos({ ...todos, [dateKey]: updatedTodos })
+   const handleToggleTodo = (id) => {
+      const updatedGoal = todayGoal.find((goal) => goal.id === id)
+
+      if (!updatedGoal) return
+
+      const newGoal = {
+         ...updatedGoal,
+         completed: !updatedGoal.completed, // ✅ 완료 상태 토글
+      }
+
+      dispatch(updateGoalAsync({ id, updatedGoal: newGoal }))
    }
 
-   const handleDeleteTodo = (index) => {
-      const updatedTodos = todos[dateKey].filter((_, i) => i !== index)
-      setTodos({ ...todos, [dateKey]: updatedTodos })
+   const handleDeleteTodo = (id) => {
+      dispatch(deleteGoalAsync(id)) // ✅ 특정 목표만 삭제하도록 수정
    }
 
    return (
@@ -53,7 +79,9 @@ const CalendarTodo = () => {
             <NavButton onClick={() => setSelectedDate(subDays(selectedDate, 1))}>
                <AiOutlineLeft />
             </NavButton>
-            <DateDisplay>{format(selectedDate, 'yyyy년 MM월 dd일')}</DateDisplay>
+            <DateDisplay>
+               {format(selectedDate, 'yyyy년 MM월 dd일')} ({['일', '월', '화', '수', '목', '금', '토'][currentDayIndex]})
+            </DateDisplay>
             <NavButton onClick={() => setSelectedDate(addDays(selectedDate, 1))}>
                <AiOutlineRight />
             </NavButton>
@@ -65,37 +93,42 @@ const CalendarTodo = () => {
                   type="text"
                   placeholder="할 일 입력 (최대 10자)"
                   value={input}
-                  maxLength={MAX_LENGTH} // ✅ HTML 속성도 유지
+                  maxLength={MAX_LENGTH}
                   onChange={(e) => {
                      const value = e.target.value
-
                      if (value.length > MAX_LENGTH) {
-                        setError(`최대 ${MAX_LENGTH}자까지만 입력할 수 있습니다.`)
-                        return // ✅ 입력값을 강제로 변경하지 않고, 초과 입력 자체를 막음
+                        setErrorMsg(`최대 ${MAX_LENGTH}자까지만 입력할 수 있습니다.`)
+                        return
                      }
-
                      setInput(value)
-                     setError('') // ✅ 정상 입력이면 오류 제거
+                     setErrorMsg('')
                   }}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddTodo()}
                />
-               {error && <ErrorText>{error}</ErrorText>} {/* ⬅️ 빨간색 경고 문구 표시 */}
+               {errorMsg && <ErrorText>{errorMsg}</ErrorText>}
             </InputWrapper>
             <AddButton onClick={handleAddTodo}>추가</AddButton>
          </InputSection>
 
+         {loading && <p>로딩 중...</p>}
+         {error && <p>에러 발생: {error}</p>}
+
          <List>
-            {(todos[dateKey] || []).map((todo, index) => (
-               <TodoItem key={index}>
-                  <TodoText onClick={() => handleToggleTodo(index)} $completed={todo.completed}>
-                     {todo.text}
-                  </TodoText>
-                  <DeleteButton onClick={() => handleDeleteTodo(index)}>
-                     {' '}
-                     <FiX />
-                  </DeleteButton>
-               </TodoItem>
-            ))}
+            {currentTodos.length > 0 ? (
+               todayGoal.map((goal) => (
+                  <TodoItem key={goal.id}>
+                     <TodoText onClick={() => handleToggleTodo(goal.id)} $completed={goal.completed}>
+                        {goal[currentDayGoalKey]}
+                     </TodoText>
+
+                     <DeleteButton onClick={() => handleDeleteTodo(goal.id)}>
+                        <FiX />
+                     </DeleteButton>
+                  </TodoItem>
+               ))
+            ) : (
+               <p>데이터가 없습니다.</p>
+            )}
          </List>
       </Container>
    )
