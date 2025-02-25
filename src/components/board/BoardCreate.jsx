@@ -1,26 +1,28 @@
 /* 사이드바 눌렀을때 각각의 리스트로 가야함 */
-
 import React, { useState, useEffect, useCallback } from 'react'
 import styled from 'styled-components'
 import { TextField, Button, Typography } from '@mui/material'
 import { createPostThunk, updatePostThunk } from '../../features/postSlice'
+import { useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
-const CreateBoard = ({ user, category, selectedCategory, onSubmit, post = null }) => {
-   // ✅ category를 props로 받음
+const BoardCreate = ({ user, category, selectedCategory, onSubmit, post = null }) => {
+   const dispatch = useDispatch()
+   const navigate = useNavigate()
    const [title, setTitle] = useState('')
    const [content, setContent] = useState('')
    const [images, setImages] = useState([])
    const [imageFiles, setImageFiles] = useState([])
    const [titleError, setTitleError] = useState(false)
 
-   /*   useEffect(() => {
+   // 기존 게시글이 있다면 (수정 모드), 초기값 설정
+   useEffect(() => {
       if (post) {
          setTitle(post.title)
          setContent(post.content)
          setImages(post.images || [])
       }
    }, [post])
- */
 
    const handleTitleChange = (e) => {
       const inputValue = e.target.value
@@ -41,54 +43,42 @@ const CreateBoard = ({ user, category, selectedCategory, onSubmit, post = null }
       }
    }
 
-   const handleSubmit = useCallback(
-      (e) => {
-         if (!title.trim() || !content.trim()) {
-            alert('제목과 내용을 입력해주세요!')
-            return
-         }
+   const handleSubmit = useCallback(() => {
+      if (!title.trim() || !content.trim()) {
+         alert('제목과 내용을 입력해주세요!')
+         return
+      }
 
-         const formData = new FormData()
-         formData.append('title', title)
-         formData.append('content', content)
-         formData.append('category', selectedCategory)
-         imageFiles.forEach((file) => {
-            formData.append('images', file)
-         })
-         onSubmit(formData)
+      const formData = new FormData()
+      formData.append('title', title)
+      formData.append('content', content)
+      formData.append('category', selectedCategory)
+      imageFiles.forEach((file) => {
+         formData.append('images', file)
+      })
 
-         //   console.log('🔥 FormData 확인:', [...formData.entries()])
-
-         /*     if (post) {
+      if (post) {
+         // 게시글 수정 모드
          dispatch(updatePostThunk({ id: post.id, postData: formData }))
             .unwrap()
             .then(() => {
                alert('게시글이 수정되었습니다!')
+               navigate(`/board/detail/${post.id}`)
             })
             .catch((error) => {
                console.error('게시글 수정 실패:', error)
                alert(`게시글 수정 실패: ${error?.message || '알 수 없는 오류'}`)
             })
       } else {
-         dispatch(createPostThunk(formData))
-            .unwrap()
-            .then(() => {
-               alert('게시글이 등록되었습니다!')
-            })
-            .catch((error) => {
-               console.error('게시글 등록 실패:', error)
-               alert(`게시글 등록 실패: ${error?.message || '알 수 없는 오류'}`)
-            })
-      } */
-      },
-      [title, content, selectedCategory, imageFiles, onSubmit]
-   )
+         // 새 게시글 작성 모드
+         onSubmit(formData)
+      }
+   }, [title, content, selectedCategory, imageFiles, onSubmit, post, dispatch, navigate])
 
    return (
       <Container>
-         {/* ✅ BoardList와 동일한 제목 스타일 적용 */}
          <Header>
-            <Title>{category} 게시판</Title> {/* ✅ category를 적용 */}
+            <Title>{category} 게시판</Title>
          </Header>
 
          <FormGroup>
@@ -120,12 +110,12 @@ const CreateBoard = ({ user, category, selectedCategory, onSubmit, post = null }
             <SubmitButton onClick={handleSubmit}>{post ? '수정하기' : '글쓰기'}</SubmitButton>
          </ButtonContainer>
 
-         <BackButton>← 뒤로가기</BackButton>
+         <BackButton onClick={() => navigate(-1)}>← 뒤로가기</BackButton>
       </Container>
    )
 }
 
-export default CreateBoard
+export default BoardCreate
 
 //
 // Styled Components (BoardList와 동일한 스타일 적용)
