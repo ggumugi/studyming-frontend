@@ -20,8 +20,6 @@ const QaBoardtDetail = ({ post, onBack }) => {
    const { postId } = useParams()
    console.log('✅ 현재 postId:', postId)
 
-   const updatedPost = useSelector((state) => state.posts.posts.find((p) => p.id === parseInt(postId))) || post
-
    useEffect(() => {
       if (postId) {
          dispatch(fetchPostsThunk({ page: 1 }))
@@ -39,6 +37,7 @@ const QaBoardtDetail = ({ post, onBack }) => {
       }
    }
 
+   //댓글추가
    const handleAddComment = () => {
       if (!postId) {
          console.error('❌ 오류: postId가 정의되지 않음')
@@ -64,7 +63,7 @@ const QaBoardtDetail = ({ post, onBack }) => {
 
    // ✅ 목록 버튼 클릭 시 목록 페이지로 이동
    const handleBackToList = () => {
-      navigate('/board/qna') // ✅ 게시판 목록으로 이동
+      navigate('/board') // ✅ 게시판 목록으로 이동
    }
 
    return (
@@ -72,7 +71,7 @@ const QaBoardtDetail = ({ post, onBack }) => {
          <Paper elevation={0} sx={{ padding: '10px', margin: '20px auto', maxWidth: '100%', paddingLeft: '100px', borderBottom: '2px solid rgba(255, 122, 0, 0.5)' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                <Typography variant="body1" gutterBottom>
-                  {updatedPost?.title || '제목 없음'}
+                  {post?.title || '제목 없음'}
                </Typography>
                <Box sx={{ display: 'flex', gap: '10px' }}>
                   <Button variant="contained" sx={{ borderRadius: '20px', backgroundColor: '#FFCC99', color: '#fff', '&:hover': { backgroundColor: '#FFB266' } }}>
@@ -84,13 +83,13 @@ const QaBoardtDetail = ({ post, onBack }) => {
                </Box>
             </Box>
             <Typography variant="subtitle1" color="textSecondary" align="right" sx={{ paddingTop: '20px' }}>
-               작성자: {updatedPost?.author || '알 수 없음'} | {updatedPost?.date || '날짜 없음'}
+               작성자: {post?.author || '알 수 없음'} | {post?.date || '날짜 없음'}
             </Typography>
          </Paper>
 
          <Paper sx={{ padding: '20px', margin: '20px auto', maxWidth: '100%', paddingLeft: '100px' }}>
             <Typography variant="body1" sx={{ height: '40px' }}>
-               {updatedPost?.content || '내용 없음'}
+               {post?.content || '내용 없음'}
             </Typography>
 
             <Box sx={{ display: 'flex', alignItems: 'center', position: 'relative', marginTop: '20px' }}>
