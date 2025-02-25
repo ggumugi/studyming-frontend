@@ -81,22 +81,21 @@ function App() {
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/find/id" element={<FindIdPage />} />
             <Route path="/find/password" element={<FindPasswordPage />} />
+
             <Route path="/board" element={<BoardListPage isAuthenticated={isAuthenticated} user={user} />} />
             <Route path="/board/create" element={<BoardCreatePage isAuthenticated={isAuthenticated} user={user} />} />
-            {/* ✅ 카테고리별 게시글 상세 페이지 */}
-<<<<<<< HEAD
+
+            {/* ✅ 카테고리별 게시글 상세 페이지 
             <Route path="/board/qna/:postId" element={<QaBoardtDetail />} />
             <Route path="/board/free/:postId" element={<FreePostDetail />} />
             <Route path="/board/inquiry/:postId" element={<InquiryBoardDetail />} />
-            <Route path="/board/noti/:postId" element={<NotiBoardDetail />} /> {/* ✅ Noti는 관리자 전용 */}
+            <Route path="/board/noti/:postId" element={<NotiBoardDetail />} /> {/* ✅ Noti는 관리자 전용 
             <Route path="/board/edit/:id" element={<BoardEditPage />} />
-=======
             <Route path="/board/detail/:postId" element={<QaBoardtDetail />} />
             <Route path="/board/detail/:postId" element={<FreePostDetail />} />
             <Route path="/board/detail/:postId" element={<InquiryBoardDetail />} />
-            <Route path="/board/detail/:postId" element={<NotiBoardDetail />} /> {/* ✅ Noti는 관리자 전용 */}
-            {/* <Route path="/board/edit/:id" element={<BoardEditPage />} /> */}
->>>>>>> 0d2d7ec288c2dbfd31660aab37d7340c4ef96065
+            <Route path="/board/detail/:postId" element={<NotiBoardDetail />} /> ✅ Noti는 관리자 전용*/}
+            <Route path="/board/edit/:id" element={<BoardEditPage />} />
             <Route path="/board/detail/:id" element={<BoardDetailPage />} />
             <Route path="/mypage" element={<MyPage isAuthenticated={isAuthenticated} user={user} />} />
             <Route path="/studygroup/:id" element={<StudyGroupPage isAuthenticated={isAuthenticated} user={user} />} />

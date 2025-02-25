@@ -7,7 +7,7 @@ import styled from 'styled-components'
 
 import { fetchPostsThunk, deletePostThunk, fetchPostByIdThunk } from '../../features/postSlice'
 
-const BoardDetail = ({ category }) => {
+const BoardDetail = () => {
    const dispatch = useDispatch()
    const navigate = useNavigate()
    const { id } = useParams() // ✅ URL에서 postId 가져오기
@@ -21,20 +21,10 @@ const BoardDetail = ({ category }) => {
    const [newComment, setNewComment] = useState('')
 
    useEffect(() => {
-      dispatch(fetchPostsThunk({ category }, [dispatch, category]))
-   })
-
-   const handleSearch = () => {
-      dispatch(fetchPostsThunk({ category }))
-   }
-
-   // ✅ useEffect는 항상 최상위에서 호출되어야 함
-   useEffect(() => {
-      dispatch(fetchPostsThunk({ page: 1 })) // ✅ 게시글 목록 불러오기
       if (id) {
-         dispatch(fetchPostByIdThunk(id)) // ✅ 특정 게시글 불러오기
+         dispatch(fetchPostByIdThunk(id))
       }
-   }, [dispatch, id]) // ✅ 하나의 useEffect 안에서 처리
+   }, [dispatch, id])
 
    if (!post) return <p>게시글을 불러오는 중...</p>
 
@@ -75,7 +65,7 @@ const BoardDetail = ({ category }) => {
    return (
       <Container>
          <Header>
-            <Title>{category}게시판</Title>
+            <Title>{}게시판</Title>
          </Header>
          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <Label>{post.title}</Label>
