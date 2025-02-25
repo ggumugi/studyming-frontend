@@ -1,30 +1,60 @@
-import React from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import io from 'socket.io-client'
 import styled from 'styled-components'
 
-// 🔥 Mock 데이터 (더미 데이터, 추후 백엔드 데이터로 대체 가능)
-const mockScreens = [
-   { id: 1, nickname: '사용자1', screenUrl: '/img/camTest1.png' },
-   { id: 2, nickname: '사자2', screenUrl: '/img/camTest2.png' },
-   { id: 3, nickname: '사용자3', screenUrl: '/img/camTest3.png' },
-   { id: 4, nickname: '사용자4', screenUrl: '/img/camTest.png' },
-   { id: 5, nickname: '사용자5', screenUrl: '/img/camTest.png' },
-   { id: 6, nickname: '사용자6dd', screenUrl: '/img/camTest.png' },
-]
+const socket = io('http://localhost:3000') // 서버 주소
 
-const ScreenShare = () => {
+const Cam = ({ groupmembers }) => {
+   const [streams, setStreams] = useState([])
+   const videoRefs = useRef([])
+
+   useEffect(() => {
+      const startCam = async () => {
+         try {
+            // 1. 웹캠 스트림 가져오기
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+            setStreams((prevStreams) => [...prevStreams, { id: socket.id, stream }])
+
+            // 2. 각 그룹 멤버에 대해 비디오 요소에 스트림 할당
+            groupmembers.forEach((member) => {
+               const video = videoRefs.current[member.id]
+               if (video) {
+                  video.srcObject = stream
+               }
+            })
+         } catch (err) {
+            console.error('웹캠 접근 실패: ', err)
+         }
+      }
+
+      startCam()
+
+      // 컴포넌트 언마운트 시 정리
+      return () => {
+         streams.forEach(({ stream }) => {
+            stream.getTracks().forEach((track) => track.stop())
+         })
+      }
+   }, [groupmembers])
+
    return (
       <Container>
-         {mockScreens.map((screen) => (
-            <ScreenBox key={screen.id}>
-               <ScreenImage src={screen.screenUrl} alt={`${screen.nickname}의 화면`} />
-               <Nickname>{screen.nickname}</Nickname>
+         {groupmembers.map((member) => (
+            <ScreenBox key={member.id}>
+               <ScreenVideo
+                  autoPlay
+                  ref={(video) => {
+                     videoRefs.current[member.id] = video
+                  }}
+               />
+               <Nickname>{member.User.nickname}</Nickname>
             </ScreenBox>
          ))}
       </Container>
    )
 }
 
-export default ScreenShare
+export default Cam
 
 // ⭐ Styled Components
 const Container = styled.div`
@@ -48,7 +78,7 @@ const ScreenBox = styled.div`
    background-color: #000;
 `
 
-const ScreenImage = styled.img`
+const ScreenVideo = styled.video`
    width: 100%;
    max-width: 750px;
    height: auto;

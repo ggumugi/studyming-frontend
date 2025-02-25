@@ -25,7 +25,6 @@ export const createStudygroupThunk = createAsyncThunk('studygroups/create', asyn
 export const fetchStudygroupByIdThunk = createAsyncThunk('studygroups/fetchStudygroupById', async (id, { rejectWithValue }) => {
    try {
       const response = await getStudygroupById(id)
-      console.log('📢 API 응답 데이터:', response.data) // 🔥 응답 데이터 확인
       return response.data
       //  return {
       //     id: response.data.studygroup.id,
