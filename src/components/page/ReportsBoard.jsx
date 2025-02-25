@@ -1,39 +1,50 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Select, MenuItem, Button, Pagination } from '@mui/material'
-
-const reportsData = [
-   { id: 1, reportedUser: '현수박박박박', reporter: '희경이이이', reason: '명예훼손 또는 저작권이 침해되었습니다.', banPeriod: '없음' },
-   { id: 2, reportedUser: '강원식', reporter: '이경희', reason: '불쾌한 표현이 있습니다', banPeriod: '없음' },
-   { id: 3, reportedUser: '박현수', reporter: '이경희', reason: '음란물입니다', banPeriod: '없음' },
-   { id: 4, reportedUser: '식원강', reporter: '박지우', reason: '스팸홍보/도배입니다', banPeriod: '없음' },
-   { id: 5, reportedUser: '수현박', reporter: '박지우', reason: '욕설/생명경시/혐오/차별적 표현입니다', banPeriod: '없음' },
-   { id: 6, reportedUser: '강원식', reporter: '이경희', reason: '그냥', banPeriod: '없음' },
-   { id: 7, reportedUser: '박현수', reporter: '이경희', reason: '그냥', banPeriod: '없음' },
-   { id: 8, reportedUser: '강원식', reporter: '박지우', reason: '담배충임', banPeriod: '없음' },
-   { id: 9, reportedUser: '박현수', reporter: '박지우', reason: '아재개그충임', banPeriod: '없음' },
-]
+import { getReports, applyBan } from '../../features/bannedSlice'
+import { useDispatch, useSelector } from 'react-redux'
 
 const ReportsBoard = () => {
-   const [reports, setReports] = useState(reportsData)
+   const dispatch = useDispatch()
+   const { reports, loading, error } = useSelector((state) => state.banned)
    const [page, setPage] = useState(1)
    const [rowsPerPage] = useState(8)
    const [searchQuery, setSearchQuery] = useState('')
    const [filter, setFilter] = useState('reportedUser')
-
+   const [banPeriods, setBanPeriods] = useState({})
+   console.log(reports)
    // 페이지네이션 변경
 
+   useEffect(() => {
+      dispatch(getReports()) // ✅ 신고 목록 불러오기
+   }, [dispatch])
    // 정지 기간 변경
    const handleBanChange = (id, value) => {
-      setReports((prev) => prev.map((report) => (report.id === id ? { ...report, banPeriod: value } : report)))
+      setBanPeriods((prev) => ({ ...prev, [id]: value }))
    }
 
    // 적용 버튼 클릭 시 알림
-   const handleApply = (id, reportedUser) => {
-      alert(`신고된 회원: ${reportedUser}, 정지 기간 적용: ${reports.find((r) => r.id === id)?.banPeriod}`)
+   const handleApply = (reportId, reportedUser) => {
+      const banDays = banPeriods[reportId]
+      if (!banDays || banDays === '없음') {
+         alert('정지 기간을 선택해주세요!')
+         return
+      }
+
+      dispatch(applyBan({ reportId, adminId: 1, banDays }))
+         .then((res) => {
+            alert(res.payload.message) // ✅ 벤 적용 응답 메시지를 출력하여 undefined 문제 해결
+            dispatch(getReports())
+         })
+         .catch((error) => console.error('❌ 벤 적용 실패:', error))
    }
 
-   // 검색 필터링
-   const filteredReports = reports.filter((report) => report[filter]?.toLowerCase().includes(searchQuery.toLowerCase()))
+   // 검색 필터링 (닉네임 데이터가 `ReportedUser.nickname`에 있으므로 수정)
+   const filteredReports = reports.filter((report) => {
+      if (filter === 'reportedUser') return report.ReportedUser.nickname.toLowerCase().includes(searchQuery.toLowerCase())
+      if (filter === 'reporter') return report.ReportedBy.nickname.toLowerCase().includes(searchQuery.toLowerCase())
+      if (filter === 'reason') return report.reason.toLowerCase().includes(searchQuery.toLowerCase())
+      return false
+   })
 
    // 페이지네이션 적용
    const paginatedReports = filteredReports.slice((page - 1) * rowsPerPage, page * rowsPerPage)
@@ -66,11 +77,11 @@ const ReportsBoard = () => {
                   {paginatedReports.map((row) => (
                      <TableRow key={row.id}>
                         <TableCell sx={{ width: '10%', textAlign: 'center', height: '64px' }}>{row.id}</TableCell>
-                        <TableCell sx={{ width: '15%', textAlign: 'center' }}>{row.reportedUser}</TableCell>
-                        <TableCell sx={{ width: '15%', textAlign: 'center' }}>{row.reporter}</TableCell>
+                        <TableCell sx={{ width: '15%', textAlign: 'center' }}>{row.ReportedUser.nickname}</TableCell>
+                        <TableCell sx={{ width: '15%', textAlign: 'center' }}>{row.ReportedBy.nickname}</TableCell>
                         <TableCell sx={{ width: '40%', textAlign: 'center' }}>{row.reason}</TableCell>
                         <TableCell sx={{ width: '20%', textAlign: 'center' }}>
-                           <Select value={row.banPeriod} onChange={(e) => handleBanChange(row.id, e.target.value)} displayEmpty sx={{ width: '100px', height: '30px', fontSize: '14px', textAlign: 'center', marginRight: '10px' }}>
+                           <Select value={banPeriods[row.id] || '없음'} onChange={(e) => handleBanChange(row.id, e.target.value)} displayEmpty sx={{ width: '100px', height: '30px', fontSize: '14px', textAlign: 'center', marginRight: '10px' }}>
                               <MenuItem value="없음">없음</MenuItem>
                               <MenuItem value="7일">7일</MenuItem>
                               <MenuItem value="14일">14일</MenuItem>

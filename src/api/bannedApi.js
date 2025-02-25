@@ -3,10 +3,15 @@ import studymingApi from './axiosApi'
 // ✅ 신고하기 API
 export const reportUser = async (reportedUserId, reporterId, reason) => {
    try {
+      if (!reportedUserId || !reporterId || !reason) {
+         throw new Error('신고 요청에 필요한 값이 누락되었습니다.')
+      }
+
       const response = await studymingApi.post('/banned/report', { reportedUserId, reporterId, reason })
       return response.data
    } catch (error) {
-      throw error.response?.data || '신고 요청 실패'
+      console.error('❌ 신고 요청 실패:', error.response?.data || error.message)
+      throw error.response?.data || { message: '신고 요청 실패' }
    }
 }
 
@@ -30,13 +35,25 @@ export const banUser = async (reportId, adminId, banDays) => {
    }
 }
 
+// ✅ 벤 기간 변경 API
+export const updateBanPeriod = async (userId, newEndDate) => {
+   try {
+      const response = await studymingApi.put('/banned/updateban', { userId, newEndDate })
+      return response.data
+   } catch (error) {
+      throw error.response?.data || '정지 기간 변경 실패'
+   }
+}
+
 // ✅ 벤 목록 불러오기 API
 export const fetchBannedUsers = async () => {
    try {
-      const response = await studymingApi.get('/banned/banned-users')
+      const response = await studymingApi.get('/banned/bannedusers')
+      console.log('🚀 Banned Users Fetched:', response.data) // ✅ 데이터 확인 로그
       return response.data
    } catch (error) {
-      throw error.response?.data || '벤 목록 불러오기 실패'
+      console.error('❌ 정지된 유저 목록 불러오기 실패:', error)
+      throw error.response?.data || '정지된 유저 목록 불러오기 실패'
    }
 }
 

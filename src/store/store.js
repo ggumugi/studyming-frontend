@@ -13,7 +13,10 @@ import conmmetReducer from '../features/commentSlice'
 import bannedReducer from '../features/bannedSlice'
 import adminpostReducer from '../features/adminpostSlice'
 import studyLikeSliceReducer from '../features/likedSlice'
+<<<<<<< HEAD
+=======
 import groupmemberSliceReducer from '../features/groupmemberSlice'
+>>>>>>> eb94bd8898fd1e10ad8ac95c3d6b17672dbc94fc
 
 const store = configureStore({
    reducer: {
@@ -30,7 +33,10 @@ const store = configureStore({
       banned: bannedReducer,
       adminpost: adminpostReducer,
       studyLike: studyLikeSliceReducer,
+<<<<<<< HEAD
+=======
       groupmembers: groupmemberSliceReducer,
+>>>>>>> eb94bd8898fd1e10ad8ac95c3d6b17672dbc94fc
    },
 })
 

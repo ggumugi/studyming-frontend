@@ -42,7 +42,7 @@ const BoardList = ({ category }) => {
          {/* ✅ 게시판 제목 + 글쓰기 버튼 */}
          <Header>
             <Title>{reverseCategoryMap[category]} 게시판</Title> {/* ✅ 한글 변환하여 표시 */}
-            <WriteButton onClick={() => navigate(`/board/${category}/create`)}>글쓰기</WriteButton> {/* ✅ 선택된 카테고리에 맞게 이동 */}
+            <WriteButton onClick={() => navigate(`/board/create`)}>글쓰기</WriteButton> {/* ✅ 선택된 카테고리에 맞게 이동 */}
          </Header>
 
          {loading ? (
@@ -61,7 +61,7 @@ const BoardList = ({ category }) => {
                      </TableHead>
                      <TableBody>
                         {posts.map((post) => (
-                           <StyledTableRow key={post.id} onClick={() => navigate(`/board/${category}/detail/${post.id}`)} style={{ cursor: 'pointer' }}>
+                           <StyledTableRow key={post.id} onClick={() => navigate(`/board/detail/${post.id}`)} style={{ cursor: 'pointer' }}>
                               {/* ✅ 카테고리를 포함한 URL로 이동 */}
                               <StyledTableCell>{post.id}</StyledTableCell>
                               <StyledTableCell>{post.title}</StyledTableCell>

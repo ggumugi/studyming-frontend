@@ -18,8 +18,8 @@ export const toggleStudyLikeThunk = createAsyncThunk('studyLike/toggle', async (
  */
 export const fetchStudyLikesThunk = createAsyncThunk('studyLike/fetchLikes', async (groupId, { rejectWithValue }) => {
    try {
-      const response = await getStudyLikes(groupId)
-      return response.liked //  서버에서 받아온 좋아요 개수 반환
+      const response = await getStudyLikes(groupId) // 🚨 API 함수에서 호출하는 엔드포인트 확인 필요
+      return response.likeCount // ✅ `liked` → `likeCount`으로 변경
    } catch (error) {
       return rejectWithValue(error.response?.data?.message || '좋아요 개수 조회 실패')
    }
