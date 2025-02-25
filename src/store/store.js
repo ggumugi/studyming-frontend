@@ -13,6 +13,7 @@ import conmmetReducer from '../features/commentSlice'
 import bannedReducer from '../features/bannedSlice'
 import adminpostReducer from '../features/adminpostSlice'
 import studyLikeSliceReducer from '../features/likedSlice'
+import groupmemberSliceReducer from '../features/groupmemberSlice'
 
 const store = configureStore({
    reducer: {
@@ -29,6 +30,7 @@ const store = configureStore({
       banned: bannedReducer,
       adminpost: adminpostReducer,
       studyLike: studyLikeSliceReducer,
+      groupmembers: groupmemberSliceReducer,
    },
 })
 

@@ -84,6 +84,7 @@ function App() {
 
             <Route path="/board" element={<BoardListPage isAuthenticated={isAuthenticated} user={user} />} />
             <Route path="/board/create" element={<BoardCreatePage isAuthenticated={isAuthenticated} user={user} />} />
+<<<<<<< HEAD
 
             {/* ✅ 카테고리별 게시글 상세 페이지 
             <Route path="/board/qna/:postId" element={<QaBoardtDetail />} />
@@ -96,6 +97,14 @@ function App() {
             <Route path="/board/detail/:postId" element={<InquiryBoardDetail />} />
             <Route path="/board/detail/:postId" element={<NotiBoardDetail />} /> ✅ Noti는 관리자 전용*/}
             <Route path="/board/edit/:id" element={<BoardEditPage />} />
+=======
+            {/* ✅ 카테고리별 게시글 상세 페이지 */}
+            {/* <Route path="/board/detail/:postId" element={<QaBoardtDetail />} />
+            <Route path="/board/detail/:postId" element={<FreePostDetail />} />
+            <Route path="/board/detail/:postId" element={<InquiryBoardDetail />} />
+            <Route path="/board/detail/:postId" element={<NotiBoardDetail />} /> {/* ✅ Noti는 관리자 전용 */}
+            {/* <Route path="/board/edit/:id" element={<BoardEditPage />} /> */}
+>>>>>>> 6ad599dbae403dc7a3375b319cf3c6e470eab509
             <Route path="/board/detail/:id" element={<BoardDetailPage />} />
             <Route path="/mypage" element={<MyPage isAuthenticated={isAuthenticated} user={user} />} />
             <Route path="/studygroup/:id" element={<StudyGroupPage isAuthenticated={isAuthenticated} user={user} />} />
