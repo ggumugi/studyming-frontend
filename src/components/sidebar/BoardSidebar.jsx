@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { setCategory } from '../../features/postSlice' // ✅ Redux 액션 임포트
 
 // 한글 카테고리 <-> 백엔드 enum 매핑
 const categoryMap = {
@@ -18,11 +19,12 @@ const reverseCategoryMap = {
 }
 
 const BoardSidebar = () => {
-   const navigate = useNavigate()
-   const { category } = useParams() // ✅ URL에서 현재 카테고리 가져오기
+   const dispatch = useDispatch()
+   const selectedCategory = useSelector((state) => state.posts.category)
 
-   const handleCategoryClick = (selectedCategory) => {
-      navigate(`/board/${categoryMap[selectedCategory]}`) // ✅ 선택된 카테고리를 백엔드 enum 값으로 변환 후 이동
+   const handleCategoryClick = (category) => {
+      const backendCategory = categoryMap[category]
+      dispatch(setCategory(backendCategory)) // ✅ Redux 상태 업데이트
    }
 
    return (
@@ -30,9 +32,9 @@ const BoardSidebar = () => {
          <SidebarContainer>
             <MenuList>
                {Object.keys(categoryMap).map((item) => (
-                  <MenuItem key={item} $isActive={categoryMap[item] === category} onClick={() => handleCategoryClick(item)}>
+                  <MenuItem key={item} $isActive={categoryMap[item] === selectedCategory} onClick={() => handleCategoryClick(item)}>
                      <StyledButton>{item}</StyledButton>
-                     {categoryMap[item] === category && <ActiveIndicator />}
+                     {categoryMap[item] === selectedCategory && <ActiveIndicator />}
                   </MenuItem>
                ))}
             </MenuList>
@@ -67,7 +69,7 @@ const MenuList = styled.ul`
    display: flex;
    flex-direction: column;
    align-items: flex-end;
-   gap: 70px; /* ✅ 메뉴 간 간격 */
+   gap: 70px;
 `
 
 const MenuItem = styled.li`
@@ -93,7 +95,7 @@ const StyledButton = styled.button`
 
 const ActiveIndicator = styled.div`
    position: absolute;
-   right: -44px; /* ✅ 오른쪽에 동그라미 위치 */
+   right: -44px;
    width: 8px;
    height: 8px;
    background-color: #ff7f00;

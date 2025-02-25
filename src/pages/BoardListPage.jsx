@@ -1,28 +1,21 @@
-/* import BoardSidebar from '../components/sidebar/BoardSidebar'
-import { BrowserRouter } from 'react-router-dom'
-
-function BoardListPage({ isAuthenticated, user }) {
-   return (
-      <>
-         <BoardSidebar isAuthenticated={isAuthenticated} user={user} />
-      </>
-   )
-}
-
-export default BoardListPage
- */
-
-import { useState } from 'react'
+import { useCallback, useState, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import BoardSidebar from '../components/sidebar/BoardSidebar'
 import BoardList from '../components/board/BoardList'
+import { fetchPostsThunk } from '../features/postSlice'
 
 function BoardListPage() {
-   const [selectedCategory, setSelectedCategory] = useState('자유') // 기본 선택 카테고리
+   const dispatch = useDispatch()
+   const category = useSelector((state) => state.posts.category)
+
+   useEffect(() => {
+      dispatch(fetchPostsThunk({ page: 1, category })) // ✅ Redux 상태가 변경될 때마다 fetchPosts 실행
+   }, [dispatch, category]) // ✅ category 변경 감지
 
    return (
       <div style={{ display: 'flex' }}>
-         <BoardSidebar selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
-         <BoardList category={selectedCategory} />
+         <BoardSidebar />
+         <BoardList />
       </div>
    )
 }
