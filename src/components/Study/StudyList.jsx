@@ -22,15 +22,12 @@ const StudyListPage = () => {
    const navigate = useNavigate()
 
    // Redux에서 로그인한 사용자 정보 & 스터디 그룹 데이터 가져오기
-   const { studygroups, studygroup, loading } = useSelector((state) => state.studygroups)
+   const { studygroups, studygroup, loadinsg } = useSelector((state) => state.studygroups)
 
    const [hashtagsMap, setHashtagsMap] = useState({}) // 🔥 해시태그를 개별적으로 저장할 상태
 
-   console.log('📌 현재 studygroups 상태:', studygroups)
-   console.log('📌 studygroups.studygroups:', studygroups?.studygroups)
-
    // 수정: 실제 배열을 가져와야 함
-   const studygroupList = studygroups.studygroups || [] //진짜배열
+   const studygroupList = studygroups || [] //진짜배열
 
    const { user } = useSelector((state) => state.auth) //로그인한 유저의 정보
 
@@ -95,16 +92,32 @@ const StudyListPage = () => {
    }
 
    // 스터디 그룹 삭제 핸들러
+   // const handleDeleteStudy = (studyId) => {
+   //    if (window.confirm('정말 삭제하시겠습니까?')) {
+   //       dispatch(deleteStudygroupThunk(studyId)).then((response) => {
+   //          console.log(response)
+   //          if (response.payload.success) {
+   //             alert('스터디 그룹이 삭제되었습니다.')
+   //             window.location.reload()
+   //          } else {
+   //             alert('삭제에 실패했습니다.')
+   //          }
+   //       })
+   //    }
+   // } -- jiuuu 한테 설명해주기
+
    const handleDeleteStudy = (studyId) => {
       if (window.confirm('정말 삭제하시겠습니까?')) {
-         dispatch(deleteStudygroupThunk(studyId)).then((response) => {
-            if (response.payload.success) {
-               alert('스터디 그룹이 삭제되었습니다.')
-               dispatch(fetchStudygroupsThunk()) // ✅ 삭제 후 최신 목록 갱신
-            } else {
-               alert('삭제에 실패했습니다.')
-            }
-         })
+         dispatch(deleteStudygroupThunk(studyId))
+            .unwrap()
+            .then(() => {
+               alert('그룹을 삭제 했습니다.')
+               window.location.reload()
+            })
+            .catch((err) => {
+               console.error('그룹 삭제제 실패 : ', err)
+               alert('그룹을 삭제할할 수 없습니다.')
+            })
       }
    }
 
