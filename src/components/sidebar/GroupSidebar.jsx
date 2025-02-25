@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import TeamList from '../studyGroup/TeamList' // ✅ 팀원 목록 추가
 
-const GroupSidebar = ({ selectedMenu, setSelectedMenu }) => {
+const GroupSidebar = ({ selectedMenu, setSelectedMenu, isAuthenticated, user, studygroup, groupmembers }) => {
    return (
       <SidebarContainer>
          <MenuList>
@@ -18,7 +18,7 @@ const GroupSidebar = ({ selectedMenu, setSelectedMenu }) => {
 
          {/* ✅ 기존 메뉴 아래에 TeamList 배치 */}
          <TeamListWrapper>
-            <TeamList />
+            <TeamList groupmembers={groupmembers} />
          </TeamListWrapper>
       </SidebarContainer>
    )

@@ -66,7 +66,7 @@ const StudyDetail = ({ isAuthenticated, user }) => {
          return
       }
 
-      dispatch(participateInGroupThunk({ groupId: id })) // 참여 상태 업데이트 API 요청
+      dispatch(participateInGroupThunk({ groupId: id, status: 'on' })) // 참여 상태 업데이트 API 요청
          .unwrap()
          .then(() => navigate(`/studygroup/${id}`))
          .catch((err) => {

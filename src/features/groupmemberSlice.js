@@ -22,9 +22,9 @@ export const createGroupMemberThunk = createAsyncThunk('groupmembers/create', as
 })
 
 // 그룹 멤버 참여
-export const participateInGroupThunk = createAsyncThunk('groupmembers/participate', async ({ groupId }, { rejectWithValue }) => {
+export const participateInGroupThunk = createAsyncThunk('groupmembers/participate', async ({ groupId, status }, { rejectWithValue }) => {
    try {
-      const response = await participateInGroup(groupId) // API 호출 함수
+      const response = await participateInGroup(groupId, status) // API 호출 함수
       return response.data // 응답 데이터 반환
    } catch (error) {
       return rejectWithValue(error.response?.data?.message || '그룹 멤버 상태 변경 실패')

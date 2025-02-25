@@ -13,9 +13,9 @@ export const createGroupMember = async (groupId) => {
 }
 
 // 그룹 멤버 상태 변경 (참여)
-export const participateInGroup = async (groupId) => {
+export const participateInGroup = async (groupId, status) => {
    try {
-      const response = await studymingApi.patch(`/groupmember/participate/${groupId}`) // PUT을 PATCH로 변경
+      const response = await studymingApi.patch(`/groupmember/participate/${groupId}`, { status }) // PUT을 PATCH로 변경
       return response
    } catch (error) {
       console.error(`API 오류: ${error.message}`)
