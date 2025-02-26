@@ -9,7 +9,7 @@ import { jwtDecode } from 'jwt-decode'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
-import { loginUserThunk } from '../../features/authSlice'
+import { loginUserThunk, googleLoginThunk, kakaoLoginThunk } from '../../features/authSlice'
 
 //ui툴만 구현.
 
@@ -24,6 +24,7 @@ const Login = () => {
    })
    //아이디 저장
    const [rememberMe, setRememberMe] = useState(false)
+   const [shouldShowError, setShouldShowError] = useState(true)
 
    //컴포넌트 마운트 시 localStorage에서 아이디 가져오기
    useEffect(() => {
@@ -34,8 +35,6 @@ const Login = () => {
       }
    }, [])
 
-   const [userInfo, setUserInfo] = useState(null)
-
    const handleChange = (e) => {
       setFormData({ ...formData, [e.target.name]: e.target.value })
    }
@@ -44,6 +43,68 @@ const Login = () => {
       setRememberMe(e.target.checked)
       if (!e.target.checked) {
          localStorage.removeItem('savedLoginId') // 체크 해제 시 저장된 아이디 삭제
+      }
+   }
+   useEffect(() => {
+      if (window.Kakao && !window.Kakao.isInitialized()) {
+         window.Kakao.init(process.env.REACT_APP_KAKAO_JS_KEY)
+         console.log('카카오 SDK 초기화 완료')
+      }
+   }, [])
+
+   const handleKakaoLogin = () => {
+      try {
+         if (!window.Kakao) {
+            throw new Error('카카오 SDK가 로드되지 않았습니다.')
+         }
+
+         if (!window.Kakao.Auth) {
+            throw new Error('카카오 Auth 모듈이 로드되지 않았습니다.')
+         }
+
+         window.Kakao.Auth.login({
+            scope: 'profile_nickname, account_email',
+            success: function (authObj) {
+               console.log('카카오 로그인 성공:', authObj)
+               const accessToken = authObj.access_token
+               const sns = 'kakao'
+
+               dispatch(kakaoLoginThunk(accessToken))
+                  .unwrap()
+                  .then((response) => {
+                     console.log('서버 응답:', response)
+                     if (response.success) {
+                        alert(`로그인 성공! ${response.nickname}님 환영합니다!`)
+                        navigate('/home')
+                     } else if (response.code === 'signupRequired') {
+                        const email = response.email || ''
+                        const nickname = response.nickname || ''
+                        alert('회원가입이 필요합니다.')
+                        navigate(`/signup?email=${email}&nickname=${nickname}&sns=${sns}`)
+                     }
+                  })
+                  .catch((error) => {
+                     console.error('서버 오류:', error)
+                     if (error.response?.data?.code === 'signupRequired') {
+                        const email = error.response?.data?.email || ''
+                        const nickname = error.response?.data?.nickname || ''
+                        alert('회원가입이 필요합니다.')
+                        navigate(`/signup?email=${email}&nickname=${nickname}&sns=${sns}`)
+                     } else if (error === '카카오 연동된 계정이 아닙니다.') {
+                        alert('카카오 연동된 계정이 아닙니다. 일반 로그인을 사용해주세요.')
+                     } else {
+                        alert('로그인 중 오류가 발생했습니다.')
+                     }
+                  })
+            },
+            fail: function (err) {
+               console.error('카카오 로그인 실패:', err)
+               alert('카카오 로그인 실패')
+            },
+         })
+      } catch (error) {
+         console.error('카카오 로그인 처리 중 오류:', error)
+         alert('카카오 로그인 처리 중 오류가 발생했습니다.')
       }
    }
 
@@ -67,9 +128,38 @@ const Login = () => {
    }
    const handleGoogleLogin = (credentialResponse) => {
       const decoded = jwtDecode(credentialResponse.credential)
-      console.log('구글 로그인 성공:', decoded)
-      setUserInfo(decoded)
+      const sns = 'google'
+
+      dispatch(googleLoginThunk(decoded))
+         .unwrap()
+         .then((response) => {
+            alert(`로그인 성공! ${response.nickname}님 환영합니다!`)
+
+            navigate('/home') // 메인 페이지로 이동
+         })
+         .catch((error) => {
+            console.log(error)
+            if (error === '회원가입이 필요합니다.') {
+               // 회원가입 페이지로 리다이렉트
+               const { email, name: nickname } = decoded
+               alert('회원가입이 필요합니다.')
+               navigate(`/signup?email=${email}&nickname=${nickname}&sns=${sns}`)
+            } else if (error === 'Request failed with status code 400') {
+               // 일반 로그인 사용자인 경우
+               alert('구글 연동된 계정이 아닙니다. 일반 로그인을 사용해주세요.')
+               setShouldShowError(false)
+            } else if (error === '로그인 중 오류 발생') {
+               // 서버 오류
+               console.error('❌ 서버 오류:', error)
+               alert('서버 오류가 발생했습니다. 다시 시도해주세요.')
+            } else {
+               // 기타 오류
+               console.error('❌ 구글 로그인 실패:', error)
+            }
+         })
    }
+
+   const displayError = shouldShowError && error !== 'Request failed with status code 400'
 
    return (
       <Wrapper>
@@ -79,8 +169,8 @@ const Login = () => {
 
             <form onSubmit={handleSubmit}>
                <InputWrapper>
-                  <StyledTextField label="아이디" name="loginId" value={formData.loginId} onChange={handleChange} error={!!error} helperText={error || ''} />
-                  <StyledTextField label="비밀번호" name="password" type="password" value={formData.password} onChange={handleChange} error={!!error} helperText={error || ''} />
+                  <StyledTextField label="아이디" name="loginId" value={formData.loginId} onChange={handleChange} error={!!displayError} helperText={displayError ? error : ''} />
+                  <StyledTextField label="비밀번호" name="password" type="password" value={formData.password} onChange={handleChange} error={!!displayError} helperText={displayError ? error : ''} />
                </InputWrapper>
 
                <RememberMeWrapper>
@@ -103,7 +193,7 @@ const Login = () => {
             </StyledDividerText>
 
             <SNSWrapper>
-               <KakaoButton>
+               <KakaoButton onClick={handleKakaoLogin}>
                   <KakaoIcon />
                   카카오 로그인
                </KakaoButton>

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { signupUser, loginUser, checkIdDuplicate, checkNicknameDuplicate, logoutUser, checkAuthStatus, sendVerificationCode, verifyCodeAndFindId, checkIdExists, checkEmailMatches, updatePassword, googleLoginApi, verifyCodepw } from '../api/authApi' // ✅ 수정된 API
+import { signupUser, loginUser, checkIdDuplicate, checkNicknameDuplicate, logoutUser, checkAuthStatus, sendVerificationCode, verifyCodeAndFindId, checkIdExists, checkEmailMatches, updatePassword, googleLoginApi, verifyCodepw, kakaoLoginApi } from '../api/authApi' // ✅ 수정된 API
 
 // 회원가입
 export const signupUserThunk = createAsyncThunk('auth/signupUser', async (userData, { rejectWithValue }) => {
@@ -133,16 +133,25 @@ export const checkAuthStatusThunk = createAsyncThunk('auth/checkAuthStatus', asy
    }
 })
 
-// 구글 로그인
-export const googleLoginThunk = createAsyncThunk('auth/googleLogin', async (tokenId, { rejectWithValue }) => {
+// 구글 로그인 Thunk
+export const googleLoginThunk = createAsyncThunk('auth/googleLogin', async (decoded, { rejectWithValue }) => {
    try {
-      const response = await googleLoginApi(tokenId)
+      const response = await googleLoginApi(decoded)
       return response.user
    } catch (error) {
-      return rejectWithValue(error.response?.data?.message || '구글 로그인 실패')
+      return rejectWithValue(error.message || '구글 로그인 실패')
    }
 })
 
+// 🔹 카카오 로그인 Thunk
+export const kakaoLoginThunk = createAsyncThunk('auth/kakaoLogin', async (accessToken, { rejectWithValue }) => {
+   try {
+      const response = await kakaoLoginApi(accessToken)
+      return response.user
+   } catch (error) {
+      return rejectWithValue(error.message || '카카오 로그인 실패')
+   }
+})
 const authSlice = createSlice({
    name: 'auth',
    initialState: {
@@ -331,6 +340,21 @@ const authSlice = createSlice({
             state.user = action.payload
          })
          .addCase(googleLoginThunk.rejected, (state, action) => {
+            state.loading = false
+            state.error = action.payload
+         })
+      // 카카오 로그인
+      builder
+         .addCase(kakaoLoginThunk.pending, (state) => {
+            state.loading = true
+            state.error = null
+         })
+         .addCase(kakaoLoginThunk.fulfilled, (state, action) => {
+            state.loading = false
+            state.isAuthenticated = true
+            state.user = action.payload
+         })
+         .addCase(kakaoLoginThunk.rejected, (state, action) => {
             state.loading = false
             state.error = action.payload
          })
