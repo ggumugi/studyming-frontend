@@ -9,7 +9,7 @@ import { jwtDecode } from 'jwt-decode'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
-import { loginUserThunk, googleLoginThunk, kakaoLoginThunk } from '../../features/authSlice'
+import { loginUserThunk, googleLoginThunk, kakaoLoginThunk, fetchKakaoUserInfoThunk } from '../../features/authSlice'
 
 //ui툴만 구현.
 
@@ -22,6 +22,8 @@ const Login = () => {
       loginId: '',
       password: '',
    })
+   const [kakaoEmail, setKakaoEmail] = useState('')
+   const [kakaoNickname, setKakaoNickname] = useState('')
    //아이디 저장
    const [rememberMe, setRememberMe] = useState(false)
    const [shouldShowError, setShouldShowError] = useState(true)
@@ -66,31 +68,30 @@ const Login = () => {
             scope: 'profile_nickname, account_email',
             success: function (authObj) {
                console.log('카카오 로그인 성공:', authObj)
-               const accessToken = authObj.access_token
+               const accessToken = authObj.access_token // 액세스 토큰 가져오기
                const sns = 'kakao'
 
-               dispatch(kakaoLoginThunk(accessToken))
+               dispatch(fetchKakaoUserInfoThunk(accessToken))
                   .unwrap()
                   .then((response) => {
-                     console.log('서버 응답:', response)
-                     if (response.success) {
-                        alert(`로그인 성공! ${response.nickname}님 환영합니다!`)
-                        navigate('/home')
-                     } else if (response.code === 'signupRequired') {
-                        const email = response.email || ''
-                        const nickname = response.nickname || ''
-                        alert('회원가입이 필요합니다.')
-                        navigate(`/signup?email=${email}&nickname=${nickname}&sns=${sns}`)
-                     }
+                     console.log('정보', response) // 사용자 정보 로그
+                     setKakaoEmail(response.email) // 이메일
+                     setKakaoNickname(response.nickname) // 닉네임
+
+                     // 사용자 정보를 가져온 후 로그인 요청
+                     return dispatch(kakaoLoginThunk(accessToken)).unwrap() // 로그인 요청
                   })
-                  .catch((error) => {
-                     console.error('서버 오류:', error)
-                     if (error.response?.data?.code === 'signupRequired') {
-                        const email = error.response?.data?.email || ''
-                        const nickname = error.response?.data?.nickname || ''
+                  .then((loginResponse) => {
+                     alert(`로그인 성공! ${loginResponse.nickname}님 환영합니다!`)
+                     navigate('/home') // 메인 페이지로 이동
+                  })
+                  .catch((err) => {
+                     console.error('서버 오류:', err)
+                     // 에러 처리
+                     if (err === '회원가입이 필요합니다.') {
                         alert('회원가입이 필요합니다.')
-                        navigate(`/signup?email=${email}&nickname=${nickname}&sns=${sns}`)
-                     } else if (error === '카카오 연동된 계정이 아닙니다.') {
+                        navigate(`/signup?email=${kakaoEmail}&nickname=${kakaoNickname}&sns=${sns}`) // 회원가입 페이지로 이동
+                     } else if (err === 'Request failed with status code 400') {
                         alert('카카오 연동된 계정이 아닙니다. 일반 로그인을 사용해주세요.')
                      } else {
                         alert('로그인 중 오류가 발생했습니다.')

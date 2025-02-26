@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { signupUser, loginUser, checkIdDuplicate, checkNicknameDuplicate, logoutUser, checkAuthStatus, sendVerificationCode, verifyCodeAndFindId, checkIdExists, checkEmailMatches, updatePassword, googleLoginApi, verifyCodepw, kakaoLoginApi } from '../api/authApi' // ✅ 수정된 API
+import { signupUser, loginUser, checkIdDuplicate, checkNicknameDuplicate, logoutUser, checkAuthStatus, sendVerificationCode, verifyCodeAndFindId, checkIdExists, checkEmailMatches, updatePassword, googleLoginApi, verifyCodepw, kakaoLoginApi, getKakaoUserInfo } from '../api/authApi' // ✅ 수정된 API
 
 // 회원가입
 export const signupUserThunk = createAsyncThunk('auth/signupUser', async (userData, { rejectWithValue }) => {
@@ -143,13 +143,22 @@ export const googleLoginThunk = createAsyncThunk('auth/googleLogin', async (deco
    }
 })
 
-// 🔹 카카오 로그인 Thunk
+// 카카오 로그인 Thunk
 export const kakaoLoginThunk = createAsyncThunk('auth/kakaoLogin', async (accessToken, { rejectWithValue }) => {
    try {
       const response = await kakaoLoginApi(accessToken)
-      return response.user
+      return response.user // 서버 응답 반환
    } catch (error) {
-      return rejectWithValue(error.message || '카카오 로그인 실패')
+      return rejectWithValue(error.message) // 에러 처리
+   }
+})
+// 카카오 사용자 정보 가져오기 Thunk
+export const fetchKakaoUserInfoThunk = createAsyncThunk('auth/fetchKakaoUserInfo', async (accessToken, { rejectWithValue }) => {
+   try {
+      const response = await getKakaoUserInfo(accessToken)
+      return response // 사용자 정보 반환
+   } catch (error) {
+      return rejectWithValue(error.message) // 에러 처리
    }
 })
 const authSlice = createSlice({
@@ -346,17 +355,28 @@ const authSlice = createSlice({
       // 카카오 로그인
       builder
          .addCase(kakaoLoginThunk.pending, (state) => {
-            state.loading = true
-            state.error = null
+            state.loading = true // 로딩 상태 설정
+            state.error = null // 오류 초기화
          })
          .addCase(kakaoLoginThunk.fulfilled, (state, action) => {
-            state.loading = false
-            state.isAuthenticated = true
-            state.user = action.payload
+            state.loading = false // 로딩 완료
+            state.isAuthenticated = true // 로그인 상태 설정
+            state.user = action.payload // 사용자 정보 저장
          })
          .addCase(kakaoLoginThunk.rejected, (state, action) => {
-            state.loading = false
-            state.error = action.payload
+            state.loading = false // 로딩 완료
+            state.error = action.payload // 오류 메시지 저장
+         })
+      builder
+         .addCase(fetchKakaoUserInfoThunk.pending, (state) => {
+            state.loading = true // 로딩 상태 설정
+         })
+         .addCase(fetchKakaoUserInfoThunk.fulfilled, (state, action) => {
+            state.loading = false // 로딩 완료
+         })
+         .addCase(fetchKakaoUserInfoThunk.rejected, (state, action) => {
+            state.loading = false // 로딩 완료
+            state.error = action.payload // 오류 메시지 저장
          })
    },
 })
