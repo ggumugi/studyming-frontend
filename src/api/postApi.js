@@ -62,15 +62,15 @@ export const fetchPosts = async ({ page, category, limit, searchType, searchKeyw
 // }
 
 //전체 포스트 가져오기(페이징)
-export const getPosts = async (page) => {
-   try {
-      const response = await studymingApi.get(`/post?page=${page}`)
-      return response
-   } catch (error) {
-      console.error(`API Request 오류: ${error.message}`)
-      throw error
-   }
-}
+// export const getPosts = async (page) => {
+//    try {
+//       const response = await studymingApi.get(`/post?page=${page}`)
+//       return response
+//    } catch (error) {
+//       console.error(`API Request 오류: ${error.message}`)
+//       throw error
+//    }
+// }
 
 //포스트 수정
 // export const updatePost = async (id, postData) => {

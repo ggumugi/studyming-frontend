@@ -14,29 +14,47 @@ const reverseCategoryMap = {
 }
 
 const BoardList = ({ category }) => {
+   const rowsPerPage = 10 // ✅ 백엔드 limit 기본값과 일치시킴
    const dispatch = useDispatch()
    const posts = useSelector((state) => state.posts.posts)
    const pagination = useSelector((state) => state.posts.pagination)
    const loading = useSelector((state) => state.posts.loading)
    const navigate = useNavigate()
+   const currentPage = pagination?.currentPage || 1 // ✅ Redux에서 현재 페이지 가져오기
 
    const [page, setPage] = useState(1)
-   const [rowsPerPage] = useState(10)
    const [searchType, setSearchType] = useState('title')
    const [searchKeyword, setSearchKeyword] = useState('')
 
    useEffect(() => {
       console.log('페이지 변경 또는 검색 조건 변경:', { page, category, searchType, searchKeyword })
       dispatch(fetchPostsThunk({ page, category, limit: rowsPerPage, searchType, searchKeyword }))
-   }, [dispatch, page, category, rowsPerPage, searchType, searchKeyword])
+   }, [dispatch, category, rowsPerPage, searchType, searchKeyword])
 
    const handleChangePage = (event, newPage) => {
-      setPage(newPage)
+      dispatch(
+         fetchPostsThunk({
+            page: newPage, // ✅ newPage 직접 사용
+            category,
+            limit: rowsPerPage,
+            searchType,
+            searchKeyword,
+         })
+      )
    }
 
+   // 검색 버튼 핸들러
    const handleSearch = () => {
-      console.log('검색 요청:', { searchType, searchKeyword })
-      dispatch(fetchPostsThunk({ page: 1, category, limit: rowsPerPage, searchType, searchKeyword }))
+      // ✅ 검색 시 페이지를 1로 설정
+      dispatch(
+         fetchPostsThunk({
+            page: 1,
+            category,
+            limit: rowsPerPage,
+            searchType,
+            searchKeyword,
+         })
+      )
    }
 
    const handleKeyDown = (e) => {
@@ -94,7 +112,13 @@ const BoardList = ({ category }) => {
 
                {pagination && (
                   <PaginationContainer>
-                     <Pagination count={Math.ceil(pagination.totalPosts / rowsPerPage)} page={pagination.currentPage} onChange={handleChangePage} color="warning" shape="rounded" />
+                     <Pagination
+                        count={Math.ceil(pagination.totalPosts / rowsPerPage)}
+                        page={currentPage} // ✅ Redux의 현재 페이지 사용
+                        onChange={handleChangePage}
+                        color="warning"
+                        shape="rounded"
+                     />
                   </PaginationContainer>
                )}
             </>
