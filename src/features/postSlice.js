@@ -28,13 +28,23 @@ export const fetchPostsThunk = createAsyncThunk('posts/fetchPosts', async ({ pag
 })
 
 // 게시물 수정
-export const updatePostThunk = createAsyncThunk('posts/updatePost', async (data, { rejectWithValue }) => {
+// export const updatePostThunk = createAsyncThunk('posts/updatePost', async (data, { rejectWithValue }) => {
+//    try {
+//       const { id, postData } = data
+//       const response = await updatePost(id, postData)
+//       return response.data.post
+//    } catch (error) {
+//       return rejectWithValue(error.response?.data?.message || '게시물 삭제 실패')
+//    }
+// })
+
+export const updatePostThunk = createAsyncThunk('posts/updatePost', async ({ id, postData, imagesToRemove }, { rejectWithValue }) => {
    try {
-      const { id, postData } = data
-      const response = await updatePost(id, postData)
-      return response.data.post
+      const response = await updatePost(id, postData, imagesToRemove)
+      console.log('수정된 게시글 데이터:', response.data)
+      return response.data
    } catch (error) {
-      return rejectWithValue(error.response?.data?.message || '게시물 삭제 실패')
+      return rejectWithValue(error.response?.data?.message || '게시글 수정 실패')
    }
 })
 
@@ -53,6 +63,7 @@ export const deletePostThunk = createAsyncThunk('posts/deletePost', async (id, {
 export const fetchPostByIdThunk = createAsyncThunk('posts/fetchPostById', async (id, { rejectWithValue }) => {
    try {
       const response = await getPostById(id)
+      console.log('Redux에 저장될 게시글 데이터:', response.data)
       return response.data
    } catch (error) {
       return rejectWithValue(error.response?.data?.message || '게시물 불러오기 실패')

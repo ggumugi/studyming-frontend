@@ -35,7 +35,7 @@ function BoardEditPage({ isAuthenticated, user }) {
    return (
       <div style={{ display: 'flex' }}>
          <BoardSidebar selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
-         {post && <BoardCreate user={user} onSubmit={handleSubmit} isAuthenticated={isAuthenticated} selectedCategory={selectedCategory} post={post} />}
+         {post && <BoardCreate user={user} onSubmit={handleSubmit} isAuthenticated={isAuthenticated} selectedCategory={selectedCategory} initialValues={post} />}
       </div>
    )
 }
