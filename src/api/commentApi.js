@@ -106,3 +106,16 @@ export const deleteComment = async ({ commentId, postCategory }) => {
       throw error
    }
 }
+
+/**
+ *  6. 댓글 채택 API
+ */
+export const selectComment = async (commentId) => {
+   try {
+      const response = await studymingApi.patch(`/comment/${commentId}/select`)
+      return response.data
+   } catch (error) {
+      console.error(`API 요청 오류: ${error.message}`)
+      throw error
+   }
+}
