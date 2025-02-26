@@ -33,7 +33,9 @@ export const submitReport = createAsyncThunk('banned/submitReport', async ({ rep
 // ✅ 벤 목록 가져오기
 export const getBannedUsers = createAsyncThunk('banned/getBannedUsers', async (_, { rejectWithValue }) => {
    try {
-      return await fetchBannedUsers()
+      const response = await fetchBannedUsers()
+      console.log('🚀 벤된 유저 목록:', response) // ✅ 디버깅용
+      return response
    } catch (error) {
       return rejectWithValue(error)
    }
@@ -51,9 +53,15 @@ export const applyBan = createAsyncThunk('banned/applyBan', async ({ reportId, a
 // ✅ 정지 기간 변경하기
 export const changeBanPeriod = createAsyncThunk('banned/changeBanPeriod', async ({ userId, newEndDate }, { rejectWithValue }) => {
    try {
-      return await updateBanPeriod(userId, newEndDate)
+      console.log('🚀 정지 기간 변경 요청:', { userId, newEndDate })
+      const response = await updateBanPeriod(userId, newEndDate) // ✅ API 요청
+      return response
    } catch (error) {
-      return rejectWithValue(error)
+      console.error('❌ 정지 기간 변경 실패:', error)
+      if (error.response && error.response.status === 404) {
+         alert(`🚨 해당 유저(${userId})의 정지 기록을 찾을 수 없습니다.`)
+      }
+      return rejectWithValue(error.response?.data || '정지 기간 변경 실패')
    }
 })
 
@@ -109,9 +117,7 @@ const bannedSlice = createSlice({
             state.loading = true
          })
          .addCase(changeBanPeriod.fulfilled, (state, action) => {
-            state.loading = false
-            const { userId, newEndDate } = action.payload
-            state.bannedUsers = state.bannedUsers.map((user) => (user.userId === userId ? { ...user, endDate: newEndDate } : user))
+            state.bannedUsers = state.bannedUsers.map((user) => (user.bannedId === action.payload.bannedId ? { ...user, endDate: action.payload.newEndDate } : user))
          })
          .addCase(changeBanPeriod.rejected, (state, action) => {
             state.loading = false
