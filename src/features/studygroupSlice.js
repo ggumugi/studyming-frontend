@@ -25,11 +25,11 @@ export const createStudygroupThunk = createAsyncThunk('studygroups/create', asyn
 export const fetchStudygroupByIdThunk = createAsyncThunk('studygroups/fetchStudygroupById', async (id, { rejectWithValue }) => {
    try {
       const response = await getStudygroupById(id)
-      console.log('📢 API 응답 데이터:', response.data) // 🔥 응답 데이터 확인
-      return {
-         id: response.data.studygroup.id,
-         hashtags: response.data.studygroup.Hashtaged || [], // ✅ Hashtaged를 Redux에 저장
-      }
+      return response.data
+      //  return {
+      //     id: response.data.studygroup.id,
+      //     hashtags: response.data.studygroup.Hashtaged || [], // ✅ Hashtaged를 Redux에 저장
+      //  }
    } catch (error) {
       return rejectWithValue(error.response?.data?.message || '스터디 그룹 불러오기 실패')
    }
@@ -74,7 +74,8 @@ const studygroupSlice = createSlice({
          })
          .addCase(fetchStudygroupsThunk.fulfilled, (state, action) => {
             state.loading = false
-            state.studygroups = action.payload
+            console.log(action.payload, '11')
+            state.studygroups = action.payload.studygroups
          })
          .addCase(fetchStudygroupsThunk.rejected, (state, action) => {
             state.loading = false
@@ -133,7 +134,6 @@ const studygroupSlice = createSlice({
          })
          .addCase(deleteStudygroupThunk.fulfilled, (state, action) => {
             state.loading = false
-            state.studygroups = state.studygroups.filter((group) => group.id !== action.payload) // 삭제된 그룹 제거
          })
          .addCase(deleteStudygroupThunk.rejected, (state, action) => {
             state.loading = false
