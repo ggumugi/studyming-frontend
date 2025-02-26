@@ -167,7 +167,7 @@ export const googleLoginApi = async (decoded) => {
       throw error
    }
 }
-
+// 카카오 로그인
 export const kakaoLoginApi = async (accessToken) => {
    try {
       const response = await studymingApi.post('/auth/kakao-login', { accessToken })
@@ -192,5 +192,21 @@ export const kakaoLoginApi = async (accessToken) => {
    } catch (error) {
       console.error('❌ 카카오 로그인 API 오류:', error)
       throw new Error(error.message || '카카오 로그인 실패')
+   }
+}
+
+// 카카오 사용자 정보 API
+export const getKakaoUserInfo = async (accessToken) => {
+   try {
+      const response = await studymingApi.post('/auth/kakao-user-info', { accessToken })
+
+      if (!response?.data) {
+         throw new Error('서버 응답이 올바르지 않습니다.')
+      }
+
+      return response.data // 서버 응답 반환
+   } catch (error) {
+      console.error('❌ 카카오 사용자 정보 API 오류:', error)
+      throw new Error(error.message || '사용자 정보 가져오기 실패')
    }
 }
