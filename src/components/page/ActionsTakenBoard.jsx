@@ -6,59 +6,84 @@ import moment from 'moment'
 
 const ActionsTakenBoard = ({ category, isAuthenticated, user }) => {
    const dispatch = useDispatch()
-   const { bannedUsers, loading } = useSelector((state) => state.banned)
-
+   // const { bannedUsers, loading } = useSelector((state) => state.banned)
+   const bannedUsersFromStore = useSelector((state) => state.banned.bannedUsers)
+   const [bannedUsers, setBannedUsers] = useState([]) // ✅ 상태 추가
    const [page, setPage] = useState(1)
    const [rowsPerPage] = useState(8)
    const [searchQuery, setSearchQuery] = useState('')
    const [filter, setFilter] = useState('reportedUser')
    const [editingId, setEditingId] = useState(null)
-   const [selectedDate, setSelectedDate] = useState(null)
+   const [selectedDates, setSelectedDates] = useState({}) // ✅ 개별 행의 날짜 상태 저장
 
    useEffect(() => {
       if (isAuthenticated && user?.role === 'ADMIN') {
-         dispatch(getBannedUsers()) // ✅ 벤된 유저 목록 불러오기 (관리자만)
+         dispatch(getBannedUsers()) // ✅ 벤된 유저 목록 불러오기
       }
    }, [dispatch, isAuthenticated, user])
-   // 날짜 변경 핸들러
-   const handleDateChange = (event, id) => {
-      setSelectedDate(event.target.value)
-      setEditingId(id)
+
+   useEffect(() => {
+      console.log('🚀 [DEBUG] Redux에서 받은 bannedUsers:', bannedUsersFromStore)
+      setBannedUsers(bannedUsersFromStore)
+   }, [bannedUsersFromStore])
+
+   // ✅ 개별 유저의 날짜만 업데이트하는 핸들러
+   const handleDateChange = (event, bannedId) => {
+      const newDate = event.target.value
+      setSelectedDates((prevDates) => ({
+         ...prevDates,
+         [bannedId]: newDate, // 특정 bannedId에 대해 날짜 저장
+      }))
+      setEditingId(bannedId)
    }
 
-   const handleApply = (userId) => {
+   // ✅ 정지 기간 변경 요청
+   const handleApply = async (bannedId) => {
+      console.log('🚀 [DEBUG] handleApply 실행 - bannedId:', bannedId)
+      console.log('🚀 [DEBUG] bannedUsers 상태:', bannedUsers)
+
+      if (!bannedId) {
+         console.error('❌ bannedId가 존재하지 않습니다.', { bannedId, bannedUsers })
+         alert('🚨 오류: bannedId가 존재하지 않습니다.')
+         return
+      }
+
+      const selectedUser = bannedUsers.find((user) => user.bannedId === bannedId)
+      console.log('🚀 [DEBUG] selectedUser:', selectedUser)
+
+      if (!selectedUser) {
+         alert('🚨 해당 유저의 정지 기록을 찾을 수 없습니다.')
+         return
+      }
+
+      const selectedDate = selectedUser?.endDate
+      console.log('🚀 [DEBUG] 선택된 날짜:', selectedDate)
+
       if (!selectedDate) {
          alert('🚨 변경할 정지 기간을 선택해주세요.')
          return
       }
 
-      if (!userId) {
-         console.error('❌ userId가 존재하지 않습니다.', { userId, newEndDate: selectedDate })
-         alert('🚨 오류: 사용자 ID가 존재하지 않습니다.')
-         return
+      try {
+         await dispatch(changeBanPeriod({ bannedId, newEndDate: selectedDate })).unwrap()
+         await dispatch(getBannedUsers())
+         alert('✅ 정지 기간이 변경되었습니다.')
+      } catch (error) {
+         console.error('❌ 정지 기간 변경 실패:', error)
+         alert('❌ 정지 기간 변경에 실패했습니다.')
       }
 
-      dispatch(changeBanPeriod({ userId, newEndDate: selectedDate }))
-         .then(() => {
-            alert('✅ 정지 기간이 변경되었습니다.')
-            dispatch(getBannedUsers()) // ✅ 변경 후 목록 다시 불러오기
-         })
-         .catch(() => {
-            alert('❌ 정지 기간 변경 실패.')
-         })
-
       setEditingId(null)
-      setSelectedDate('')
    }
 
    // 검색 필터링
    const filteredReports = bannedUsers.map((user) => ({
-      id: user.id || null,
-      reportedUser: user?.reportedUser ? user.reportedUser.nickname : '알 수 없음',
-      reportedBy: user?.reportedBy ? user.reportedBy.nickname : '알 수 없음',
-      reason: user.reason ? user.reason : '사유 없음',
-      startDate: user.startDate ? new Date(user.startDate).toLocaleDateString() : '없음',
-      endDate: user.endDate ? new Date(user.endDate).toLocaleDateString() : '없음',
+      id: user.id,
+      reportedUser: user.reportedUser?.nickname ? user.reportedUser.nickname : '알 수 없음',
+      reportedBy: user.reportedBy?.nickname || '알 수 없음',
+      reason: user.reason || '사유 없음',
+      startDate: user.startDate ? moment(user.startDate).format('YYYY-MM-DD') : '없음',
+      endDate: user.endDate ? moment(user.endDate).format('YYYY-MM-DD') : '없음',
    }))
 
    // 페이지네이션 적용
@@ -80,18 +105,18 @@ const ActionsTakenBoard = ({ category, isAuthenticated, user }) => {
                <TableBody>
                   {paginatedReports.length > 0 ? (
                      paginatedReports.map((user, index) => (
-                        <TableRow key={user.id || index}>
+                        <TableRow key={user.bannedId || index}>
                            <TableCell sx={{ textAlign: 'center' }}>{index + 1 + (page - 1) * rowsPerPage}</TableCell>
                            <TableCell sx={{ textAlign: 'center' }}>{user?.reportedUser || '알 수 없음'}</TableCell>
                            <TableCell sx={{ textAlign: 'center' }}>{user?.reportedBy || '알 수 없음'}</TableCell>
                            <TableCell sx={{ textAlign: 'center' }}>{user.reason || '사유 없음'}</TableCell>
                            <TableCell sx={{ textAlign: 'center' }}>
-                              {editingId === user.userId ? (
+                              {editingId === user.bannedId ? (
                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <TextField
                                        type="date"
-                                       value={selectedDate || user.endDate}
-                                       onChange={(e) => handleDateChange(e, user.userId)}
+                                       value={user.endDate || ''}
+                                       onChange={(e) => handleDateChange(e, user.bannedId)}
                                        sx={{
                                           width: '110px',
                                           height: '30px',
@@ -99,12 +124,12 @@ const ActionsTakenBoard = ({ category, isAuthenticated, user }) => {
                                           '& .MuiInputBase-input': { height: '30px', padding: '0 5px', lineHeight: '30px', fontSize: '14px' },
                                        }}
                                     />
-                                    <Button variant="contained" color="warning" sx={{ height: '30px', marginLeft: '10px' }} onClick={() => handleApply(user.userId)}>
+                                    <Button variant="contained" color="warning" sx={{ height: '30px', marginLeft: '10px' }} onClick={() => handleApply(user.bannedId)}>
                                        적용
                                     </Button>
                                  </div>
                               ) : (
-                                 <Button variant="outlined" color="primary" sx={{ width: '120px', height: '30px' }} onClick={() => setEditingId(user.userId)}>
+                                 <Button variant="outlined" color="primary" sx={{ width: '120px', height: '30px' }} onClick={() => setEditingId(user.bannedId)}>
                                     {user.startDate && user.endDate ? `${moment(user.startDate).format('YYYY-MM-DD')} ~ ${moment(user.endDate).format('YYYY-MM-DD')}` : '정지 기간 없음'}
                                  </Button>
                               )}

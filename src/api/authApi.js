@@ -143,13 +143,54 @@ export const checkAuthStatus = async () => {
    }
 }
 
-// 구글 로그인 (토큰 기반 로그인)
-export const googleLoginApi = async (tokenId) => {
+// 구글 로그인 API
+export const googleLoginApi = async (decoded) => {
    try {
-      const response = await studymingApi.post('/auth/google-login', { tokenId })
-      return response.data
+      const { email, name } = decoded // 구글 이메일과 닉네임 추출
+      const response = await studymingApi.post('/auth/google-login', { email, name })
+
+      if (response.data.success) {
+         // 로그인 성공
+         return response.data
+      } else if (response.data.message === '회원가입이 필요합니다.') {
+         // 사용자가 없는 경우
+         throw new Error(response.data.message)
+      } else if (response.data.message === '구글 연동된 계정이 아닙니다.') {
+         // 일반 로그인 사용자인 경우
+         throw new Error(response.data.message)
+      } else {
+         // 기타 오류
+         throw new Error(response.data.message || '구글 로그인 실패')
+      }
    } catch (error) {
-      console.error('Google login API failed', error)
+      console.error('❌ 구글 로그인 실패:', error)
       throw error
+   }
+}
+
+export const kakaoLoginApi = async (accessToken) => {
+   try {
+      const response = await studymingApi.post('/auth/kakao-login', { accessToken })
+
+      if (!response?.data) {
+         throw new Error('서버 응답이 올바르지 않습니다.')
+      }
+
+      if (response.data.success) {
+         return response.data
+      }
+
+      // 📌 오류 코드 처리
+      switch (response.data.code) {
+         case 'signupRequired':
+            throw new Error('회원가입이 필요합니다.')
+         case 'notKakao':
+            throw new Error('카카오 연동된 계정이 아닙니다.')
+         default:
+            throw new Error(response.data.message || '카카오 로그인 실패')
+      }
+   } catch (error) {
+      console.error('❌ 카카오 로그인 API 오류:', error)
+      throw new Error(error.message || '카카오 로그인 실패')
    }
 }

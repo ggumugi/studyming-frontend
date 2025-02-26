@@ -15,7 +15,7 @@ function BoardListPage() {
    return (
       <div style={{ display: 'flex' }}>
          <BoardSidebar />
-         <BoardList />
+         <BoardList category={category} />
       </div>
    )
 }

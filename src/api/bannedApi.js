@@ -31,17 +31,20 @@ export const banUser = async (reportId, adminId, banDays) => {
       const response = await studymingApi.post('/banned/ban', { reportId, adminId, banDays })
       return response.data
    } catch (error) {
+      console.error('❌ 벤 적용 실패:', error)
       throw error.response?.data || '벤 적용 실패'
    }
 }
 
 // ✅ 벤 기간 변경 API
-export const updateBanPeriod = async (userId, newEndDate) => {
+export const updateBanPeriod = async (bannedId, newEndDate) => {
+   console.log(`🚀 정지 기간 변경 요청: { bannedId: ${bannedId}, newEndDate: '${newEndDate}' }`)
    try {
-      const response = await studymingApi.put('/banned/updateban', { userId, newEndDate })
+      const response = await studymingApi.put('/banned/updateban', { bannedId, newEndDate })
       return response.data
    } catch (error) {
-      throw error.response?.data || '정지 기간 변경 실패'
+      console.error('❌ 정지 기간 변경 실패:', error)
+      throw error.response?.data || error.message
    }
 }
 

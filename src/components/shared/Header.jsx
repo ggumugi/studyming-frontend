@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Menu, MenuItem } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
@@ -10,10 +10,12 @@ import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 
 import { logoutUserThunk, checkAuthStatusThunk } from '../../features/authSlice'
+import { setCategory } from '../../features/postSlice' // ✅ Redux 액션 추가
 
 const Header = ({ isAuthenticated, user }) => {
    const dispatch = useDispatch()
    const navigate = useNavigate()
+   const location = useLocation()
 
    const handleLogout = useCallback(() => {
       dispatch(logoutUserThunk())
@@ -34,9 +36,29 @@ const Header = ({ isAuthenticated, user }) => {
    const [userAnchor, setUserAnchor] = useState(null)
    const userOpen = Boolean(userAnchor)
 
-   // 📌 게시판 메뉴 열기/닫기
-   const handleBoardClick = (event) => setBoardAnchor(event.currentTarget)
-   const handleBoardClose = () => setBoardAnchor(null)
+   // 📌 게시판 카테고리 매핑
+   const categoryMap = {
+      자유: 'free',
+      질문: 'QnA',
+      정보: 'noti',
+      문의: 'inquiry',
+   }
+
+   // 📌 게시판 버튼 클릭 시 드롭다운 열기
+   const handleBoardClick = (event) => {
+      setBoardAnchor(event.currentTarget)
+   }
+
+   // 📌 게시판 카테고리 클릭 시 Redux 상태 업데이트 (URL 변경 X)
+   const handleBoardCategoryClick = (category) => {
+      dispatch(setCategory(categoryMap[category])) // ✅ Redux 상태 업데이트
+
+      if (location.pathname !== '/board') {
+         navigate('/board') // ✅ 다른 페이지에서는 먼저 `/board`로 이동
+      }
+
+      setBoardAnchor(null) // ✅ 드롭다운 닫기
+   }
 
    // 📌 유저 메뉴 열기/닫기
    const handleUserClick = (event) => setUserAnchor(event.currentTarget)
@@ -67,19 +89,12 @@ const Header = ({ isAuthenticated, user }) => {
                      </NavItem>
 
                      {/* 📌 게시판 드롭다운 메뉴 */}
-                     <Menu anchorEl={boardAnchor} open={boardOpen} onClose={handleBoardClose} anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }} transformOrigin={{ vertical: 'top', horizontal: 'left' }}>
-                        <CustomMenuItem onClick={handleBoardClose}>
-                           <Link to="/board/general">자유</Link>
-                        </CustomMenuItem>
-                        <CustomMenuItem onClick={handleBoardClose}>
-                           <Link to="/board/qna">질문</Link>
-                        </CustomMenuItem>
-                        <CustomMenuItem onClick={handleBoardClose}>
-                           <Link to="/board/study">정보</Link>
-                        </CustomMenuItem>
-                        <CustomMenuItem onClick={handleBoardClose}>
-                           <Link to="/board/inquiry">문의</Link>
-                        </CustomMenuItem>
+                     <Menu anchorEl={boardAnchor} open={boardOpen} onClose={() => setBoardAnchor(null)} anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }} transformOrigin={{ vertical: 'top', horizontal: 'left' }}>
+                        {Object.keys(categoryMap).map((item) => (
+                           <CustomMenuItem key={item} onClick={() => handleBoardCategoryClick(item)} style={{ padding: '10px 25px' }}>
+                              {item}
+                           </CustomMenuItem>
+                        ))}
                      </Menu>
 
                      {/* 🔥 관리자만 "관리" 메뉴 표시 */}
@@ -103,7 +118,7 @@ const Header = ({ isAuthenticated, user }) => {
                         <UserMenu onClick={handleUserClick} $isOpen={userOpen}>
                            {user?.nickname} 님 {userOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
                         </UserMenu>
-                        <LogoutButton onClick={handleLogout}>로그아웃</LogoutButton> {/* ✅ 유저 닉네임 옆에 로그아웃 버튼 추가 */}
+                        <LogoutButton onClick={handleLogout}>로그아웃</LogoutButton>
                      </UserWrapper>
 
                      {/* 📌 사용자 드롭다운 메뉴 */}
@@ -121,7 +136,7 @@ const Header = ({ isAuthenticated, user }) => {
                            <Link to="/payment">결제 및 밍 내역</Link>
                         </CustomMenuItem>
                         <CustomMenuItem onClick={handleUserClose}>
-                           <span style={{ color: 'red' }}>회원 탈퇴</span> {/* ✅ 회원 탈퇴 메뉴 유지 */}
+                           <span style={{ color: 'red' }}>회원 탈퇴</span>
                         </CustomMenuItem>
                      </Menu>
                   </>
@@ -207,44 +222,27 @@ const UserMenu = styled.div`
    align-items: center;
    gap: 5px;
    cursor: pointer;
+
    &:hover {
       color: #ff7f00;
    }
 `
 
 const CustomMenuItem = styled(MenuItem)`
-   width: 150px;
    text-align: center;
-   display: flex;
-   justify-content: center;
-   align-items: center; /* ✅ 세로 중앙 정렬 */
-   flex-direction: column; /* ✅ 내부 요소 세로 배치 */
 
    & a {
       text-decoration: none;
       color: inherit;
       width: 100%;
       text-align: center;
-      font-weight: 300;
-      font-size: 16px;
-   }
-
-   &:hover {
-      background-color: #fff5e1;
-   }
-
-   span {
-      font-size: 13px;
-      color: rgba(0, 0, 0, 0.6);
-      display: block;
-      width: 100%;
-      text-align: center;
    }
 `
+
 const UserWrapper = styled.div`
    display: flex;
    align-items: center;
-   gap: 15px; /* 닉네임과 로그아웃 버튼 사이 간격 */
+   gap: 15px;
 `
 
 const LogoutButton = styled.button`

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { createComment, updateComment, fetchComments, fetchCommentById, deleteComment } from '../api/commentApi'
+import { createComment, updateComment, fetchComments, fetchCommentById, deleteComment, selectComment } from '../api/commentApi'
 
 //  댓글 생성 Thunk (이미지 업로드 가능)
 export const createCommentThunk = createAsyncThunk('comments/createComment', async (commentData, { rejectWithValue }) => {
@@ -49,6 +49,16 @@ export const deleteCommentThunk = createAsyncThunk('comments/deleteComment', asy
       return id // 삭제된 댓글의 id 반환
    } catch (err) {
       return rejectWithValue(err.response?.data?.message || '댓글 삭제 실패')
+   }
+})
+
+// 댓글 채택 Thunk
+export const selectCommentThunk = createAsyncThunk('comments/selectComment', async (commentId, { rejectWithValue }) => {
+   try {
+      const response = await selectComment(commentId) // 🔥 위에서 만든 selectComment API 호출
+      return response // ✅ 채택된 댓글 반환
+   } catch (err) {
+      return rejectWithValue(err.response?.data?.message || '댓글 채택 실패')
    }
 })
 
@@ -136,6 +146,23 @@ const commentSlice = createSlice({
             state.comments = state.comments.filter((comment) => comment.id !== action.payload) // 삭제된 댓글 제거
          })
          .addCase(deleteCommentThunk.rejected, (state, action) => {
+            state.loading = false
+            state.error = action.payload
+         })
+      // ✅ 댓글 채택 처리
+      builder
+         .addCase(selectCommentThunk.pending, (state) => {
+            state.loading = true
+            state.error = null
+         })
+         .addCase(selectCommentThunk.fulfilled, (state, action) => {
+            state.loading = false
+            const updatedComment = action.payload
+
+            // ✅ 기존 댓글 리스트에서 채택된 댓글 업데이트
+            state.comments = state.comments.map((comment) => (comment.id === updatedComment.id ? updatedComment : { ...comment, selected: false }))
+         })
+         .addCase(selectCommentThunk.rejected, (state, action) => {
             state.loading = false
             state.error = action.payload
          })

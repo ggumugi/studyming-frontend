@@ -1,25 +1,56 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 import { TextField, Button } from '@mui/material'
 import { RiKakaoTalkFill } from 'react-icons/ri'
 import { FcGoogle } from 'react-icons/fc'
 import { signupUserThunk, checkIdDuplicateThunk, checkNicknameDuplicateThunk } from '../../features/authSlice'
 import { useDispatch } from 'react-redux'
+import { FlashOnRounded } from '@mui/icons-material'
 
 const Signup = () => {
    const navigate = useNavigate()
    const dispatch = useDispatch()
+   const location = useLocation()
+   const queryParams = new URLSearchParams(location.search)
+
+   //쿼리 파라미터에서 sns 값을 가져와 google 및 kakao 값을 설정
+   const sns = queryParams.get('sns')
+   const isGoogle = sns === 'google'
+   const isKakao = sns === 'kakao'
 
    // 폼 상태
    const [formData, setFormData] = useState({
-      email: '',
+      email: queryParams.get('email') || '',
       loginId: '',
       password: '',
       confirmPassword: '',
-      nickname: '',
+      nickname: queryParams.get('nickname') || '',
       name: '',
+      google: isGoogle, // sns가 google이면 true
+      kakao: isKakao, // sns가 kakao이면 true
    })
+
+   const isEmailDisabled = !!queryParams.get('email')
+   // 쿼리 파라미터로 nickname 값이 있으면 중복 검사 실행
+   useEffect(() => {
+      if (queryParams.get('nickname')) {
+         dispatch(checkNicknameDuplicateThunk(queryParams.get('nickname')))
+            .unwrap()
+            .then((response) => {
+               if (!response.success) {
+                  setErrors((prev) => ({ ...prev, nickname: '중복된 닉네임입니다.' }))
+                  setSuccessMessages((prev) => ({ ...prev, nickname: '' }))
+               } else {
+                  setErrors((prev) => ({ ...prev, nickname: '' }))
+                  setSuccessMessages((prev) => ({ ...prev, nickname: '사용할 수 있는 닉네임입니다.' }))
+               }
+            })
+            .catch(() => {
+               setErrors((prev) => ({ ...prev, nickname: '닉네임 중복 확인 실패' }))
+            })
+      }
+   }, [])
 
    // 에러 메시지 상태
    const [errors, setErrors] = useState({})
@@ -149,7 +180,7 @@ const Signup = () => {
                         helperText={errors.loginId || successMessages.loginId || ''}
                      />
                   </InputRow>
-                  <StyledTextField label="이메일" name="email" type="email" value={formData.email} onChange={handleChange} error={!!errors.email} helperText={errors.email || ''} autoComplete="email" />
+                  <StyledTextField label="이메일" name="email" type="email" value={formData.email} onChange={handleChange} error={!!errors.email} helperText={errors.email || ''} autoComplete="email" disabled={isEmailDisabled} />
                   <StyledTextField label="비밀번호" name="password" type="password" value={formData.password} onChange={handleChange} helperText="비밀번호는 최소 8자 이상, 영문/숫자/특수문자를 포함해야 합니다." autoComplete="new-password" />
                   <StyledTextField label="비밀번호 확인" name="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleChange} error={!!errors.confirmPassword} helperText={errors.confirmPassword || ''} autoComplete="new-password" />
                </InputWrapper>
