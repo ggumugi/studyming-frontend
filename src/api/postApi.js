@@ -27,16 +27,39 @@ export const fetchPosts = async ({ page, category, limit, searchType, searchKeyw
          page,
          category,
          limit: limit || 10,
-         [searchType]: searchKeyword, // 동적 검색 조건
       }
-      const response = await studymingApi.get(API_URL, { params })
 
+      if (searchKeyword) {
+         params.searchType = searchType // 'title' 또는 'author' 전송
+         params.searchKeyword = searchKeyword // 검색어 전송
+      }
+
+      console.log(`🛠 API 요청 URL: /post`, params)
+
+      const response = await studymingApi.get('/post', { params })
       return response.data
    } catch (error) {
       console.error(`API 요청 오류: ${error.message}`)
       throw error
    }
 }
+
+// export const fetchPosts = async ({ page, category, limit, searchType, searchKeyword }) => {
+//    try {
+//       const params = {
+//          page,
+//          category,
+//          limit: limit || 10,
+//          [searchType]: searchKeyword, // 동적 검색 조건
+//       }
+//       const response = await studymingApi.get(API_URL, { params })
+
+//       return response.data
+//    } catch (error) {
+//       console.error(`API 요청 오류: ${error.message}`)
+//       throw error
+//    }
+// }
 
 //전체 포스트 가져오기(페이징)
 export const getPosts = async (page) => {
