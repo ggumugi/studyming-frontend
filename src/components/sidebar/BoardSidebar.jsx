@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import { setCategory } from '../../features/postSlice' // ✅ Redux 액션 임포트
 
 // 한글 카테고리 <-> 백엔드 enum 매핑
@@ -20,11 +21,13 @@ const reverseCategoryMap = {
 
 const BoardSidebar = () => {
    const dispatch = useDispatch()
+   const navigate = useNavigate()
    const selectedCategory = useSelector((state) => state.posts.category)
 
    const handleCategoryClick = (category) => {
       const backendCategory = categoryMap[category]
       dispatch(setCategory(backendCategory)) // ✅ Redux 상태 업데이트
+      navigate('/board') // ✅ 네비게이션 이동
    }
 
    return (

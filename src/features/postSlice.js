@@ -13,7 +13,7 @@ export const createPostThunk = createAsyncThunk('posts/createPost', async (postD
 })
 
 // 전체 게시물 리스트 가져오기
-export const fetchPostsThunk = createAsyncThunk('posts/fetchPosts', async ({ page, category }, { rejectWithValue }) => {
+/* export const fetchPostsThunk = createAsyncThunk('posts/fetchPosts', async ({ page, category }, { rejectWithValue }) => {
    try {
       const response = await fetchPosts({ page, category })
 
@@ -25,16 +25,30 @@ export const fetchPostsThunk = createAsyncThunk('posts/fetchPosts', async ({ pag
    } catch (error) {
       return rejectWithValue(error.message)
    }
+}) */
+export const fetchPostsThunk = createAsyncThunk('posts/fetchPosts', async ({ page, category, limit, searchType, searchKeyword }, { rejectWithValue }) => {
+   try {
+      console.log(`🛠 Redux Thunk 요청: page=${page}, category=${category}, searchType=${searchType}, searchKeyword=${searchKeyword}`)
+      const response = await fetchPosts({ page, category, limit, searchType, searchKeyword })
+
+      if (!response || !response.posts) {
+         return rejectWithValue('응답에 posts가 없습니다.')
+      }
+
+      return response
+   } catch (error) {
+      return rejectWithValue(error.message)
+   }
 })
 
-// 게시물 수정
-export const updatePostThunk = createAsyncThunk('posts/updatePost', async (data, { rejectWithValue }) => {
+//게시물 수정
+export const updatePostThunk = createAsyncThunk('posts/updatePost', async ({ id, postData, imagesToRemove }, { rejectWithValue }) => {
    try {
-      const { id, postData } = data
-      const response = await updatePost(id, postData)
-      return response.data.post
+      const response = await updatePost(id, postData, imagesToRemove)
+      console.log('수정된 게시글 데이터:', response.data)
+      return response.data
    } catch (error) {
-      return rejectWithValue(error.response?.data?.message || '게시물 삭제 실패')
+      return rejectWithValue(error.response?.data?.message || '게시글 수정 실패')
    }
 })
 
@@ -53,6 +67,7 @@ export const deletePostThunk = createAsyncThunk('posts/deletePost', async (id, {
 export const fetchPostByIdThunk = createAsyncThunk('posts/fetchPostById', async (id, { rejectWithValue }) => {
    try {
       const response = await getPostById(id)
+      console.log('Redux에 저장될 게시글 데이터:', response.data)
       return response.data
    } catch (error) {
       return rejectWithValue(error.response?.data?.message || '게시물 불러오기 실패')
@@ -98,8 +113,15 @@ const postSlice = createSlice({
          })
          .addCase(fetchPostsThunk.fulfilled, (state, action) => {
             state.loading = false
-            state.posts = action.payload?.posts || [] // ✅ posts가 undefined일 경우 빈 배열로 설정
-            state.pagination = action.payload?.pagination || { totalPosts: 0, currentPage: 1, totalPages: 1, limit: 10 }
+            if (action.payload?.posts.length > 0) {
+               state.posts = action.payload.posts
+            }
+            state.pagination = action.payload?.pagination || {
+               totalPosts: 0,
+               currentPage: 1,
+               totalPages: 1,
+               limit: 10,
+            }
          })
 
          .addCase(fetchPostsThunk.rejected, (state, action) => {

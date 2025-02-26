@@ -26,6 +26,12 @@ const BoardDetail = () => {
       }
    }, [dispatch, id])
 
+   useEffect(() => {
+      if (post) {
+         console.log('불러온 게시글 데이터:', post) // ✅ post 데이터 확인
+      }
+   }, [post])
+
    if (!post) return <p>게시글을 불러오는 중...</p>
 
    // 삭제 버튼
@@ -80,6 +86,16 @@ const BoardDetail = () => {
          </div>
 
          <Content>{post.content}</Content>
+
+         {post.Images && post.Images.length > 0 && (
+            <ImageContainer>
+               {post.Images.map((image) => {
+                  const imagePath = `http://localhost:8000/${image.path}`
+                  console.log('이미지 최종 경로:', imagePath) // ✅ 최종 경로 확인
+                  return <img key={image.id} src={imagePath} alt="게시글 이미지" />
+               })}
+            </ImageContainer>
+         )}
 
          <CommentSection>
             <CommentInput placeholder="댓글을 입력해주세요." value={newComment} onChange={(e) => setNewComment(e.target.value)} />
@@ -270,3 +286,5 @@ const BackButton = styled.button`
       background-color: #ccc;
    }
 `
+
+const ImageContainer = styled.div``
