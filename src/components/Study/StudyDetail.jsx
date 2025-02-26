@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchStudygroupByIdThunk } from '../../features/studygroupSlice'
-import { createGroupMemberThunk, fetchGroupMembersThunk, participateInGroupThunk } from '../../features/groupmemberSlice'
+import { createGroupMemberThunk, fetchGroupMembersThunk, participateInGroupThunk, deleteGroupMemberThunk } from '../../features/groupmemberSlice'
 
 const StudyDetail = ({ isAuthenticated, user }) => {
    const dispatch = useDispatch()
@@ -73,6 +73,28 @@ const StudyDetail = ({ isAuthenticated, user }) => {
             console.error('스터디 참여 실패: ', err)
             alert('스터디에 참여할 수 없습니다.')
          })
+   }
+
+   // 탈퇴 버튼 핸들러 추가
+   const handleStudyLeaveClick = () => {
+      if (studygroup.createdBy === user?.id) {
+         alert('방장은 바로 탈퇴할 수 없습니다. 방장 위임을 먼저 진행하세요.')
+         navigate(`/study/leader/transfer`, groupmembers) // 방장 위임 페이지로 이동
+         return
+      }
+
+      if (window.confirm('정말로 스터디를 탈퇴하시겠습니까?')) {
+         dispatch(deleteGroupMemberThunk({ groupId: id, userId: user.id }))
+            .unwrap()
+            .then(() => {
+               alert('스터디에서 성공적으로 탈퇴하였습니다.')
+               navigate('/study/list') // 탈퇴 후 홈 화면으로 이동
+            })
+            .catch((err) => {
+               console.error('스터디 탈퇴 실패:', err)
+               alert('스터디를 탈퇴할 수 없습니다.')
+            })
+      }
    }
 
    return (
@@ -148,6 +170,12 @@ const StudyDetail = ({ isAuthenticated, user }) => {
                   </SubmitButton>
                )}
                {studygroup.createdBy === user?.id && <SubmitButton2 onClick={handleStudyEditClick}>스터디 정보 수정하기</SubmitButton2>}
+
+               {isMember && (
+                  <ButtonWrapper>
+                     <BackButton onClick={handleStudyLeaveClick}>스터디 탈퇴하기</BackButton>
+                  </ButtonWrapper>
+               )}
             </Wrapper>
          )}
       </>
@@ -162,7 +190,7 @@ const Wrapper = styled.div`
    justify-content: center; /* 중앙 정렬 */
    align-items: center;
    min-height: 100vh;
-   padding: 40px;
+   padding: 0px 40px 40px 40px;
    width: 100%;
    max-width: 800px; /* 적절한 최대 너비 유지 */
    margin: 0 auto; /* 좌우 중앙 정렬 */
@@ -276,8 +304,23 @@ const SubmitButton2 = styled.button`
    cursor: pointer;
    margin-top: 30px; /* 버튼과 마지막 항목 사이 간격 추가 */
    width: 70%;
-
    &:hover {
       background-color: #2980b9;
    }
+`
+const ButtonWrapper = styled.div`
+   display: flex;
+   justify-content: center;
+   margin-top: 20px;
+`
+
+const BackButton = styled.button`
+   background-color: transparent;
+   color: #ffa654;
+   text-decoration: underline;
+   padding: 10px 20px;
+   border: none;
+   font-weight: 400;
+   font-size: 16px;
+   cursor: pointer;
 `

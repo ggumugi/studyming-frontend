@@ -40,9 +40,9 @@ const ReportsBoard = () => {
 
    // 검색 필터링 (닉네임 데이터가 `ReportedUser.nickname`에 있으므로 수정)
    const filteredReports = reports.filter((report) => {
-      if (filter === 'reportedUser') return report.ReportedUser.nickname.toLowerCase().includes(searchQuery.toLowerCase())
-      if (filter === 'reporter') return report.ReportedBy.nickname.toLowerCase().includes(searchQuery.toLowerCase())
-      if (filter === 'reason') return report.reason.toLowerCase().includes(searchQuery.toLowerCase())
+      if (filter === 'reportedUser') return report.reportedUser?.nickname?.toLowerCase().includes(searchQuery.toLowerCase())
+      if (filter === 'reporter') return report.reportedBy?.nickname?.toLowerCase().includes(searchQuery.toLowerCase())
+      if (filter === 'reason') return report.reason?.toLowerCase().includes(searchQuery.toLowerCase())
       return false
    })
 
@@ -77,16 +77,16 @@ const ReportsBoard = () => {
                   {paginatedReports.map((row) => (
                      <TableRow key={row.id}>
                         <TableCell sx={{ width: '10%', textAlign: 'center', height: '64px' }}>{row.id}</TableCell>
-                        <TableCell sx={{ width: '15%', textAlign: 'center' }}>{row.ReportedUser.nickname}</TableCell>
-                        <TableCell sx={{ width: '15%', textAlign: 'center' }}>{row.ReportedBy.nickname}</TableCell>
+                        <TableCell sx={{ width: '15%', textAlign: 'center' }}>{row.reportedUser.nickname}</TableCell>
+                        <TableCell sx={{ width: '15%', textAlign: 'center' }}>{row.reportedBy.nickname}</TableCell>
                         <TableCell sx={{ width: '40%', textAlign: 'center' }}>{row.reason}</TableCell>
                         <TableCell sx={{ width: '20%', textAlign: 'center' }}>
-                           <Select value={banPeriods[row.id] || '없음'} onChange={(e) => handleBanChange(row.id, e.target.value)} displayEmpty sx={{ width: '100px', height: '30px', fontSize: '14px', textAlign: 'center', marginRight: '10px' }}>
-                              <MenuItem value="없음">없음</MenuItem>
-                              <MenuItem value="7일">7일</MenuItem>
-                              <MenuItem value="14일">14일</MenuItem>
-                              <MenuItem value="30일">30일</MenuItem>
-                              <MenuItem value="영구정지">영구정지</MenuItem>
+                           <Select value={banPeriods[row.id] || '없음'} onChange={(e) => handleBanChange(row.id, parseInt(e.target.value.replace(/[^0-9]/g, ''), 10))} displayEmpty sx={{ width: '100px', height: '30px', fontSize: '14px', textAlign: 'center', marginRight: '10px' }}>
+                              <MenuItem value="0">없음</MenuItem>
+                              <MenuItem value="7">7일</MenuItem>
+                              <MenuItem value="14">14일</MenuItem>
+                              <MenuItem value="30">30일</MenuItem>
+                              <MenuItem value="-1">영구정지</MenuItem>
                            </Select>
                            <Button variant="contained" color="warning" sx={{ height: '30px', textAlign: 'center', top: '-1px' }} onClick={() => handleApply(row.id, row.reportedUser)}>
                               적용

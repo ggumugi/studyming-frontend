@@ -1,24 +1,25 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
 
 import styled from 'styled-components'
 
-const StudyLeaderTransfer = () => {
-   const [members, setMembers] = useState([]) // ✅ 초기값을 빈 배열로 설정
+const StudyLeaderTransfer = ({ user }) => {
+   const dispatch = useDispatch()
+   const navigate = useNavigate()
+   const { id } = useParams() // URL에서 스터디 그룹 ID 추출
+   const { groupmembers } = useSelector((state) => state.groupmembers.groupmember) // Redux 상태 가져오기
    const [selectedLeader, setSelectedLeader] = useState('')
 
    useEffect(() => {
-      // 예제: 백엔드에서 데이터 가져오기 (실제 API로 변경해야 함)
-      setTimeout(() => {
-         setMembers(['원빈', '우지박', '블랙쉐도우', '듀가나디'])
-      }, 1000)
-   }, [])
+      console.log('Redux에서 가져온 groupmembers:', groupmembers) // ✅ 데이터 확인
+   }, [groupmembers])
 
+   const filteredMembers = groupmembers.filter((member) => member.role !== 'leader') // ✅ 방장 제외
+   console.log('filteredMembers', filteredMembers)
    const handleLeaderChange = (e) => {
       setSelectedLeader(e.target.value)
    }
-
-   const navigate = useNavigate() // ✅ 내비게이트 훅 사용
 
    const handleTransfer = () => {
       if (!selectedLeader) {
@@ -26,15 +27,13 @@ const StudyLeaderTransfer = () => {
          return
       }
       alert(`${selectedLeader}님에게 방장을 위임합니다.`)
-      // TODO: 백엔드 API 연결 (스터디 방장 위임 로직)
-      // ✅ 방장 위임 후 특정 페이지로 이동
-      navigate('/study/leader/exit')
+      // TODO: 방장 위임 API 연결 후 처리
+      navigate(`/study/list`) // ✅ 위임 후 스터디 상세 페이지로 이동
    }
 
-   if (!members.length) {
-      return <LoadingText>Loading...</LoadingText> // ✅ 데이터 로딩 중 표시
-   }
-
+   // if (loading) {
+   //    return <LoadingText>Loading...</LoadingText> // ✅ 로딩 중 표시
+   // }
    return (
       <Wrapper>
          <TitleContainer>
@@ -42,12 +41,16 @@ const StudyLeaderTransfer = () => {
             <Divider />
          </TitleContainer>
          <MemberList>
-            {members.map((member) => (
-               <Label key={member}>
-                  <input type="radio" name="leader" value={member} checked={selectedLeader === member} onChange={handleLeaderChange} />
-                  {member}
-               </Label>
-            ))}
+            {filteredMembers.length > 0 ? (
+               filteredMembers.map((member) => (
+                  <Label key={member.userId}>
+                     <input type="radio" name="leader" value={member.userId} checked={selectedLeader === member.userId} onChange={handleLeaderChange} />
+                     {member.User.nickname}
+                  </Label>
+               ))
+            ) : (
+               <p>위임할 멤버가 없습니다.</p>
+            )}
          </MemberList>
 
          <TransferButton onClick={handleTransfer}>스터디 방장 위임</TransferButton>
