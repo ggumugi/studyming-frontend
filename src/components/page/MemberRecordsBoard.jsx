@@ -1,92 +1,81 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import { fetchUsersThunk } from '../../features/authSlice' // Redux Thunk 가져오기
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Select, MenuItem, Button, Pagination } from '@mui/material'
 
-const reportsData = [
-   { id: 1, nickname: '현수박박박박', userid: 'user001', email: 'user001@example.com', registrationDate: '2020-01-01', status: '일반' },
-   { id: 2, nickname: '강원식', userid: 'user002', email: 'user002@example.com', registrationDate: '2021-05-15', status: '휴먼정지' },
-   { id: 3, nickname: '박현수', userid: 'user003', email: 'user003@example.com', registrationDate: '2019-11-20', status: '일반' },
-   { id: 4, nickname: '이경희', userid: 'user004', email: 'user004@example.com', registrationDate: '2022-07-08', status: '운영자' },
-   { id: 5, nickname: '박지우', userid: 'user005', email: 'user005@example.com', registrationDate: '2023-02-10', status: '운영자' },
-   { id: 6, nickname: '식원강', userid: 'user006', email: 'user006@example.com', registrationDate: '2018-09-30', status: '일반' },
-   { id: 7, nickname: '수현박', userid: 'user007', email: 'user007@example.com', registrationDate: '2020-06-21', status: '일반' },
-   { id: 8, nickname: '희경이', userid: 'user008', email: 'user008@example.com', registrationDate: '2017-03-15', status: '휴먼정지' },
-   { id: 9, nickname: '우지박', userid: 'user009', email: 'user009@example.com', registrationDate: '2024-01-05', status: '일반' },
-]
-
-const BanRecordsBoard = () => {
-   const [reports] = useState(reportsData)
+const MemberRecordsBoard = () => {
+   const dispatch = useDispatch()
+   const users = useSelector((state) => state.auth.users) || [] // 🔥 Redux에서 유저 리스트 가져오기
    const [page, setPage] = useState(1)
    const [rowsPerPage] = useState(8)
    const [searchQuery, setSearchQuery] = useState('')
    const [filter, setFilter] = useState('nickname')
 
+   useEffect(() => {
+      dispatch(fetchUsersThunk()) // ✅ 컴포넌트 마운트 시 유저 리스트 불러오기
+   }, [dispatch])
+
+   useEffect(() => {
+      setPage(1) // 검색 시 첫 페이지로 이동
+   }, [searchQuery, filter])
+
    const handleChangePage = (event, newPage) => {
       setPage(newPage)
    }
 
-   // 검색 필터링
-   const filteredReports = reports.filter((report) => report[filter] && report[filter].toString().toLowerCase().includes(searchQuery.toLowerCase()))
+   // 🔍 검색 필터링
+   const filteredUsers = users.filter((user) => user[filter]?.toString().toLowerCase().includes(searchQuery.toLowerCase()))
 
-   // 페이지네이션 적용
-   const paginatedReports = filteredReports.slice((page - 1) * rowsPerPage, page * rowsPerPage)
+   // 📌 페이지네이션 적용
+   const paginatedUsers = filteredUsers.slice((page - 1) * rowsPerPage, page * rowsPerPage)
+
    return (
       <div style={{ width: '100%' }}>
          <TableContainer component={Paper} sx={{ maxWidth: '100%', margin: 'auto' }}>
             <Table>
                <TableHead>
                   <TableRow>
-                     <TableCell sx={{ width: '10%' }} style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                        NO
-                     </TableCell>
-                     <TableCell sx={{ width: '15%' }} style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                        닉네임
-                     </TableCell>
-                     {/* ✅ 제목을 넓게 */}
-                     <TableCell sx={{ width: '15%' }} style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                        아이디
-                     </TableCell>
-                     <TableCell sx={{ width: '25%' }} style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                        이메일
-                     </TableCell>
-                     <TableCell sx={{ width: '20%' }} style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                        가입일
-                     </TableCell>
-                     <TableCell sx={{ width: '15%' }} style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                        상태
-                     </TableCell>
+                     <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>NO</TableCell>
+                     <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>닉네임</TableCell>
+                     <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>아이디</TableCell>
+                     <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>이메일</TableCell>
+                     <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>가입일</TableCell>
+                     <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>상태</TableCell>
                   </TableRow>
                </TableHead>
                <TableBody>
-                  {paginatedReports.map((row) => (
-                     <TableRow key={row.id}>
-                        <TableCell sx={{ width: '10%', textAlign: 'center', height: '64px' }}>{row.id}</TableCell>
-                        <TableCell sx={{ width: '15%', textAlign: 'center' }}>{row.nickname}</TableCell>
-                        <TableCell sx={{ width: '15%', textAlign: 'center' }}>{row.userid}</TableCell>
-                        <TableCell sx={{ width: '25%', textAlign: 'center' }}>{row.email}</TableCell>
-                        <TableCell sx={{ width: '20%', textAlign: 'center' }}>{row.registrationDate}</TableCell>
-                        <TableCell sx={{ width: '15%', textAlign: 'center' }}>{row.status}</TableCell>
+                  {paginatedUsers.length > 0 ? (
+                     paginatedUsers.map((user, index) => (
+                        <TableRow key={user.id}>
+                           <TableCell sx={{ textAlign: 'center' }}>{(page - 1) * rowsPerPage + index + 1}</TableCell>
+                           <TableCell sx={{ textAlign: 'center' }}>{user.nickname}</TableCell>
+                           <TableCell sx={{ textAlign: 'center' }}>{user.name}</TableCell>
+                           <TableCell sx={{ textAlign: 'center' }}>{user.email}</TableCell>
+                           <TableCell sx={{ textAlign: 'center' }}>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
+                           <TableCell sx={{ textAlign: 'center' }}>{user.status}</TableCell>
+                        </TableRow>
+                     ))
+                  ) : (
+                     <TableRow>
+                        <TableCell colSpan={6} sx={{ textAlign: 'center' }}>
+                           회원 데이터가 없습니다.
+                        </TableCell>
                      </TableRow>
-                  ))}
+                  )}
                </TableBody>
             </Table>
          </TableContainer>
 
-         {/* 페이지네이션 */}
+         {/* 📌 페이지네이션 */}
          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-            <Pagination
-               count={Math.ceil(filteredReports.length / rowsPerPage)} // 총 페이지 수
-               page={page}
-               onChange={handleChangePage}
-               color="warning"
-               shape="rounded"
-            />
+            <Pagination count={Math.ceil(filteredUsers.length / rowsPerPage)} page={page} onChange={handleChangePage} color="warning" shape="rounded" />
          </div>
 
-         {/* 검색 필터 */}
+         {/* 🔎 검색 필터 */}
          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
             <Select value={filter} onChange={(e) => setFilter(e.target.value)} sx={{ width: '165px' }}>
                <MenuItem value="nickname">회원 닉네임</MenuItem>
-               <MenuItem value="userid">회원 아이디</MenuItem>
+               <MenuItem value="name">회원 아이디</MenuItem>
                <MenuItem value="email">이메일</MenuItem>
                <MenuItem value="status">상태</MenuItem>
             </Select>
@@ -99,4 +88,4 @@ const BanRecordsBoard = () => {
    )
 }
 
-export default BanRecordsBoard
+export default MemberRecordsBoard

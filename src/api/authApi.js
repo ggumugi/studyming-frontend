@@ -210,3 +210,14 @@ export const getKakaoUserInfo = async (accessToken) => {
       throw new Error(error.message || '사용자 정보 가져오기 실패')
    }
 }
+
+//  유저 리스트 가져오기 API
+export const fetchUsers = async () => {
+   try {
+      const response = await studymingApi.get('/auth/users') // API 요청
+      return response.data.users
+   } catch (error) {
+      console.error('❌ 유저 리스트 가져오기 실패:', error)
+      throw error
+   }
+}

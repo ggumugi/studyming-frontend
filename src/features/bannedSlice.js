@@ -51,15 +51,16 @@ export const applyBan = createAsyncThunk('banned/applyBan', async ({ reportId, a
 })
 
 // ✅ 정지 기간 변경하기
-export const changeBanPeriod = createAsyncThunk('banned/changeBanPeriod', async ({ userId, newEndDate }, { rejectWithValue }) => {
+export const changeBanPeriod = createAsyncThunk('banned/changeBanPeriod', async ({ bannedId, newEndDate }, { rejectWithValue }) => {
+   console.log('🚀 정지 기간 변경 요청:', { bannedId, newEndDate }) // ✅ 추가!
+
    try {
-      console.log('🚀 정지 기간 변경 요청:', { userId, newEndDate })
-      const response = await updateBanPeriod(userId, newEndDate) // ✅ API 요청
+      const response = await updateBanPeriod(bannedId, newEndDate)
       return response
    } catch (error) {
       console.error('❌ 정지 기간 변경 실패:', error)
       if (error.response && error.response.status === 404) {
-         alert(`🚨 해당 유저(${userId})의 정지 기록을 찾을 수 없습니다.`)
+         alert(`🚨 해당 유저(${bannedId})의 정지 기록을 찾을 수 없습니다.`)
       }
       return rejectWithValue(error.response?.data || '정지 기간 변경 실패')
    }
@@ -105,9 +106,10 @@ const bannedSlice = createSlice({
          })
          .addCase(getBannedUsers.fulfilled, (state, action) => {
             state.loading = false
-            console.log('🚀 Redux State Updated (bannedUsers):', action.payload) // ✅ 상태 확인
+            console.log('🚀 Redux 상태 업데이트 (bannedUsers):', action.payload) // ✅ 여기 추가
             state.bannedUsers = action.payload
          })
+
          .addCase(getBannedUsers.rejected, (state, action) => {
             state.loading = false
             state.error = action.payload
@@ -117,8 +119,11 @@ const bannedSlice = createSlice({
             state.loading = true
          })
          .addCase(changeBanPeriod.fulfilled, (state, action) => {
+            console.log('🚀 Redux State Updated (bannedUsers):', state.bannedUsers)
+            console.log('🚀 업데이트된 유저 데이터:', action.payload)
             state.bannedUsers = state.bannedUsers.map((user) => (user.bannedId === action.payload.bannedId ? { ...user, endDate: action.payload.newEndDate } : user))
          })
+
          .addCase(changeBanPeriod.rejected, (state, action) => {
             state.loading = false
             state.error = action.payload
