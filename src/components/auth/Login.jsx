@@ -22,8 +22,8 @@ const Login = () => {
       loginId: '',
       password: '',
    })
-   const [kakaoEmail, setKakaoEmail] = useState('')
-   const [kakaoNickname, setKakaoNickname] = useState('')
+   // const [kakaoEmail, setKakaoEmail] = useState('')
+   // const [kakaoNickname, setKakaoNickname] = useState('')
    //아이디 저장
    const [rememberMe, setRememberMe] = useState(false)
    const [shouldShowError, setShouldShowError] = useState(true)
@@ -75,27 +75,28 @@ const Login = () => {
                   .unwrap()
                   .then((response) => {
                      console.log('정보', response) // 사용자 정보 로그
-                     setKakaoEmail(response.email) // 이메일
-                     setKakaoNickname(response.nickname) // 닉네임
+                     const kakaoEmail = response.email // 이메일
+                     const kakaoNickname = response.nickname // 닉네임
 
                      // 사용자 정보를 가져온 후 로그인 요청
-                     return dispatch(kakaoLoginThunk(accessToken)).unwrap() // 로그인 요청
-                  })
-                  .then((loginResponse) => {
-                     alert(`로그인 성공! ${loginResponse.nickname}님 환영합니다!`)
-                     navigate('/home') // 메인 페이지로 이동
-                  })
-                  .catch((err) => {
-                     console.error('서버 오류:', err)
-                     // 에러 처리
-                     if (err === '회원가입이 필요합니다.') {
-                        alert('회원가입이 필요합니다.')
-                        navigate(`/signup?email=${kakaoEmail}&nickname=${kakaoNickname}&sns=${sns}`) // 회원가입 페이지로 이동
-                     } else if (err === 'Request failed with status code 400') {
-                        alert('카카오 연동된 계정이 아닙니다. 일반 로그인을 사용해주세요.')
-                     } else {
-                        alert('로그인 중 오류가 발생했습니다.')
-                     }
+                     return dispatch(kakaoLoginThunk(accessToken))
+                        .unwrap()
+                        .then((loginResponse) => {
+                           alert(`로그인 성공! ${loginResponse.nickname}님 환영합니다!`)
+                           navigate('/home') // 메인 페이지로 이동
+                        })
+                        .catch((err) => {
+                           console.error('서버 오류:', err)
+                           // 에러 처리
+                           if (err === '회원가입이 필요합니다.') {
+                              alert('회원가입이 필요합니다.')
+                              navigate(`/signup?email=${kakaoEmail}&nickname=${kakaoNickname}&sns=${sns}`) // 회원가입 페이지로 이동
+                           } else if (err === 'Request failed with status code 400') {
+                              alert('카카오 연동된 계정이 아닙니다. 일반 로그인을 사용해주세요.')
+                           } else {
+                              alert('로그인 중 오류가 발생했습니다.')
+                           }
+                        }) // 로그인 요청
                   })
             },
             fail: function (err) {
@@ -342,13 +343,4 @@ const KakaoIcon = styled(RiKakaoTalkFill)`
    font-size: 28px;
    position: absolute;
    left: 8px; /* 아이콘을 왼쪽에 배치 */
-`
-
-const UserInfo = styled.div`
-   margin-top: 20px;
-   padding: 10px;
-   border: 1px solid #ddd;
-   border-radius: 10px;
-   text-align: center;
-   background-color: #f9f9f9;
 `
