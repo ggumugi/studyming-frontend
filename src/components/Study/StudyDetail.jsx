@@ -68,7 +68,7 @@ const StudyDetail = ({ isAuthenticated, user }) => {
 
       dispatch(participateInGroupThunk({ groupId: id, status: 'on' })) // 참여 상태 업데이트 API 요청
          .unwrap()
-         .then(() => navigate(`/studygroup/${id}`))
+         .then(() => navigate(`/studygroup/${id}`, groupmembers))
          .catch((err) => {
             console.error('스터디 참여 실패: ', err)
             alert('스터디에 참여할 수 없습니다.')
@@ -79,7 +79,7 @@ const StudyDetail = ({ isAuthenticated, user }) => {
    const handleStudyLeaveClick = () => {
       if (studygroup.createdBy === user?.id) {
          alert('방장은 바로 탈퇴할 수 없습니다. 방장 위임을 먼저 진행하세요.')
-         navigate(`/study/leader/transfer`, groupmembers) // 방장 위임 페이지로 이동
+         navigate(`/study/leader/transfer/${id}`, groupmembers) // 방장 위임 페이지로 이동
          return
       }
 

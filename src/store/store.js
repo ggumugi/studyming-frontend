@@ -14,6 +14,8 @@ import bannedReducer from '../features/bannedSlice'
 import adminpostReducer from '../features/adminpostSlice'
 import studyLikeSliceReducer from '../features/likedSlice'
 import groupmemberSliceReducer from '../features/groupmemberSlice'
+import timeReducer from '../features/timeSlice'
+import screenShareReducer from '../features/screenShareSlice'
 
 const store = configureStore({
    reducer: {
@@ -31,7 +33,18 @@ const store = configureStore({
       adminpost: adminpostReducer,
       studyLike: studyLikeSliceReducer,
       groupmembers: groupmemberSliceReducer,
+      time: timeReducer,
+      screenShare: screenShareReducer,
    },
+   middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({
+         serializableCheck: {
+            // 모든 screenShare 관련 액션 무시
+            ignoredActions: ['screenShare/start/fulfilled', 'screenShare/addStreamToState', 'screenShare/removeStreamFromState'],
+            // 스트림 관련 모든 경로 무시
+            ignoredPaths: ['screenShare.streams', 'payload.stream'],
+         },
+      }),
 })
 
 export default store

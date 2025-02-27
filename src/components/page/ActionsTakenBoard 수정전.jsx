@@ -14,7 +14,7 @@ const ActionsTakenBoard = ({ category, isAuthenticated, user }) => {
    const [searchQuery, setSearchQuery] = useState('')
    const [filter, setFilter] = useState('reportedUser')
    const [editingId, setEditingId] = useState(null)
-   const [selectedDates, setSelectedDates] = useState(null) // ✅ 개별 행의 날짜 상태 저장
+   const [selectedDates, setSelectedDates] = useState({}) // ✅ 개별 행의 날짜 상태 저장
 
    useEffect(() => {
       if (isAuthenticated && user?.role === 'ADMIN') {
@@ -25,12 +25,6 @@ const ActionsTakenBoard = ({ category, isAuthenticated, user }) => {
    useEffect(() => {
       console.log('🚀 [DEBUG] Redux에서 받은 bannedUsers:', bannedUsersFromStore)
       setBannedUsers(bannedUsersFromStore)
-
-      if (bannedUsersFromStore.length > 0) {
-         bannedUsersFromStore.forEach((user, index) => {
-            console.log(`✅ bannedUsers[${index}]:`, user)
-         })
-      }
    }, [bannedUsersFromStore])
 
    // ✅ 개별 유저의 날짜만 업데이트하는 핸들러
@@ -45,10 +39,11 @@ const ActionsTakenBoard = ({ category, isAuthenticated, user }) => {
 
    // ✅ 정지 기간 변경 요청
    const handleApply = async (bannedId) => {
-      console.log('🚀 [DEBUG] handleApply 실행 - 전달된 bannedId:', bannedId)
+      console.log('🚀 [DEBUG] handleApply 실행 - bannedId:', bannedId)
+      console.log('🚀 [DEBUG] bannedUsers 상태:', bannedUsers)
 
       if (!bannedId) {
-         console.error('❌ handleApply 호출 시 bannedId가 undefined입니다!', bannedId)
+         console.error('❌ bannedId가 존재하지 않습니다.', { bannedId, bannedUsers })
          alert('🚨 오류: bannedId가 존재하지 않습니다.')
          return
       }
@@ -61,8 +56,7 @@ const ActionsTakenBoard = ({ category, isAuthenticated, user }) => {
          return
       }
 
-      // ✅ 여기서 변경된 날짜를 `selectedDates`에서 가져와야 함!
-      const selectedDate = selectedDates?.[bannedId] || selectedUser.endDate
+      const selectedDate = selectedUser?.endDate
       console.log('🚀 [DEBUG] 선택된 날짜:', selectedDate)
 
       if (!selectedDate) {
@@ -72,7 +66,7 @@ const ActionsTakenBoard = ({ category, isAuthenticated, user }) => {
 
       try {
          await dispatch(changeBanPeriod({ bannedId, newEndDate: selectedDate })).unwrap()
-         // await dispatch(getBannedUsers())
+         await dispatch(getBannedUsers())
          alert('✅ 정지 기간이 변경되었습니다.')
       } catch (error) {
          console.error('❌ 정지 기간 변경 실패:', error)
@@ -83,17 +77,14 @@ const ActionsTakenBoard = ({ category, isAuthenticated, user }) => {
    }
 
    // 검색 필터링
-   const filteredReports = bannedUsers.map((user) => {
-      console.log('🚀 [DEBUG] 가공 전 user 객체:', user)
-      return {
-         bannedId: user.bannedId, // ✅ `bannedId` 유지!
-         reportedUser: user.reportedUser?.nickname || '알 수 없음',
-         reportedBy: user.reportedBy?.nickname || '알 수 없음',
-         reason: user.reason || '사유 없음',
-         startDate: user.startDate ? moment(user.startDate).format('YYYY-MM-DD') : '없음',
-         endDate: user.endDate ? moment(user.endDate).format('YYYY-MM-DD') : '없음',
-      }
-   })
+   const filteredReports = bannedUsers.map((user) => ({
+      id: user.id,
+      reportedUser: user.reportedUser?.nickname ? user.reportedUser.nickname : '알 수 없음',
+      reportedBy: user.reportedBy?.nickname || '알 수 없음',
+      reason: user.reason || '사유 없음',
+      startDate: user.startDate ? moment(user.startDate).format('YYYY-MM-DD') : '없음',
+      endDate: user.endDate ? moment(user.endDate).format('YYYY-MM-DD') : '없음',
+   }))
 
    // 페이지네이션 적용
    const paginatedReports = filteredReports.slice((page - 1) * rowsPerPage, page * rowsPerPage)
@@ -133,15 +124,7 @@ const ActionsTakenBoard = ({ category, isAuthenticated, user }) => {
                                           '& .MuiInputBase-input': { height: '30px', padding: '0 5px', lineHeight: '30px', fontSize: '14px' },
                                        }}
                                     />
-                                    <Button
-                                       variant="contained"
-                                       color="warning"
-                                       sx={{ height: '30px', marginLeft: '10px' }}
-                                       onClick={() => {
-                                          console.log('🚀 [DEBUG] 클릭한 유저 데이터:', user)
-                                          handleApply(user.bannedId)
-                                       }}
-                                    >
+                                    <Button variant="contained" color="warning" sx={{ height: '30px', marginLeft: '10px' }} onClick={() => handleApply(user.bannedId)}>
                                        적용
                                     </Button>
                                  </div>

@@ -13,20 +13,43 @@ export const createComment = async (commentData) => {
    }
 
    try {
+      const formData = new FormData()
+      formData.append('content', commentData.content)
+      if (commentData.imageFile) {
+         formData.append('image', commentData.imageFile) // ✅ 이미지 파일 추가
+      }
+
+      console.log('✅ FormData.append() 실행 완료!')
+      formData.forEach((value, key) => {
+         console.log(`✅ FormData key: ${key}, value:`, value)
+      })
+
+      // ✅ FormData 객체 복사 (혹시 모를 객체 변형 방지)
+      const formDataCopy = new FormData()
+      commentData.formData.forEach((value, key) => {
+         formDataCopy.append(key, value)
+      })
+
+      console.log('🔥 API로 보낼 최종 FormData 데이터:')
+      formDataCopy.forEach((value, key) => {
+         console.log(`✅ API FormData key: ${key}, value:`, value)
+      })
+
       const config = {
          headers: {
             'Content-Type': 'multipart/form-data',
          },
       }
 
-      const response = await studymingApi.post(`${API_URL}/${commentData.postId}`, commentData, config)
+      console.log("✅ FormData.get('content') (append 실행 직후):", formData.get('content'))
+
+      const response = await studymingApi.post(`${API_URL}/${commentData.postId}`, formDataCopy, config)
       return response.data
    } catch (error) {
       console.error(`API 요청 오류: ${error.message}`)
       throw error
    }
 }
-
 /**
  * 2. 특정 포스트의 댓글 조회 (페이징, 공지사항 예외 처리)
  */
@@ -37,6 +60,8 @@ export const fetchComments = async ({ postId, postCategory, page = 1, limit = 10
    }
 
    try {
+      console.log('📢 fetchComments 요청 시작! postId:', postId)
+
       const response = await studymingApi.get(`${API_URL}/${postId}`, {
          params: { page, limit },
       })
@@ -57,7 +82,7 @@ export const fetchCommentById = async ({ commentId, postCategory }) => {
    }
 
    try {
-      const response = await studymingApi.get(`${API_URL}/detail/${commentId}`)
+      const response = await studymingApi.get(`${API_URL}/${commentId}`) //detail 중간ㄴ에 껴있었음
       return response.data
    } catch (error) {
       console.error(`API 요청 오류: ${error.message}`)
@@ -66,25 +91,38 @@ export const fetchCommentById = async ({ commentId, postCategory }) => {
 }
 
 /**
- * 4. 댓글 수정 (공지사항 예외 처리)
+ * 4. 댓글 수정 (공지사항 예외 처리 제거)
  */
 export const updateComment = async (commentData) => {
-   if (commentData.postCategory === 'noti') {
-      console.warn('공지사항의 댓글은 수정할 수 없습니다.')
-      return { success: false, message: '공지사항의 댓글은 수정할 수 없습니다.' }
-   }
-
    try {
+      const formData = new FormData()
+      formData.append('commentId', commentData.commentId)
+      formData.append('content', commentData.content)
+
+      if (commentData.img) {
+         formData.append('image', commentData.img) // ✅ 이미지 파일 추가
+      }
+
+      const formDataCopy = new FormData()
+      commentData.formData.forEach((value, key) => {
+         formDataCopy.append(key, value)
+      })
+
+      console.log('🔥 API로 보낼 최종 FormData 데이터:')
+      formDataCopy.forEach((value, key) => {
+         console.log(`✅ API FormData key: ${key}, value:`, value)
+      })
+
       const config = {
          headers: {
             'Content-Type': 'multipart/form-data',
          },
       }
 
-      const response = await studymingApi.put(`${API_URL}/${commentData.commentId}`, commentData, config)
+      const response = await studymingApi.put(`${API_URL}/${commentData.commentId}`, formDataCopy, config) // ✅ API 경로 수정
       return response.data
    } catch (error) {
-      console.error(`API 요청 오류: ${error.message}`)
+      console.error(`❌ 댓글 수정 API 요청 오류: ${error.message}`)
       throw error
    }
 }
@@ -92,13 +130,9 @@ export const updateComment = async (commentData) => {
 /**
  *  5. 댓글 삭제 (공지사항 예외 처리)
  */
-export const deleteComment = async ({ commentId, postCategory }) => {
-   if (postCategory === 'noti') {
-      console.warn('공지사항의 댓글은 삭제할 수 없습니다.')
-      return { success: false, message: '공지사항의 댓글은 삭제할 수 없습니다.' }
-   }
-
+export const deleteComment = async (commentId) => {
    try {
+      console.log(`${API_URL}/${commentId}`) // 요청 URL 로그 확인
       const response = await studymingApi.delete(`${API_URL}/${commentId}`)
       return response.data
    } catch (error) {

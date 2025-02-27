@@ -1,14 +1,15 @@
-import React, { useState } from 'react'
-import { useDispatch } from 'react-redux'
+import React, { useState, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { createSelector } from '@reduxjs/toolkit'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
-import { createCommentThunk, updateCommentThunk, fetchCommentsThunk } from '../features/commentSlice'
+import { createCommentThunk, updateCommentThunk, fetchCommentsThunk, deleteCommentThunk } from '../../features/commentSlice'
 import { FaImage } from 'react-icons/fa' // 🔥 이미지 아이콘 추가
 
 const CommentItem = ({ comment }) => {
-   // const { id: postId } = useParams() // ✅ 동적 postId 가져오기 boarddetail에 import할 때 URL post 값 갖고오게 하기
-   const postId = 1 // 🔥 강제로 postId를 1로 지정
+   const { id: postId } = useParams() // ✅ 동적 postId 가져오기 boarddetail에 import할 때 URL post 값 갖고오게 하기
    console.log('📝 postId 확인:', postId) // ✅ postId 값 확인
+
    const dispatch = useDispatch()
 
    // 🔥 댓글 입력값 & 수정 상태 관리
@@ -17,6 +18,9 @@ const CommentItem = ({ comment }) => {
    const [selectedImage, setSelectedImage] = useState(null) // 🔥 이미지 파일 상태 추가
    const [imageFile, setImageFile] = useState(null) // 🔥 실제 업로드할 파일
 
+   const comments = useSelector((state) => state.comments.comments)
+   // console.log('댓글 리스트:', comments)
+   //comments.map((comment) => console.log(comment))
    // ✅ 이미지 선택 핸들러
    const handleImageChange = (e) => {
       const file = e.target.files[0] // 첫 번째 선택한 파일 가져오기
@@ -28,43 +32,79 @@ const CommentItem = ({ comment }) => {
 
    // ✅ 댓글 등록 (Redux Thunk 활용)
    const handleAddComment = () => {
-      if (!editedComment.trim() && !imageFile) return // 🔥 텍스트 & 이미지 모두 없을 때 방지
+      console.log('📢 댓글 등록 요청 시작')
+
+      const numericPostId = parseInt(postId, 10)
+      console.log('📢 숫자로 변환된 postId:', numericPostId)
+
+      if (!numericPostId || isNaN(numericPostId)) {
+         console.error('❌ postId가 잘못되었습니다! API 요청을 중단합니다.')
+         return
+      }
+      console.log('✅ editedComment 타입 확인:', typeof editedComment, editedComment)
 
       const formData = new FormData()
       formData.append('content', editedComment)
-      if (imageFile) formData.append('image', imageFile) // 🔥 선택된 이미지가 있다면 추가
-      console.log('🔥 보낼 데이터:', { postId, formData })
+      if (imageFile) formData.append('image', imageFile)
 
-      dispatch(createCommentThunk({ postId, formData }))
+      console.log('📢 FormData 내부 데이터 확인:')
+      formData.forEach((value, key) => {
+         console.log(`✅ FormData key: ${key}, value:`, value)
+      })
+
+      console.log('🔥 보낼 데이터:', { postId: numericPostId, formData })
+
+      dispatch(createCommentThunk({ postId: numericPostId, formData }))
          .unwrap()
          .then(() => {
-            console.log('🔥 댓글 등록 요청 실행!') // ✅ 요청 실행 확인용 로그
-            setEditedComment('') // 등록 후 입력 필드 초기화
-            setSelectedImage(null) // 이미지 초기화
+            console.log('🔥 댓글 등록 요청 실행 완료!')
+            setEditedComment('')
+            setSelectedImage(null)
             setImageFile(null)
-            dispatch(fetchCommentsThunk(postId)) // 🔥 댓글 리스트 갱신
          })
          .catch((error) => console.error('❌ 댓글 등록 실패:', error))
    }
+
+   useEffect(() => {
+      if (postId) {
+         const numericPostId = parseInt(postId, 10)
+         dispatch(fetchCommentsThunk({ postId: numericPostId, page: 1, limit: 10 }))
+      }
+   }, [dispatch, postId])
 
    // ✅ 댓글 수정
    const handleEditComment = () => {
       if (!editedComment.trim() && !imageFile) return
 
       const formData = new FormData()
-      formData.append('id', comment.id)
+      formData.append('id', comment.id) // ✅ commentId 사용
       formData.append('content', editedComment)
       if (imageFile) formData.append('image', imageFile) // 🔥 선택된 이미지가 있다면 추가
 
-      dispatch(updateCommentThunk({ postId, formData }))
+      dispatch(updateCommentThunk({ id: comment.id, commentData: formData })) // ✅ commentId 전달
          .unwrap()
          .then(() => {
             setIsEditing(false) // 수정 완료 후, 수정 모드 해제
             setSelectedImage(null) // 이미지 초기화
             setImageFile(null)
-            dispatch(fetchCommentsThunk(postId)) // 🔥 댓글 리스트 갱신
          })
          .catch((error) => console.error('❌ 댓글 수정 실패:', error))
+   }
+   //댓글삭제
+   const handleDelete = async (commentId) => {
+      const id = Number(commentId) // 숫자로 변환
+      console.log('삭제할 댓글 ID:', commentId)
+      if (!commentId) {
+         console.error('삭제할 댓글 ID가 없습니다.')
+         return
+      }
+      try {
+         await dispatch(deleteCommentThunk(id)).unwrap()
+         alert('댓글이 삭제되었습니다.')
+      } catch (error) {
+         console.error(error)
+         alert(error || '댓글 삭제 중 오류가 발생했습니다.')
+      }
    }
 
    return (
@@ -85,19 +125,20 @@ const CommentItem = ({ comment }) => {
          {selectedImage && <ImagePreview src={selectedImage} alt="미리보기" />}
 
          {/* 🔥 댓글 렌더링 */}
-         {comment && (
-            <CommentBox>
+         {comments.map((comment) => (
+            <CommentBox key={comment.id}>
                <CommentText>
-                  <CommentAuthor>{comment.author}</CommentAuthor>
-                  <CommentContent>{comment.content}</CommentContent>
+                  <CommentAuthor>{comment.User?.nickname || '익명'}</CommentAuthor>
+                  {comment.img && <CommentImg src={`http://localhost:8000${comment.img}`} alt="댓글 이미지" />}
+                  <CommentContent>{comment.content || '내용 없음'}</CommentContent>
                   <CommentDate>{new Date(comment.createdAt).toLocaleString()}</CommentDate>
                </CommentText>
                <CommentActions>
-                  <ReportButton onClick={() => setIsEditing(true)}>수정</ReportButton>
-                  <SmallDeleteButton>삭제</SmallDeleteButton>
+                  <ReportButton onClick={handleEditComment}>수정</ReportButton>
+                  <SmallDeleteButton onClick={() => handleDelete(comment.id)}>삭제</SmallDeleteButton>
                </CommentActions>
             </CommentBox>
-         )}
+         ))}
       </>
    )
 }
@@ -173,6 +214,12 @@ const CommentBox = styled.div`
 const CommentText = styled.div`
    display: flex;
    flex-direction: column;
+`
+const CommentImg = styled.img`
+   width: 100px; /* 원하는 크기로 조정 */
+   height: auto;
+   border-radius: 5px;
+   margin-top: 5px;
 `
 
 const CommentAuthor = styled.p`

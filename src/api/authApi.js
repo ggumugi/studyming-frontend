@@ -3,7 +3,6 @@ import studymingApi from './axiosApi' // studymingApi 인스턴스를 import
 // 회원가입
 export const signupUser = async (userData) => {
    try {
-      console.log('회원가입 요청 데이터:', userData) // ✅ 실제 프론트에서 보낼 데이터 확인
       const response = await studymingApi.post('/auth/signup', userData)
       return response.data
    } catch (error) {
@@ -15,9 +14,8 @@ export const signupUser = async (userData) => {
 // 로그인
 export const loginUser = async (credentials) => {
    try {
-      console.log('📡 로그인 요청 데이터:', credentials)
       const response = await studymingApi.post('/auth/login', credentials)
-      console.log('✅ 로그인 응답 데이터:', response.data)
+
       return response.data
    } catch (error) {
       console.error('Login failed', error)
@@ -109,7 +107,6 @@ export const verifyCodepw = async (email, verificationCodepw) => {
 // 새 비밀번호 설정 함수
 export const updatePassword = async (info) => {
    try {
-      console.log('📡 API 요청 데이터:', info) // ✅ 디버깅 로그 추가
       const response = await studymingApi.patch('auth/password-reset/update-password', { email: info.email, newPassword: info.newPassword })
       return response.data
    } catch (error) {
@@ -122,7 +119,6 @@ export const updatePassword = async (info) => {
 export const logoutUser = async () => {
    try {
       const response = await studymingApi.get('/auth/logout') // ✅ 서버에 로그아웃 요청
-      console.log('✅ 로그아웃 성공:', response.data)
 
       return response.data // ✅ 로그아웃 성공 메시지 반환
    } catch (error) {
@@ -208,5 +204,16 @@ export const getKakaoUserInfo = async (accessToken) => {
    } catch (error) {
       console.error('❌ 카카오 사용자 정보 API 오류:', error)
       throw new Error(error.message || '사용자 정보 가져오기 실패')
+   }
+}
+
+//  유저 리스트 가져오기 API
+export const fetchUsers = async () => {
+   try {
+      const response = await studymingApi.get('/auth/users') // API 요청
+      return response.data.users
+   } catch (error) {
+      console.error('❌ 유저 리스트 가져오기 실패:', error)
+      throw error
    }
 }

@@ -38,7 +38,6 @@ export const banUser = async (reportId, adminId, banDays) => {
 
 // ✅ 벤 기간 변경 API
 export const updateBanPeriod = async (bannedId, newEndDate) => {
-   console.log(`🚀 정지 기간 변경 요청: { bannedId: ${bannedId}, newEndDate: '${newEndDate}' }`)
    try {
       const response = await studymingApi.put('/banned/updateban', { bannedId, newEndDate })
       return response.data
@@ -52,7 +51,7 @@ export const updateBanPeriod = async (bannedId, newEndDate) => {
 export const fetchBannedUsers = async () => {
    try {
       const response = await studymingApi.get('/banned/bannedusers')
-      console.log('🚀 Banned Users Fetched:', response.data) // ✅ 데이터 확인 로그
+
       return response.data
    } catch (error) {
       console.error('❌ 정지된 유저 목록 불러오기 실패:', error)
