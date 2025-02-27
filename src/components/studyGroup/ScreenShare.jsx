@@ -1,299 +1,313 @@
-// import React, { useEffect, useRef, useState } from 'react'
-// import io from 'socket.io-client'
-// import styled from 'styled-components'
-
-// const socket = io('http://localhost:3000')
-
-// socket.on('connect', () => {
-//    console.log('소켓 연결 성공:', socket.id)
-// })
-
-// socket.on('connect_error', (err) => {
-//    console.error('소켓 연결 실패:', err)
-// })
-
-// const ScreenShare = ({ groupmembers }) => {
-//    const [streams, setStreams] = useState([])
-//    const peerConnections = useRef({})
-
-//    useEffect(() => {
-//       const startScreenShare = async () => {
-//          try {
-//             // 1. 화면 공유 스트림 가져오기
-//             const stream = await navigator.mediaDevices.getDisplayMedia({ video: true })
-//             console.log('화면 공유 스트림:', stream)
-//             setStreams((prevStreams) => [...prevStreams, { id: socket.id, stream }])
-
-//             // 2. 각 그룹 멤버에 대해 PeerConnection 생성
-//             groupmembers.forEach((member) => {
-//                const peerConnection = new RTCPeerConnection({
-//                   iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-//                })
-
-//                console.log('PeerConnection 생성:', member.id, peerConnection)
-
-//                // 3. 스트림 트랙 추가
-//                stream.getTracks().forEach((track) => peerConnection.addTrack(track, stream))
-
-//                // 4. ICE Candidate 이벤트 핸들러
-//                peerConnection.onicecandidate = (event) => {
-//                   if (event.candidate) {
-//                      console.log('Candidate 생성:', event.candidate)
-//                      socket.emit('candidate', { candidate: event.candidate, roomId: groupmembers.groupId, to: member.id })
-//                   }
-//                }
-
-//                // 5. 원격 스트림 처리
-//                peerConnection.ontrack = (event) => {
-//                   if (event.streams && event.streams[0]) {
-//                      console.log('원격 스트림 수신:', event.streams[0])
-//                      setStreams((prevStreams) => {
-//                         // 이미 스트림이 추가된 멤버인지 확인
-//                         if (!prevStreams.some((s) => s.id === member.id)) {
-//                            return [...prevStreams, { id: member.id, stream: event.streams[0] }]
-//                         }
-//                         return prevStreams
-//                      })
-//                   }
-//                }
-
-//                // 6. PeerConnection 저장
-//                peerConnections.current[member.id] = peerConnection
-//             })
-
-//             // 7. 방에 입장
-//             socket.emit('join_room', groupmembers.groupId)
-
-//             // 8. 소켓 이벤트 핸들러 등록
-//             socket.on('offer', handleOffer)
-//             socket.on('answer', handleAnswer)
-//             socket.on('candidate', handleCandidate)
-
-//             // 9. Offer 생성 및 전송
-//             const myPeerConnection = peerConnections.current[Object.keys(peerConnections.current)[0]]
-//             if (myPeerConnection) {
-//                const offer = await myPeerConnection.createOffer()
-//                console.log('Offer 생성:', offer)
-//                await myPeerConnection.setLocalDescription(offer)
-//                socket.emit('offer', { sdp: myPeerConnection.localDescription, roomId: groupmembers.groupId, to: Object.keys(peerConnections.current)[0] })
-//             }
-//          } catch (err) {
-//             console.error('화면 공유 실패: ', err)
-//          }
-//       }
-
-//       // Offer 처리
-//       const handleOffer = async (data) => {
-//          console.log('Offer 수신:', data)
-//          const peerConnection = peerConnections.current[data.from]
-//          if (peerConnection) {
-//             await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp))
-//             const answer = await peerConnection.createAnswer()
-//             console.log('Answer 생성:', answer)
-//             await peerConnection.setLocalDescription(answer)
-//             socket.emit('answer', { sdp: peerConnection.localDescription, roomId: data.groupmembers.groupId, to: data.from })
-//          }
-//       }
-
-//       // Answer 처리
-//       const handleAnswer = async (data) => {
-//          console.log('Answer 수신:', data)
-//          const peerConnection = peerConnections.current[data.from]
-//          if (peerConnection) {
-//             await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp))
-//          }
-//       }
-
-//       // ICE Candidate 처리
-//       const handleCandidate = (data) => {
-//          console.log('Candidate 수신:', data)
-//          const peerConnection = peerConnections.current[data.from]
-//          if (peerConnection) {
-//             peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate))
-//          }
-//       }
-
-//       // 화면 공유 시작
-//       startScreenShare()
-
-//       // 컴포넌트 언마운트 시 정리
-//       return () => {
-//          socket.off('offer', handleOffer)
-//          socket.off('answer', handleAnswer)
-//          socket.off('candidate', handleCandidate)
-//          Object.values(peerConnections.current).forEach((pc) => pc.close())
-//       }
-//    }, [groupmembers.groupId, groupmembers])
-
-//    return (
-//       <Container>
-//          {groupmembers.map((member) => (
-//             <ScreenBox key={member.id}>
-//                {member.shareState ? (
-//                   <ScreenVideo
-//                      autoPlay
-//                      ref={(video) => {
-//                         if (video) {
-//                            const stream = streams.find((s) => s.id === member.id)?.stream
-//                            if (stream) video.srcObject = stream
-//                         }
-//                      }}
-//                   />
-//                ) : (
-//                   <BlackBackground />
-//                )}
-//                <Nickname>{member.User.nickname}</Nickname>
-//             </ScreenBox>
-//          ))}
-//       </Container>
-//    )
-// }
-
-// export default ScreenShare
-
-// // ⭐ Styled Components
-// const Container = styled.div`
-//    display: grid;
-//    grid-template-columns: repeat(2, 1fr);
-//    grid-template-rows: repeat(3, 1fr);
-//    gap: 16px;
-//    width: 100%;
-//    height: 150vh;
-//    padding: 20px;
-// `
-
-// const ScreenBox = styled.div`
-//    position: relative;
-//    display: flex;
-//    justify-content: center;
-//    align-items: center;
-//    border: 2px solid #ddd;
-//    border-radius: 8px;
-//    overflow: hidden;
-//    background-color: #000;
-// `
-
-// const ScreenVideo = styled.video`
-//    width: 100%;
-//    max-width: 750px;
-//    height: auto;
-//    object-fit: cover;
-// `
-
-// const Nickname = styled.div`
-//    position: absolute;
-//    bottom: 10px;
-//    right: 10px;
-//    background: rgba(0, 0, 0, 0.6);
-//    color: #fff;
-//    padding: 10px 15px;
-//    border-radius: 5px;
-//    font-size: 14px;
-// `
-
-// const BlackBackground = styled.div`
-//    width: 100%;
-//    height: 100%;
-//    background-color: #000;
-// `
-
 import React, { useEffect, useRef, useState } from 'react'
 import io from 'socket.io-client'
 import styled from 'styled-components'
 
 const socket = io('http://localhost:3000') // 서버 주소
 
-// 🔥 Mock 데이터 (더미 데이터, 추후 백엔드 데이터로 대체 가능)
-const mockScreens = [
-   { id: 1, nickname: '사용자1', screenUrl: '/img/camTest.png' },
-   { id: 2, nickname: '사자2', screenUrl: '/img/camTest1.png' },
-   { id: 3, nickname: '사용자3', screenUrl: '/img/camTest2.png' },
-   { id: 4, nickname: '사용자4', screenUrl: '/img/camTest3.png' },
-   { id: 5, nickname: '사용자5', screenUrl: '/img/camTest.png' },
-   { id: 6, nickname: '사용자6dd', screenUrl: '/img/camTest.png' },
-]
-
 const ScreenShare = ({ groupmembers }) => {
-   const [streams, setStreams] = useState([])
+   const [streams, setStreams] = useState({}) // 멤버별 스트림을 관리하는 객체
    const peerConnections = useRef({})
+   const localStreamRef = useRef(null)
 
    useEffect(() => {
-      const startScreenShare = async () => {
-         try {
-            const stream = await navigator.mediaDevices.getDisplayMedia({ video: true })
-            setStreams((prevStreams) => [...prevStreams, { id: socket.id, stream }])
+      // 소켓 이벤트 리스너 등록
+      socket.on('offer', handleOffer)
+      socket.on('answer', handleAnswer)
+      socket.on('candidate', handleCandidate)
+      socket.on('user-joined', handleUserJoined)
 
-            groupmembers.forEach((member) => {
-               const peerConnection = new RTCPeerConnection({
-                  iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-               })
+      // 방에 입장
+      socket.emit('join_room', { roomId: groupmembers.groupId })
 
-               stream.getTracks().forEach((track) => peerConnection.addTrack(track, stream))
-
-               peerConnection.onicecandidate = (event) => {
-                  if (event.candidate) {
-                     socket.emit('candidate', { candidate: event.candidate, roomId: groupmembers.groupId })
-                  }
-               }
-
-               peerConnection.ontrack = (event) => {
-                  setStreams((prevStreams) => [...prevStreams, { id: member.id, stream: event.streams[0] }])
-               }
-
-               peerConnections.current[member.id] = peerConnection
-            })
-
-            socket.emit('join_room', groupmembers.groupId)
-
-            socket.on('offer', handleOffer)
-            socket.on('answer', handleAnswer)
-            socket.on('candidate', handleCandidate)
-
-            const offer = await peerConnections.current[socket.id].createOffer()
-            await peerConnections.current[socket.id].setLocalDescription(offer)
-
-            socket.emit('offer', { sdp: peerConnections.current[socket.id].localDescription, roomId: groupmembers.groupId })
-         } catch (err) {
-            console.error('화면 공유 실패: ', err)
-         }
-      }
-
-      const handleOffer = async (data) => {
-         const peerConnection = peerConnections.current[data.from]
-         await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp))
-         const answer = await peerConnection.createAnswer()
-         await peerConnection.setLocalDescription(answer)
-         socket.emit('answer', { sdp: peerConnection.localDescription, roomId: data.groupmembers.groupId })
-      }
-
-      const handleAnswer = async (data) => {
-         const peerConnection = peerConnections.current[data.from]
-         await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp))
-      }
-
-      const handleCandidate = (data) => {
-         const peerConnection = peerConnections.current[data.from]
-         peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate))
-      }
-
+      // 화면 공유 시작
       startScreenShare()
 
+      // 컴포넌트 언마운트 시 이벤트 리스너 제거 및 PeerConnection 종료
       return () => {
          socket.off('offer', handleOffer)
          socket.off('answer', handleAnswer)
          socket.off('candidate', handleCandidate)
+         socket.off('user-joined', handleUserJoined)
+
+         // 로컬 스트림 트랙 종료
+         if (localStreamRef.current) {
+            localStreamRef.current.getTracks().forEach((track) => track.stop())
+         }
+
+         // PeerConnection 종료
          Object.values(peerConnections.current).forEach((pc) => pc.close())
       }
-   }, [groupmembers.groupId, groupmembers])
+   }, [])
+
+   const startScreenShare = async () => {
+      try {
+         // 화면 공유 스트림 생성
+         const stream = await navigator.mediaDevices.getDisplayMedia({
+            video: { cursor: 'always' },
+            audio: false,
+         })
+         console.log('화면 공유 스트림:', stream)
+
+         // 로컬 스트림 저장
+         localStreamRef.current = stream
+
+         // 자신의 스트림 추가 - 소켓 ID 대신 'local' 사용
+         setStreams((prevStreams) => ({
+            ...prevStreams,
+            local: stream,
+         }))
+
+         // 화면 공유 시작 알림
+         socket.emit('screen_share_started', { roomId: groupmembers.groupId })
+
+         // 다른 사용자들과 연결
+         createPeerConnections()
+      } catch (err) {
+         console.error('화면 공유 실패: ', err)
+      }
+   }
+
+   const createPeerConnections = () => {
+      // 각 멤버에 대해 RTCPeerConnection 생성
+      groupmembers.forEach((member) => {
+         if (member.id === socket.id) return // 자신은 제외
+
+         const peerConnection = new RTCPeerConnection({
+            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }],
+         })
+
+         // 연결 상태 변화 이벤트 처리
+         peerConnection.oniceconnectionstatechange = () => {
+            console.log(`ICE 연결 상태 (${member.id}):`, peerConnection.iceConnectionState)
+         }
+
+         peerConnection.onconnectionstatechange = () => {
+            console.log(`연결 상태 (${member.id}):`, peerConnection.connectionState)
+         }
+
+         // 스트림 트랙 추가
+         if (localStreamRef.current) {
+            localStreamRef.current.getTracks().forEach((track) => {
+               peerConnection.addTrack(track, localStreamRef.current)
+               console.log('트랙 추가:', track)
+            })
+         }
+
+         // ICE Candidate 이벤트 처리
+         peerConnection.onicecandidate = (event) => {
+            if (event.candidate) {
+               console.log('ICE Candidate 전송:', event.candidate)
+               socket.emit('candidate', {
+                  candidate: event.candidate,
+                  roomId: groupmembers.groupId,
+                  to: member.id,
+                  from: socket.id,
+               })
+            }
+         }
+
+         // 원격 스트림 수신 시 처리
+         peerConnection.ontrack = (event) => {
+            console.log('원격 스트림 수신:', event.streams[0])
+            setStreams((prevStreams) => ({
+               ...prevStreams,
+               [member.id]: event.streams[0],
+            }))
+         }
+
+         // PeerConnection 저장
+         peerConnections.current[member.id] = peerConnection
+
+         // 오퍼 생성 및 전송
+         createAndSendOffer(member.id, peerConnection)
+      })
+   }
+
+   const createAndSendOffer = async (memberId, peerConnection) => {
+      try {
+         const offer = await peerConnection.createOffer()
+         await peerConnection.setLocalDescription(offer)
+         console.log('오퍼 생성:', offer)
+
+         socket.emit('offer', {
+            sdp: offer,
+            roomId: groupmembers.groupId,
+            to: memberId,
+            from: socket.id,
+         })
+      } catch (error) {
+         console.error('오퍼 생성 실패:', error)
+      }
+   }
+
+   // 사용자 입장 처리
+   const handleUserJoined = (data) => {
+      console.log('사용자 입장:', data)
+      // 새로운 사용자와 연결
+      const newUserId = data.userId
+
+      if (newUserId !== socket.id && !peerConnections.current[newUserId]) {
+         const peerConnection = new RTCPeerConnection({
+            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }],
+         })
+
+         // 연결 상태 변화 이벤트 처리
+         peerConnection.oniceconnectionstatechange = () => {
+            console.log(`ICE 연결 상태 (${newUserId}):`, peerConnection.iceConnectionState)
+         }
+
+         // 스트림 트랙 추가
+         if (localStreamRef.current) {
+            localStreamRef.current.getTracks().forEach((track) => {
+               peerConnection.addTrack(track, localStreamRef.current)
+            })
+         }
+
+         // ICE Candidate 이벤트 처리
+         peerConnection.onicecandidate = (event) => {
+            if (event.candidate) {
+               socket.emit('candidate', {
+                  candidate: event.candidate,
+                  roomId: groupmembers.groupId,
+                  to: newUserId,
+                  from: socket.id,
+               })
+            }
+         }
+
+         // 원격 스트림 수신 시 처리
+         peerConnection.ontrack = (event) => {
+            console.log('원격 스트림 수신:', event.streams[0])
+            setStreams((prevStreams) => ({
+               ...prevStreams,
+               [newUserId]: event.streams[0],
+            }))
+         }
+
+         // PeerConnection 저장
+         peerConnections.current[newUserId] = peerConnection
+
+         // 오퍼 생성 및 전송
+         createAndSendOffer(newUserId, peerConnection)
+      }
+   }
+
+   // 오퍼 처리
+   const handleOffer = async (data) => {
+      console.log('오퍼 수신:', data)
+      try {
+         const { sdp, from } = data
+
+         // PeerConnection이 없으면 생성
+         if (!peerConnections.current[from]) {
+            const peerConnection = new RTCPeerConnection({
+               iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }],
+            })
+
+            // 연결 상태 변화 이벤트 처리
+            peerConnection.oniceconnectionstatechange = () => {
+               console.log(`ICE 연결 상태 (${from}):`, peerConnection.iceConnectionState)
+            }
+
+            // 스트림 트랙 추가
+            if (localStreamRef.current) {
+               localStreamRef.current.getTracks().forEach((track) => {
+                  peerConnection.addTrack(track, localStreamRef.current)
+               })
+            }
+
+            // ICE Candidate 이벤트 처리
+            peerConnection.onicecandidate = (event) => {
+               if (event.candidate) {
+                  socket.emit('candidate', {
+                     candidate: event.candidate,
+                     roomId: groupmembers.groupId,
+                     to: from,
+                     from: socket.id,
+                  })
+               }
+            }
+
+            // 원격 스트림 수신 시 처리
+            peerConnection.ontrack = (event) => {
+               console.log('원격 스트림 수신:', event.streams[0])
+               setStreams((prevStreams) => ({
+                  ...prevStreams,
+                  [from]: event.streams[0],
+               }))
+            }
+
+            // PeerConnection 저장
+            peerConnections.current[from] = peerConnection
+         }
+
+         const peerConnection = peerConnections.current[from]
+         await peerConnection.setRemoteDescription(new RTCSessionDescription(sdp))
+
+         const answer = await peerConnection.createAnswer()
+         await peerConnection.setLocalDescription(answer)
+         console.log('앤서 생성:', answer)
+
+         socket.emit('answer', {
+            sdp: answer,
+            roomId: groupmembers.groupId,
+            to: from,
+            from: socket.id,
+         })
+      } catch (error) {
+         console.error('오퍼 처리 실패:', error)
+      }
+   }
+
+   // 앤서 처리
+   const handleAnswer = async (data) => {
+      console.log('앤서 수신:', data)
+      try {
+         const { sdp, from } = data
+         const peerConnection = peerConnections.current[from]
+
+         if (peerConnection) {
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(sdp))
+            console.log('원격 설명 설정 완료')
+         }
+      } catch (error) {
+         console.error('앤서 처리 실패:', error)
+      }
+   }
+
+   // ICE Candidate 처리
+   const handleCandidate = (data) => {
+      console.log('ICE Candidate 수신:', data)
+      try {
+         const { candidate, from } = data
+         const peerConnection = peerConnections.current[from]
+
+         if (peerConnection) {
+            peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
+            console.log('ICE Candidate 추가 완료')
+         }
+      } catch (error) {
+         console.error('ICE Candidate 처리 실패:', error)
+      }
+   }
 
    return (
       <Container>
-         {streams.map(({ id, stream }) => (
-            <ScreenBox key={id}>
-               <Screenvideo autoPlay ref={(video) => video && (video.srcObject = stream)} />
-               <Nickname>{groupmembers.find((member) => member.id === id)?.nickname || '사용자'}</Nickname>
-            </ScreenBox>
-         ))}
+         {/* 자신의 화면 공유 */}
+         <ScreenBox key="local">
+            {streams.local ? <Screenvideo autoPlay muted ref={(video) => video && (video.srcObject = streams.local)} /> : <BlackScreen />}
+            <Nickname>내 화면</Nickname>
+         </ScreenBox>
+
+         {/* 다른 멤버들의 화면 */}
+         {groupmembers
+            .filter((member) => member.id !== socket.id)
+            .map((member) => (
+               <ScreenBox key={member.id}>
+                  {streams[member.id] ? <Screenvideo autoPlay ref={(video) => video && (video.srcObject = streams[member.id])} /> : <BlackScreen />}
+                  <Nickname>{member.nickname || '사용자'}</Nickname>
+               </ScreenBox>
+            ))}
       </Container>
    )
 }
@@ -320,6 +334,7 @@ const ScreenBox = styled.div`
    border-radius: 8px;
    overflow: hidden;
    background-color: #000;
+   min-height: 200px;
 `
 
 const Screenvideo = styled.video`
@@ -327,6 +342,12 @@ const Screenvideo = styled.video`
    max-width: 750px;
    height: auto;
    object-fit: cover;
+`
+
+const BlackScreen = styled.div`
+   width: 100%;
+   height: 100%;
+   background-color: #000;
 `
 
 const Nickname = styled.div`
