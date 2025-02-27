@@ -29,6 +29,7 @@ import StudyLeaderTransferPage from './pages/StudyLeaderTransferPage'
 import InfoPage from './pages/InfoPage'
 import EditMingShopPage from './pages/EditMingShopPage'
 // import Sidebar from './components/shared/Sidebar'
+import StudyLeaderTransfer from './components/Study/StudyLeaderTransfer'
 
 import { checkAuthStatusThunk } from './features/authSlice'
 import { useDispatch, useSelector } from 'react-redux'
@@ -97,8 +98,8 @@ function App() {
             <Route path="/study/create" element={<StudyCreatePage isAuthenticated={isAuthenticated} user={user} />} />
             <Route path="/study/detail/:id" element={<StudyDetailPage isAuthenticated={isAuthenticated} user={user} />} />
             <Route path="/study/edit/:id" element={<StudyEditPage isAuthenticated={isAuthenticated} user={user} />} />
-            <Route path="/study/leader/exit" element={<StudyLeaderExitPendingPage />} isAuthenticated={isAuthenticated} user={user} />
-            <Route path="/study/leader/transfer" element={<StudyLeaderTransferPage />} isAuthenticated={isAuthenticated} user={user} />
+            <Route path="/study/leader/exit" element={<StudyLeaderExitPendingPage isAuthenticated={isAuthenticated} user={user} />} />
+            <Route path="/study/leader/transfer/:id" element={<StudyLeaderTransfer isAuthenticated={isAuthenticated} user={user} />} />
          </Routes>
          {/* <Sidebar/> */}
          <Footer />
