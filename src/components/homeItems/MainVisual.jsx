@@ -1,4 +1,8 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+
+import { fetchPostsThunk } from '../../features/postSlice'
+
 import styled from 'styled-components'
 import Slider from 'react-slick'
 import 'slick-carousel/slick/slick.css'
@@ -8,11 +12,6 @@ import { AiOutlineLeft, AiOutlineRight } from 'react-icons/ai'
 // ✅ 캐러셀 데이터 (예제)
 /* 타이틀 최대 40자.  
 안그러면 줄넘어가고 간격 이상해짐 */
-const carouselData = [
-   { title: '제 23회 가맹거래사 1차 빈자리 원서접수', date: '02 / 12' },
-   { title: '변리사 2차 시험 D-3000111111111100000111111111', date: '03 / 15' },
-   { title: '공인회계사 CPA 1차 발표', date: '04 / 05' },
-]
 
 // ✅ 커스텀 화살표 (왼쪽)
 const PrevArrow = ({ onClick }) => (
@@ -42,16 +41,31 @@ const settings = {
 }
 
 const MainVisual = () => {
+   const dispatch = useDispatch()
+   const { posts, loading } = useSelector((state) => state.posts)
+
+   useEffect(() => {
+      dispatch(fetchPostsThunk({ page: 1, category: 'noti', limit: 5 }))
+   }, [dispatch])
+
    return (
       <MainBanner>
-         <StyledSlider {...settings}>
-            {carouselData.map((item, index) => (
-               <CarouselItem key={index}>
-                  <h3>{item.title}</h3>
-                  <p>{item.date}</p>
-               </CarouselItem>
-            ))}
-         </StyledSlider>
+         {loading ? (
+            <p>로딩 중...</p>
+         ) : (
+            <StyledSlider {...settings}>
+               {posts.length > 0 ? (
+                  posts.map((item, index) => (
+                     <CarouselItem key={index}>
+                        <h3>{item.title}</h3>
+                        <p>{item.content}</p>
+                     </CarouselItem>
+                  ))
+               ) : (
+                  <p>공지사항이 없습니다.</p>
+               )}
+            </StyledSlider>
+         )}
       </MainBanner>
    )
 }
