@@ -130,6 +130,10 @@ const BoardCreate = ({ user, category, onSubmit, initialValues = {} }) => {
          <FormGroup>
             <Label>내용</Label>
             <StyledTextField variant="outlined" placeholder="내용을 입력해주세요." multiline rows={15} value={content} onChange={(e) => setContent(e.target.value)} />
+            <UploadButton>
+               <input type="file" accept="image/*" multiple onChange={handleImageUpload} />
+               이미지 업로드
+            </UploadButton>
          </FormGroup>
 
          {/* ✅ 기존 이미지 표시 및 삭제 기능 */}
@@ -149,10 +153,6 @@ const BoardCreate = ({ user, category, onSubmit, initialValues = {} }) => {
 
          <ButtonContainer>
             <UploadContainer>
-               <UploadButton>
-                  <input type="file" accept="image/*" multiple onChange={handleImageUpload} />
-                  이미지 업로드
-               </UploadButton>
                {imageFiles.length > 0 &&
                   imageFiles.map((file, index) => {
                      const previewURL = URL.createObjectURL(file)
@@ -164,10 +164,8 @@ const BoardCreate = ({ user, category, onSubmit, initialValues = {} }) => {
                      )
                   })}
             </UploadContainer>
-
-            <SubmitButton onClick={handleSubmit}>{initialValues ? '수정하기' : '글쓰기'}</SubmitButton>
          </ButtonContainer>
-
+         <SubmitButton onClick={handleSubmit}>{initialValues ? '수정하기' : '글쓰기'}</SubmitButton>
          <BackButton onClick={() => navigate(-1)}>← 뒤로가기</BackButton>
       </Container>
    )
@@ -184,7 +182,6 @@ const Container = styled.div`
    background-color: #fff;
    display: flex;
    flex-direction: column;
-   gap: 20px;
 `
 
 const Header = styled.div`
@@ -232,10 +229,11 @@ const ButtonContainer = styled.div`
 const UploadContainer = styled.div`
    display: flex;
    justify-content: flex-start;
-   margin-left: 120px;
+   align-items: center;
 `
 
 const UploadButton = styled.label`
+   margin-top: 20px;
    display: inline-block;
    padding: 10px 15px;
    font-size: 14px;
@@ -244,7 +242,7 @@ const UploadButton = styled.label`
    border-radius: 20px;
    cursor: pointer;
    text-align: center;
-   width: 150px;
+   width: 110px;
 
    input {
       display: none;
@@ -264,7 +262,8 @@ const SubmitButton = styled(Button).attrs({
       font-weight: bold;
       padding: 10px 20px;
       border-radius: 20px;
-
+      width: 110px;
+      margin: 10px auto 100px auto;
       &:hover {
          background-color: #e66a00;
       }
@@ -273,12 +272,13 @@ const SubmitButton = styled(Button).attrs({
 
 const BackButton = styled(Button)`
    && {
+      margin-bottom: 50px;
       background-color: #ddd;
       color: #333;
-      font-weight: bold;
-      padding: 10px 20px;
+      font-weight: 400;
+      padding: 5px 20px;
       border-radius: 20px;
-      width: 150px;
+      width: 50%;
       align-self: center;
 
       &:hover {

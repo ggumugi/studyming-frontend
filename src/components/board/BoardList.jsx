@@ -64,6 +64,11 @@ const BoardList = ({ category }) => {
       }
    }
 
+   // const handleWriteClick = () => {
+   //    navigate('/board/create')
+   //    window.location.reload()
+   // }
+
    return (
       <Container>
          <Header>
