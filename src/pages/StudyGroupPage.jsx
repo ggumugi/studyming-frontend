@@ -69,6 +69,7 @@ const StudyGroupPage = ({ isAuthenticated, user }) => {
          })
          .finally(() => setIsModalOpen(false)) // 모달 닫기
    }
+   console.log('studygroup ', studygroup, 'groupmembers', groupmembers)
 
    return (
       <>

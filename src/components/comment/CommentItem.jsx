@@ -2,12 +2,11 @@ import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
-import { createCommentThunk, updateCommentThunk, fetchCommentsThunk } from '../features/commentSlice'
+import { createCommentThunk, updateCommentThunk, fetchCommentsThunk } from '../../features/commentSlice'
 import { FaImage } from 'react-icons/fa' // 🔥 이미지 아이콘 추가
 
 const CommentItem = ({ comment }) => {
-   // const { id: postId } = useParams() // ✅ 동적 postId 가져오기 boarddetail에 import할 때 URL post 값 갖고오게 하기
-   const postId = 1 // 🔥 강제로 postId를 1로 지정
+   const { id: postId } = useParams() // ✅ 동적 postId 가져오기 boarddetail에 import할 때 URL post 값 갖고오게 하기
    console.log('📝 postId 확인:', postId) // ✅ postId 값 확인
    const dispatch = useDispatch()
 

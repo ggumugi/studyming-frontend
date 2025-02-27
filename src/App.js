@@ -11,7 +11,7 @@ import BoardListPage from './pages/BoardListPage'
 import BoardCreatePage from './pages/BoardCreatePage'
 import BoardEditPage from './pages/BoardEditPage'
 import BoardDetailPage from './pages/BoardDetailPage'
-import CommenItem from './comment/CommentItem'
+import CommenItem from './components/comment/CommentItem'
 
 import MyPage from './pages/MyPage'
 import FindIdPage from './pages/FindIdPage'
