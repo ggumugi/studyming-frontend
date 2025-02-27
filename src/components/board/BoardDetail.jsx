@@ -14,13 +14,6 @@ const BoardDetail = () => {
    const { id } = useParams() // ✅ URL에서 postId 가져오기
    const post = useSelector((state) => state.posts.post)
 
-   const [isEditing, setIsEditing] = useState(false)
-   const [comments, setComments] = useState([
-      { id: 1, author: '수험박', text: '정신차리세요... 32년 동안 공부하셨다면서요', date: '2025.01.06. 15:30' },
-      { id: 2, author: '희경이', text: '어? 기사시험 그저께였는데요?', date: '2025.01.06. 15:35' },
-   ])
-   const [newComment, setNewComment] = useState('')
-
    useEffect(() => {
       if (id) {
          dispatch(fetchPostByIdThunk(id))
@@ -51,23 +44,23 @@ const BoardDetail = () => {
       }
    }
 
-   // ✅ 댓글 추가 기능
-   const handleAddComment = () => {
-      if (!newComment.trim()) return
-      const newEntry = {
-         id: comments.length + 1,
-         author: '익명',
-         text: newComment,
-         date: new Date().toISOString().replace('T', ' ').slice(0, 16),
-      }
-      setComments([...comments, newEntry])
-      setNewComment('') // 입력 필드 초기화
-   }
+   // // ✅ 댓글 추가 기능
+   // const handleAddComment = () => {
+   //    if (!newComment.trim()) return
+   //    const newEntry = {
+   //       id: comments.length + 1,
+   //       author: '익명',
+   //       text: newComment,
+   //       date: new Date().toISOString().replace('T', ' ').slice(0, 16),
+   //    }
+   //    setComments([...comments, newEntry])
+   //    setNewComment('') // 입력 필드 초기화
+   // }
 
    // ✅ 댓글 삭제 기능
-   const handleDeleteComment = (id) => {
-      setComments(comments.filter((comment) => comment.id !== id))
-   }
+   // const handleDeleteComment = (id) => {
+   //    setComments(comments.filter((comment) => comment.id !== id))
+   // }
 
    return (
       <Container>
@@ -98,25 +91,7 @@ const BoardDetail = () => {
             </ImageContainer>
          )}
 
-         <CommentItem></CommentItem>
-         <CommentSection>
-            <CommentInput placeholder="댓글을 입력해주세요." value={newComment} onChange={(e) => setNewComment(e.target.value)} />
-            <CommentButton onClick={handleAddComment}>등록</CommentButton>
-         </CommentSection>
-
-         {comments.map((comment) => (
-            <CommentBox key={comment.id}>
-               <CommentText>
-                  <CommentAuthor>{comment.author}</CommentAuthor>
-                  <CommentContent>{comment.text}</CommentContent>
-                  <CommentDate>{comment.date}</CommentDate>
-               </CommentText>
-               <CommentActions>
-                  <ReportButton>수정</ReportButton>
-                  <SmallDeleteButton onClick={() => handleDeleteComment(comment.id)}>삭제</SmallDeleteButton>
-               </CommentActions>
-            </CommentBox>
-         ))}
+         <CommentItem />
 
          <ButtonWrapper>
             <BackButton onClick={() => navigate('/board')}>목록</BackButton>
