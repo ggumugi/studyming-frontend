@@ -6,6 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import styled from 'styled-components'
 
 import { fetchPostsThunk, deletePostThunk, fetchPostByIdThunk } from '../../features/postSlice'
+import CommentItem from '../comment/CommentItem'
 
 const BoardDetail = () => {
    const dispatch = useDispatch()
@@ -97,6 +98,7 @@ const BoardDetail = () => {
             </ImageContainer>
          )}
 
+         <CommentItem></CommentItem>
          <CommentSection>
             <CommentInput placeholder="댓글을 입력해주세요." value={newComment} onChange={(e) => setNewComment(e.target.value)} />
             <CommentButton onClick={handleAddComment}>등록</CommentButton>
