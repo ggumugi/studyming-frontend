@@ -10,6 +10,7 @@ import Timer from '../components/shared/Timer'
 
 import { fetchStudygroupByIdThunk } from '../features/studygroupSlice'
 import { fetchGroupMembersThunk, participateInGroupThunk } from '../features/groupmemberSlice'
+import Ejection from '../components/shared/Ejection'
 
 const StudyGroupPage = ({ isAuthenticated, user }) => {
    const dispatch = useDispatch()
@@ -19,6 +20,17 @@ const StudyGroupPage = ({ isAuthenticated, user }) => {
    const { groupmembers } = useSelector((state) => state.groupmembers.groupmember)
    const [selectedMenu, setSelectedMenu] = useState('채팅')
    const [isModalOpen, setIsModalOpen] = useState(false) // 모달 상태 관리
+   const [isEjectionModalOpen, setIsEjectionModalOpen] = useState(false)
+
+   const handleEjectionModalOpen = () => {
+      console.log('🔥 강퇴 모달 열기 클릭됨')
+      setIsEjectionModalOpen(true)
+   }
+
+   const handleEjectionModalClose = () => {
+      console.log('❌ 강퇴 모달 닫기 클릭됨')
+      setIsEjectionModalOpen(false)
+   }
 
    const renderComponent = () => {
       switch (selectedMenu) {
@@ -68,10 +80,15 @@ const StudyGroupPage = ({ isAuthenticated, user }) => {
                <ContentArea>
                   <Header>
                      <h1>{studygroup.name}</h1>
-                     <OutButton onClick={handleStudyOutClick}>나가기</OutButton>
+                     <div>
+                        {studygroup.createdBy === user?.id && <OutButton onClick={handleEjectionModalOpen}>강퇴</OutButton>}
+                        <OutButton onClick={handleStudyOutClick}>나가기</OutButton>
+                     </div>
                   </Header>
                   {renderComponent()}
                </ContentArea>
+               {/* ✅ 강퇴 모달 추가 */}
+               {isEjectionModalOpen && <Ejection isOpen={isEjectionModalOpen} onClose={handleEjectionModalClose} groupId={id} />}
                {isModalOpen && (
                   <Modal>
                      <ModalContent>

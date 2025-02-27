@@ -3,7 +3,6 @@ import studymingApi from './axiosApi'
 // ✅ 아이템 등록 API
 export const createItem = async (itemData) => {
    try {
-      console.log('📌 API 요청 데이터:', [...itemData.entries()]) // ✅ FormData 확인
       const config = {
          headers: {
             'Content-Type': 'multipart/form-data', // 파일 전송시 반드시 지정
