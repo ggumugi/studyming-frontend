@@ -14,7 +14,7 @@ const pythonApi = axios.create({
 export const fetchCaptcha = async () => {
    try {
       const response = await pythonApi.get(`/captchaImage`)
-      console.log(response.data)
+
       return response.data
    } catch (error) {
       console.error(`API 오류: ${error.message}`)

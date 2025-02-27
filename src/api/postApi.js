@@ -12,7 +12,7 @@ export const createPost = async (postData) => {
       }
 
       const response = await studymingApi.post(API_URL, postData, config)
-      console.log(response, 'api')
+
       return response
    } catch (error) {
       console.error(`API 요청 오류: ${error.message}`)
@@ -33,8 +33,6 @@ export const fetchPosts = async ({ page, category, limit, searchType, searchKeyw
          params.searchType = searchType // 'title' 또는 'author' 전송
          params.searchKeyword = searchKeyword // 검색어 전송
       }
-
-      console.log(`🛠 API 요청 URL: /post`, params)
 
       const response = await studymingApi.get('/post', { params })
       return response.data
@@ -115,9 +113,7 @@ export const updatePost = async (id, postData, imagesToRemove) => {
          })
       }
 
-      console.log('🔍 [수정 요청] formData:')
       for (const pair of postData.entries()) {
-         console.log(`${pair[0]}:`, pair[1])
       }
 
       const response = await studymingApi.put(`/post/${id}`, postData, config)

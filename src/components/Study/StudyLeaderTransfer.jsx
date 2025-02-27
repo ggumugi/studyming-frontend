@@ -1,24 +1,21 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
+import { transferGroupLeaderThunk } from '../../features/groupmemberSlice'
 
 import styled from 'styled-components'
 
-const StudyLeaderTransfer = ({ user }) => {
+const StudyLeaderTransfer = () => {
    const dispatch = useDispatch()
    const navigate = useNavigate()
    const { id } = useParams() // URL에서 스터디 그룹 ID 추출
    const { groupmembers } = useSelector((state) => state.groupmembers.groupmember) // Redux 상태 가져오기
-   const [selectedLeader, setSelectedLeader] = useState('')
-
-   useEffect(() => {
-      console.log('Redux에서 가져온 groupmembers:', groupmembers) // ✅ 데이터 확인
-   }, [groupmembers])
+   const [selectedLeader, setSelectedLeader] = useState(null)
 
    const filteredMembers = groupmembers.filter((member) => member.role !== 'leader') // ✅ 방장 제외
-   console.log('filteredMembers', filteredMembers)
+
    const handleLeaderChange = (e) => {
-      setSelectedLeader(e.target.value)
+      setSelectedLeader(Number(e.target.value)) // 🔥 숫자로 변환하여 저장
    }
 
    const handleTransfer = () => {
@@ -26,9 +23,19 @@ const StudyLeaderTransfer = ({ user }) => {
          alert('위임할 방장을 선택하세요.')
          return
       }
-      alert(`${selectedLeader}님에게 방장을 위임합니다.`)
-      // TODO: 방장 위임 API 연결 후 처리
-      navigate(`/study/list`) // ✅ 위임 후 스터디 상세 페이지로 이동
+      const selectedLeaderNickname = groupmembers.find((member) => member.User.id === selectedLeader)?.User.nickname || '선택된 사용자'
+
+      if (!window.confirm(`${selectedLeaderNickname}님에게 방장을 위임하시겠습니까?`)) return
+
+      dispatch(transferGroupLeaderThunk({ groupId: id, newLeaderId: selectedLeader }))
+         .unwrap()
+         .then(() => {
+            navigate(`/study/list`)
+         })
+         .catch((err) => {
+            console.error('방장 위임 실패:', err)
+            alert('방장 위임에 실패했습니다.')
+         })
    }
 
    // if (loading) {
@@ -44,7 +51,7 @@ const StudyLeaderTransfer = ({ user }) => {
             {filteredMembers.length > 0 ? (
                filteredMembers.map((member) => (
                   <Label key={member.userId}>
-                     <input type="radio" name="leader" value={member.userId} checked={selectedLeader === member.userId} onChange={handleLeaderChange} />
+                     <input type="radio" name="leader" value={member.User.id} checked={selectedLeader === member.User.id} onChange={handleLeaderChange} />
                      {member.User.nickname}
                   </Label>
                ))

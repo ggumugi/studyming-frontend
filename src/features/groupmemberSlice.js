@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { createGroupMember, deleteGroupMember, updateGroupMember, getGroupMembers, getGroupMemberById, participateInGroup } from '../api/groupmemberApi'
+import { createGroupMember, deleteGroupMember, updateGroupMember, getGroupMembers, getGroupMemberById, participateInGroup, transferGroupLeader, kickGroupMember } from '../api/groupmemberApi'
 
 // 그룹 멤버 전체 불러오기
 export const fetchGroupMembersThunk = createAsyncThunk('groupmembers/fetchAll', async (groupId, { rejectWithValue }) => {
@@ -59,6 +59,26 @@ export const fetchGroupMemberByIdThunk = createAsyncThunk('groupmembers/fetchByI
       return response.data // 특정 그룹 멤버 데이터를 반환
    } catch (error) {
       return rejectWithValue(error.response?.data?.message || '그룹 멤버 조회 실패')
+   }
+})
+
+// 방장 위임
+export const transferGroupLeaderThunk = createAsyncThunk('groupmembers/transferLeader', async ({ groupId, newLeaderId }, { rejectWithValue }) => {
+   try {
+      const response = await transferGroupLeader(groupId, newLeaderId)
+      return response.data // 성공 시 응답 데이터 반환
+   } catch (error) {
+      return rejectWithValue(error.response?.data?.message || '방장 위임 실패')
+   }
+})
+
+// 멤버 강퇴
+export const kickGroupMemberThunk = createAsyncThunk('groupmembers/kick', async ({ groupId, userId }, { rejectWithValue }) => {
+   try {
+      const response = await kickGroupMember(groupId, userId) // API 호출
+      return { userId, groupId }
+   } catch (error) {
+      return rejectWithValue(error.response?.data?.message || '강퇴 실패')
    }
 })
 
@@ -158,6 +178,37 @@ const groupmemberSlice = createSlice({
          .addCase(fetchGroupMemberByIdThunk.rejected, (state, action) => {
             state.loading = false
             state.error = action.payload
+         })
+
+         // 방장 위임
+         .addCase(transferGroupLeaderThunk.pending, (state) => {
+            state.loading = true
+            state.error = null
+         })
+         .addCase(transferGroupLeaderThunk.fulfilled, (state, action) => {
+            state.loading = false
+            alert('방장이 성공적으로 위임되었습니다.')
+         })
+         .addCase(transferGroupLeaderThunk.rejected, (state, action) => {
+            state.loading = false
+            state.error = action.payload
+            alert(action.payload)
+         })
+
+         // 멤버 강퇴
+         .addCase(kickGroupMemberThunk.pending, (state) => {
+            state.loading = true
+            state.error = null
+         })
+         .addCase(kickGroupMemberThunk.fulfilled, (state, action) => {
+            state.loading = false
+            state.groupmembers = state.groupmembers.filter((member) => member.userId !== action.payload.userId) // Redux 상태에서 삭제
+            alert('유저가 강퇴되었습니다.')
+         })
+         .addCase(kickGroupMemberThunk.rejected, (state, action) => {
+            state.loading = false
+            state.error = action.payload
+            alert(action.payload)
          })
    },
 })

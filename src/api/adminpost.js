@@ -15,7 +15,7 @@ export const createAdminPost = async (postData) => {
       }
 
       const response = await studymingApi.post(API_URL, postData, config)
-      console.log(response, 'api')
+
       return response
    } catch (error) {
       console.error(`API 요청 오류: ${error.message}`)
