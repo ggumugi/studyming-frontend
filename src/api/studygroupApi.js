@@ -50,3 +50,13 @@ export const deleteStudygroup = async (id) => {
       throw error
    }
 }
+
+export const getChannelInfo = async (groupId) => {
+   try {
+      const response = await studymingApi.get(`/studygroup/${groupId}/channel`)
+      return response
+   } catch (error) {
+      console.error(`API 오류: ${error.message}`)
+      throw error
+   }
+}
