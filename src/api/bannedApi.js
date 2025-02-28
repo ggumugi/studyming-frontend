@@ -16,11 +16,13 @@ export const reportUser = async (reportedUserId, reporterId, reason) => {
 }
 
 // ✅ 신고 목록 불러오기 API
+// 🚀 신고 목록 불러오기 API (정지된 회원 신고 제외)
 export const fetchReports = async () => {
    try {
       const response = await studymingApi.get('/banned/reports')
       return response.data
    } catch (error) {
+      console.error('❌ 신고 목록 불러오기 실패:', error)
       throw error.response?.data || '신고 목록 불러오기 실패'
    }
 }
