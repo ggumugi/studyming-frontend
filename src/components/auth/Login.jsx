@@ -126,6 +126,13 @@ const Login = () => {
          })
          .catch((err) => {
             console.error('❌ 로그인 실패:', err)
+
+            if (err === '6개월 미접속으로 휴면 계정이 되었습니다. 비밀번호를 변경해주세요.') {
+               alert('6개월 미접속으로 휴면 계정이 되었습니다. 비밀번호를 변경해주세요.')
+               navigate('/find/password') // ✅ 비밀번호 변경 페이지로 이동
+            } else {
+               setShouldShowError(true)
+            }
          })
    }
    const handleGoogleLogin = (credentialResponse) => {
