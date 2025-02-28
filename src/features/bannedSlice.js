@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { fetchReports, fetchBannedUsers, reportUser, banUser, unbanUser, updateBanPeriod } from '../api/bannedApi'
+import { fetchReports, fetchBannedUsers, reportUser, banUser, unbanUser, updateBanPeriod, removeReport as deleteReportApi } from '../api/bannedApi'
 
 // ✅ 신고 목록 가져오기 (비동기 요청)
 export const getReports = createAsyncThunk('banned/getReports', async (_, { rejectWithValue }) => {
@@ -75,6 +75,15 @@ export const removeBan = createAsyncThunk('banned/removeBan', async (userId, { r
    }
 })
 
+// ✅ 신고 삭제 액션 추가
+export const removeReport = createAsyncThunk('banned/removeReport', async (reportId, { rejectWithValue }) => {
+   try {
+      return await deleteReportApi(reportId)
+   } catch (error) {
+      return rejectWithValue(error)
+   }
+})
+
 const bannedSlice = createSlice({
    name: 'banned',
    initialState: {
@@ -83,7 +92,12 @@ const bannedSlice = createSlice({
       loading: false,
       error: null,
    },
-   reducers: {},
+   reducers: {
+      // 🚀 새로운 정지 항목을 추가하는 액션
+      addToBannedList: (state, action) => {
+         state.bannedUsers.push(action.payload)
+      },
+   },
    extraReducers: (builder) => {
       builder
          // 신고 목록 불러오기
@@ -91,10 +105,17 @@ const bannedSlice = createSlice({
             state.loading = true
             state.error = null
          })
+         // ✅ 신고 목록 불러오기 시 BANNED 회원 신고도 포함
          .addCase(getReports.fulfilled, (state, action) => {
             state.loading = false
-            state.reports = action.payload
+
+            // 🚨 이미 정지된 회원의 신고도 남아 있도록 유지
+            state.reports = action.payload.map((report) => ({
+               ...report,
+               isBanned: report.isBanned, // ✅ 추가된 isBanned 값 유지
+            }))
          })
+
          .addCase(getReports.rejected, (state, action) => {
             state.loading = false
             state.error = action.payload
@@ -104,9 +125,10 @@ const bannedSlice = createSlice({
             state.loading = true
             state.error = null
          })
+         // ✅ Redux 상태 업데이트 확인
          .addCase(getBannedUsers.fulfilled, (state, action) => {
             state.loading = false
-            console.log('🚀 Redux 상태 업데이트 (bannedUsers):', action.payload) // ✅ 여기 추가
+            console.log('🚀 Redux 상태 업데이트 (bannedUsers):', action.payload) // ✅ 여기에 추가
             state.bannedUsers = action.payload
          })
 
@@ -147,8 +169,11 @@ const bannedSlice = createSlice({
          .addCase(applyBan.fulfilled, (state, action) => {
             state.loading = false
             state.bannedUsers.push(action.payload)
-            state.reports = state.reports.filter((r) => r.id !== action.payload.reportId) // ✅ 신고에서 삭제
+
+            // 🔥 "신고된 회원"의 모든 신고를 삭제하지 말고 "특정 신고(reportId)만 삭제" 유지!
+            state.reports = state.reports.filter((r) => r.id !== action.payload.reportId) // ✅ reportId만 삭제 유지
          })
+
          .addCase(applyBan.rejected, (state, action) => {
             state.loading = false
             state.error = action.payload
@@ -163,6 +188,16 @@ const bannedSlice = createSlice({
          })
          .addCase(removeBan.rejected, (state, action) => {
             state.loading = false
+            state.error = action.payload
+         })
+         //신고 삭제
+         .addCase(removeReport.pending, (state) => {
+            state.loading = true
+         })
+         .addCase(removeReport.fulfilled, (state, action) => {
+            state.reports = state.reports.filter((r) => r.id !== action.payload.reportId)
+         })
+         .addCase(removeReport.rejected, (state, action) => {
             state.error = action.payload
          })
    },

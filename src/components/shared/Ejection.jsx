@@ -21,7 +21,7 @@ const Ejection = ({ isOpen, onClose, groupId }) => {
    const membersToKick = groupmembers.filter((member) => member.role !== 'leader')
    console.log('membersToKick', membersToKick)
    // ✅ 멤버 강퇴 처리
-   const handleKickMember = () => {
+   const handleKickMember = (userId, nickname) => {
       if (!selectedMember) {
          alert('강퇴할 멤버를 선택하세요.')
          return
@@ -31,6 +31,7 @@ const Ejection = ({ isOpen, onClose, groupId }) => {
 
       if (!window.confirm(`${selectedNickname}님을 강퇴하시겠습니까?`)) return
 
+      console.log('🔥 강퇴 요청 전송 - groupId:', groupId, 'userId:', userId) // ✅ 확인용
       dispatch(kickGroupMemberThunk({ groupId, userId: selectedMember }))
          .unwrap()
          .then(() => {

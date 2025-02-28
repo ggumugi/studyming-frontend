@@ -1,82 +1,34 @@
+// features/screenShareSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { apiUpdateScreenShareStatus, apiGetChannelInfo, apiUpdateChannelInfo, initiateScreenShare, terminateScreenShare, cleanupScreenShareResources, joinSocketRoom } from '../api/screenShareApi'
+import { updateScreenShareStatus, getGroupScreenShareStatus, getActivePeers } from '../api/screenShareApi'
 
-// 화면 공유 상태 업데이트
+// 화면 공유 상태 업데이트 액션
 export const updateScreenShareStatusThunk = createAsyncThunk('screenShare/updateStatus', async ({ groupId, userId, shareState }, { rejectWithValue }) => {
    try {
-      const response = await apiUpdateScreenShareStatus(groupId, userId, shareState)
-      return response.data
+      const response = await updateScreenShareStatus({ groupId, userId, shareState })
+      return response.groupmember
    } catch (error) {
       return rejectWithValue(error.response?.data?.message || '화면 공유 상태 업데이트 실패')
    }
 })
 
-// 채널 정보 가져오기
-export const getChannelInfoThunk = createAsyncThunk('screenShare/getChannelInfo', async (groupId, { rejectWithValue }) => {
+// 그룹의 화면 공유 상태 조회 액션
+export const fetchGroupScreenShareStatusThunk = createAsyncThunk('screenShare/fetchStatus', async (groupId, { rejectWithValue }) => {
    try {
-      const response = await apiGetChannelInfo(groupId)
-      return response.data
+      const response = await getGroupScreenShareStatus(groupId)
+      return response.groupmembers
    } catch (error) {
-      return rejectWithValue(error.response?.data?.message || '채널 정보 가져오기 실패')
+      return rejectWithValue(error.response?.data?.message || '그룹 화면 공유 상태 조회 실패')
    }
 })
 
-// 채널 정보 업데이트
-export const updateChannelInfoThunk = createAsyncThunk('screenShare/updateChannelInfo', async ({ groupId, sharedChannel }, { rejectWithValue }) => {
+// 활성 피어 목록 조회 액션
+export const fetchActivePeersThunk = createAsyncThunk('screenShare/fetchPeers', async (groupId, { rejectWithValue }) => {
    try {
-      const response = await apiUpdateChannelInfo(groupId, sharedChannel)
-      return response.data
+      const response = await getActivePeers(groupId)
+      return response.peers
    } catch (error) {
-      return rejectWithValue(error.response?.data?.message || '채널 정보 업데이트 실패')
-   }
-})
-
-// 화면 공유 시작
-export const startScreenShareThunk = createAsyncThunk('screenShare/start', async ({ roomId, groupMembers }, { dispatch, rejectWithValue }) => {
-   try {
-      // 방 입장
-      joinSocketRoom(roomId)
-
-      // 화면 공유 시작
-      const stream = await initiateScreenShare(roomId, groupMembers, dispatch, {
-         addStreamToState,
-         removeStreamFromState,
-         setScreenShareActive,
-         setScreenShareInactive,
-         clearAllStreams,
-         addParticipant, // 이 액션을 추가
-         removeParticipant, // 이 액션도 추가
-      })
-
-      return { success: true, stream }
-   } catch (error) {
-      console.error('화면 공유 시작 실패:', error)
-      return rejectWithValue(error.message || '화면 공유를 시작할 수 없습니다.')
-   }
-})
-
-// 화면 공유 중지
-export const stopScreenShareThunk = createAsyncThunk('screenShare/stop', async (_, { dispatch, rejectWithValue }) => {
-   try {
-      terminateScreenShare(dispatch, {
-         setScreenShareInactive,
-         removeStreamFromState,
-      })
-      return { success: true }
-   } catch (error) {
-      return rejectWithValue(error.message || '화면 공유 중지 실패')
-   }
-})
-
-// 연결 정리
-export const cleanupConnectionThunk = createAsyncThunk('screenShare/cleanup', async (_, { dispatch, rejectWithValue }) => {
-   try {
-      cleanupScreenShareResources(dispatch, {
-         clearAllStreams,
-      })
-      return { success: true }
-   } catch (error) {
-      return rejectWithValue(error.message || '연결 정리 실패')
+      return rejectWithValue(error.response?.data?.message || '활성 피어 목록 조회 실패')
    }
 })
 
@@ -84,55 +36,35 @@ export const cleanupConnectionThunk = createAsyncThunk('screenShare/cleanup', as
 const screenShareSlice = createSlice({
    name: 'screenShare',
    initialState: {
-      streams: {},
-      participants: [],
       isSharing: false,
-      channelInfo: null,
+      participants: [],
+      activePeers: [],
       loading: false,
       error: null,
    },
    reducers: {
-      // 참가자 목록 설정
-      setInitialParticipants: (state, action) => {
-         state.participants = action.payload
+      setIsSharing: (state, action) => {
+         state.isSharing = action.payload
       },
-      // 참가자 추가
       addParticipant: (state, action) => {
-         if (!state.participants.find((p) => p.id === action.payload.id)) {
-            state.participants.push(action.payload)
+         const { participant } = action.payload
+         if (!state.participants.find((p) => p.id === participant.id)) {
+            state.participants.push(participant)
          }
       },
-      // 참가자 제거
       removeParticipant: (state, action) => {
-         state.participants = state.participants.filter((participant) => participant.id !== action.payload)
+         const { participantId } = action.payload
+         state.participants = state.participants.filter((p) => p.id !== participantId)
       },
-      // 스트림 추가
-      addStreamToState: (state, action) => {
-         const { userId, stream } = action.payload
-         state.streams = {
-            ...state.streams,
-            [userId]: stream,
+      updateParticipantShareState: (state, action) => {
+         const { participantId, shareState } = action.payload
+         const participant = state.participants.find((p) => p.id === participantId)
+         if (participant) {
+            participant.shareState = shareState
          }
       },
-      // 스트림 제거
-      removeStreamFromState: (state, action) => {
-         const { userId } = action.payload
-         const newStreams = { ...state.streams }
-         delete newStreams[userId]
-         state.streams = newStreams
-      },
-      // 화면 공유 시작
-      setScreenShareActive: (state) => {
-         state.isSharing = true
-      },
-      // 화면 공유 중지
-      setScreenShareInactive: (state) => {
-         state.isSharing = false
-      },
-      // 모든 스트림 초기화
-      clearAllStreams: (state) => {
-         state.streams = {}
-         state.isSharing = false
+      clearParticipants: (state) => {
+         state.participants = []
       },
    },
    extraReducers: (builder) => {
@@ -142,73 +74,68 @@ const screenShareSlice = createSlice({
             state.loading = true
             state.error = null
          })
-         .addCase(updateScreenShareStatusThunk.fulfilled, (state) => {
+         .addCase(updateScreenShareStatusThunk.fulfilled, (state, action) => {
             state.loading = false
+
+            // 자신의 화면 공유 상태 업데이트
+            if (action.meta.arg.userId === action.payload.userId) {
+               state.isSharing = action.payload.shareState
+            }
+
+            // 참가자 목록에서 해당 사용자 찾아 상태 업데이트
+            const participantIndex = state.participants.findIndex((p) => p.id === action.payload.userId)
+
+            if (participantIndex !== -1) {
+               state.participants[participantIndex].shareState = action.payload.shareState
+            }
          })
          .addCase(updateScreenShareStatusThunk.rejected, (state, action) => {
             state.loading = false
             state.error = action.payload
          })
 
-      // 채널 정보 가져오기
+      // 그룹의 화면 공유 상태 조회
       builder
-         .addCase(getChannelInfoThunk.pending, (state) => {
+         .addCase(fetchGroupScreenShareStatusThunk.pending, (state) => {
             state.loading = true
             state.error = null
          })
-         .addCase(getChannelInfoThunk.fulfilled, (state, action) => {
+         .addCase(fetchGroupScreenShareStatusThunk.fulfilled, (state, action) => {
             state.loading = false
-            state.channelInfo = action.payload.channel
+
+            // 참가자 정보 업데이트
+            state.participants = action.payload.map((member) => ({
+               id: member.userId,
+               nickname: member.User ? member.User.nickname : `사용자 ${member.userId}`,
+               role: member.role,
+               status: member.status,
+               shareState: member.shareState,
+               camState: member.camState,
+               voiceState: member.voiceState,
+            }))
          })
-         .addCase(getChannelInfoThunk.rejected, (state, action) => {
+         .addCase(fetchGroupScreenShareStatusThunk.rejected, (state, action) => {
             state.loading = false
             state.error = action.payload
          })
 
-      // 채널 정보 업데이트
+      // 활성 피어 목록 조회
       builder
-         .addCase(updateChannelInfoThunk.pending, (state) => {
+         .addCase(fetchActivePeersThunk.pending, (state) => {
             state.loading = true
             state.error = null
          })
-         .addCase(updateChannelInfoThunk.fulfilled, (state, action) => {
+         .addCase(fetchActivePeersThunk.fulfilled, (state, action) => {
             state.loading = false
-            state.channelInfo = action.payload.channel
+            state.activePeers = action.payload
          })
-         .addCase(updateChannelInfoThunk.rejected, (state, action) => {
-            state.loading = false
-            state.error = action.payload
-         })
-
-      // 화면 공유 시작
-      builder
-         .addCase(startScreenShareThunk.pending, (state) => {
-            state.loading = true
-            state.error = null
-         })
-         .addCase(startScreenShareThunk.fulfilled, (state) => {
-            state.loading = false
-         })
-         .addCase(startScreenShareThunk.rejected, (state, action) => {
-            state.loading = false
-            state.error = action.payload
-         })
-
-      // 화면 공유 중지
-      builder
-         .addCase(stopScreenShareThunk.pending, (state) => {
-            state.loading = true
-         })
-         .addCase(stopScreenShareThunk.fulfilled, (state) => {
-            state.loading = false
-         })
-         .addCase(stopScreenShareThunk.rejected, (state, action) => {
+         .addCase(fetchActivePeersThunk.rejected, (state, action) => {
             state.loading = false
             state.error = action.payload
          })
    },
 })
 
-export const { setInitialParticipants, addParticipant, removeParticipant, addStreamToState, removeStreamFromState, setScreenShareActive, setScreenShareInactive, clearAllStreams } = screenShareSlice.actions
+export const { setIsSharing, addParticipant, removeParticipant, updateParticipantShareState, clearParticipants } = screenShareSlice.actions
 
 export default screenShareSlice.reducer

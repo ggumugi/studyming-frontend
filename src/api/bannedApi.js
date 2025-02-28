@@ -16,11 +16,13 @@ export const reportUser = async (reportedUserId, reporterId, reason) => {
 }
 
 // ✅ 신고 목록 불러오기 API
+// 🚀 신고 목록 불러오기 API (정지된 회원 신고 제외)
 export const fetchReports = async () => {
    try {
       const response = await studymingApi.get('/banned/reports')
       return response.data
    } catch (error) {
+      console.error('❌ 신고 목록 불러오기 실패:', error)
       throw error.response?.data || '신고 목록 불러오기 실패'
    }
 }
@@ -28,10 +30,11 @@ export const fetchReports = async () => {
 // ✅ 벤 적용 API
 export const banUser = async (reportId, adminId, banDays) => {
    try {
+      console.log('🚀 벤 적용 요청 데이터:', { reportId, adminId, banDays })
       const response = await studymingApi.post('/banned/ban', { reportId, adminId, banDays })
       return response.data
    } catch (error) {
-      console.error('❌ 벤 적용 실패:', error)
+      console.error('❌ 벤 적용 실패:', error.response?.data || error.message)
       throw error.response?.data || '벤 적용 실패'
    }
 }
@@ -66,5 +69,17 @@ export const unbanUser = async (userId) => {
       return response.data
    } catch (error) {
       throw error.response?.data || '벤 해제 실패'
+   }
+}
+
+// ✅ 신고 삭제 API
+// ✅ 신고 삭제 API (서버 경로 확인)
+export const removeReport = async (reportId) => {
+   try {
+      const response = await studymingApi.delete(`/banned/report/${reportId}`)
+      return response.data
+   } catch (error) {
+      console.error('❌ 신고 삭제 실패:', error)
+      throw error.response?.data || '신고 삭제 실패'
    }
 }

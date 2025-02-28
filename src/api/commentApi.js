@@ -93,24 +93,11 @@ export const fetchCommentById = async ({ commentId, postCategory }) => {
 /**
  * 4. 댓글 수정 (공지사항 예외 처리 제거)
  */
-export const updateComment = async (commentData) => {
+export const updateComment = async (id, commentData) => {
    try {
-      const formData = new FormData()
-      formData.append('commentId', commentData.commentId)
-      formData.append('content', commentData.content)
-
-      if (commentData.img) {
-         formData.append('image', commentData.img) // ✅ 이미지 파일 추가
-      }
-
-      const formDataCopy = new FormData()
-      commentData.formData.forEach((value, key) => {
-         formDataCopy.append(key, value)
-      })
-
       console.log('🔥 API로 보낼 최종 FormData 데이터:')
-      formDataCopy.forEach((value, key) => {
-         console.log(`✅ API FormData key: ${key}, value:`, value)
+      commentData.forEach((value, key) => {
+         console.log(`✅ API commentData key: ${key}, value:`, value)
       })
 
       const config = {
@@ -119,7 +106,7 @@ export const updateComment = async (commentData) => {
          },
       }
 
-      const response = await studymingApi.put(`${API_URL}/${commentData.commentId}`, formDataCopy, config) // ✅ API 경로 수정
+      const response = await studymingApi.put(`${API_URL}/${id}`, commentData, config) // ✅ API 경로 수정
       return response.data
    } catch (error) {
       console.error(`❌ 댓글 수정 API 요청 오류: ${error.message}`)
@@ -144,9 +131,9 @@ export const deleteComment = async (commentId) => {
 /**
  *  6. 댓글 채택 API
  */
-export const selectComment = async (commentId) => {
+export const selectComment = async (id) => {
    try {
-      const response = await studymingApi.patch(`/comment/${commentId}/select`)
+      const response = await studymingApi.patch(`/comment/${id}/select`)
       return response.data
    } catch (error) {
       console.error(`API 요청 오류: ${error.message}`)

@@ -36,15 +36,6 @@ const store = configureStore({
       time: timeReducer,
       screenShare: screenShareReducer,
    },
-   middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware({
-         serializableCheck: {
-            // 모든 screenShare 관련 액션 무시
-            ignoredActions: ['screenShare/start/fulfilled', 'screenShare/addStreamToState', 'screenShare/removeStreamFromState'],
-            // 스트림 관련 모든 경로 무시
-            ignoredPaths: ['screenShare.streams', 'payload.stream'],
-         },
-      }),
 })
 
 export default store
