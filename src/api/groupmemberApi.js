@@ -81,6 +81,7 @@ export const transferGroupLeader = async (groupId, newLeaderId) => {
 // 멤버 강퇴
 export const kickGroupMember = async (groupId, userId) => {
    try {
+      console.log('🔥 API 요청 - groupId:', groupId, 'userId:', userId) // ✅ 확인용
       const response = await studymingApi.delete(`/groupmember/${groupId}/${userId}`)
       return response
    } catch (error) {

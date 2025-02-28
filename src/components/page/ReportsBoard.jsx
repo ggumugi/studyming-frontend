@@ -11,8 +11,7 @@ const ReportsBoard = () => {
    const [searchQuery, setSearchQuery] = useState('')
    const [filter, setFilter] = useState('reportedUser')
    const [banPeriods, setBanPeriods] = useState({})
-   console.log(reports)
-   // 페이지네이션 변경
+   const [localReports, setLocalReports] = useState([])
 
    useEffect(() => {
       dispatch(getReports()) // ✅ 신고 목록 불러오기
@@ -21,28 +20,58 @@ const ReportsBoard = () => {
    const handleBanChange = (id, value) => {
       setBanPeriods((prev) => ({ ...prev, [id]: value }))
    }
+   useEffect(() => {
+      dispatch(getReports()) // ✅ Redux에서 데이터 가져오기
+   }, [dispatch])
+
+   useEffect(() => {
+      setLocalReports(reports) // ✅ Redux에서 가져온 데이터 로컬 상태에 반영
+   }, [reports])
 
    // 적용 버튼 클릭 시 알림
-   const handleApply = (reportId, reportedUser) => {
+   // ✅ 적용 버튼 클릭 시 동작
+   const handleApply = async (reportId, reportedUser) => {
       const banDays = banPeriods[reportId]
+
       if (!banDays || banDays === '없음') {
-         alert('정지 기간을 선택해주세요!')
+         alert('🚨 정지 기간을 선택해주세요!')
          return
       }
 
-      dispatch(applyBan({ reportId, adminId: 1, banDays }))
-         .then((res) => {
-            alert(res.payload.message) // ✅ 벤 적용 응답 메시지를 출력하여 undefined 문제 해결
-            dispatch(getReports())
-         })
-         .catch((error) => console.error('❌ 벤 적용 실패:', error))
+      // ✅ "이미 정지된 회원"일 때 특정 신고만 삭제하도록 수정
+      if (reportedUser.status === 'BANNED') {
+         alert('🚨 이미 정지된 회원입니다!')
+
+         // ✅ 특정 신고(reportId)만 삭제하고, 같은 유저의 다른 신고는 유지
+         setLocalReports((prev) => prev.filter((report) => report.id !== reportId))
+
+         return
+      }
+
+      try {
+         const res = await dispatch(applyBan({ reportId, adminId: 1, banDays })).unwrap()
+         alert(res.message)
+
+         // ✅ Redux 상태 갱신 (서버에서 최신 데이터 불러오기)
+         await dispatch(getReports())
+
+         // ✅ 특정 신고만 리스트에서 삭제 (같은 유저의 다른 신고는 유지)
+         setLocalReports((prev) => prev.filter((report) => report.id !== reportId))
+      } catch (error) {
+         console.error('❌ 벤 적용 실패:', error)
+         alert('❌ 정지 처리에 실패했습니다.')
+      }
+   }
+
+   const handleSearch = () => {
+      setPage(1) // 검색 시 첫 페이지로 이동
    }
 
    // 검색 필터링 (닉네임 데이터가 `ReportedUser.nickname`에 있으므로 수정)
-   const filteredReports = reports.filter((report) => {
-      if (filter === 'reportedUser') return report.reportedUser?.nickname?.toLowerCase().includes(searchQuery.toLowerCase())
-      if (filter === 'reporter') return report.reportedBy?.nickname?.toLowerCase().includes(searchQuery.toLowerCase())
-      if (filter === 'reason') return report.reason?.toLowerCase().includes(searchQuery.toLowerCase())
+   const filteredReports = localReports.filter((report) => {
+      if (filter === 'reportedUser' && report.reportedUser?.nickname) return report.reportedUser.nickname.toLowerCase().includes(searchQuery.toLowerCase())
+      if (filter === 'reporter' && report.reportedBy?.nickname) return report.reportedBy.nickname.toLowerCase().includes(searchQuery.toLowerCase())
+      if (filter === 'reason') return report.reason.toLowerCase().includes(searchQuery.toLowerCase())
       return false
    })
 
@@ -117,7 +146,7 @@ const ReportsBoard = () => {
                <MenuItem value="reason">사유</MenuItem>
             </Select>
             <TextField value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="검색어 입력" sx={{ marginLeft: '10px', width: '400px', height: '40px' }} />
-            <Button variant="contained" color="warning" sx={{ marginLeft: '10px', width: '100px' }}>
+            <Button variant="contained" color="warning" sx={{ marginLeft: '10px', width: '100px' }} onClick={handleSearch}>
                검색
             </Button>
          </div>

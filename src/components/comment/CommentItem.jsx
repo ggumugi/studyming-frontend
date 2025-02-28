@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { createSelector } from '@reduxjs/toolkit'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
-import { createCommentThunk, updateCommentThunk, fetchCommentsThunk, deleteCommentThunk } from '../../features/commentSlice'
-import { FaImage } from 'react-icons/fa' // 🔥 이미지 아이콘 추가
+import { createCommentThunk, updateCommentThunk, fetchCommentsThunk, deleteCommentThunk, selectCommentThunk } from '../../features/commentSlice'
+import { FaImage, FaCheck } from 'react-icons/fa' // 🔥 이미지 아이콘 추가
 
 const CommentItem = ({ comment }) => {
    const { id: postId } = useParams() // ✅ 동적 postId 가져오기
@@ -19,6 +18,8 @@ const CommentItem = ({ comment }) => {
    const [imageFile, setImageFile] = useState(null) // 실제 업로드할 파일
 
    const comments = useSelector((state) => state.comments.comments)
+   const user = useSelector((state) => state.auth.user)
+   const totalPages = useSelector((state) => state.comments.totalPages) // ✅ 총 페이지 수 가져오기
 
    // ✅ 이미지 선택 핸들러
    const handleImageChange = (e) => {
@@ -89,11 +90,12 @@ const CommentItem = ({ comment }) => {
          console.log(`✅ FormData Key: ${key}, Value:`, value)
       })
 
-      dispatch(updateCommentThunk({ id: isEditing, formData }))
+      dispatch(updateCommentThunk({ id: isEditing, commentData: formData }))
          .unwrap()
          .then(() => {
             setIsEditing(null)
             setImageFile(null)
+            setSelectedImage(null) // ✅ 미리보기 이미지 초기화 (등록창에 남지 않도록)
             dispatch(fetchCommentsThunk({ postId })) // 🔥 댓글 리스트 갱신
          })
          .catch((error) => console.error('❌ 댓글 수정 실패:', error))
@@ -108,6 +110,54 @@ const CommentItem = ({ comment }) => {
          console.error(error)
       }
    }
+
+   // ✅ 댓글 채택 함수
+   const handleSelectComment = (id) => {
+      dispatch(selectCommentThunk(id))
+         .unwrap()
+         .then((updatedComment) => {
+            // ✅ 채택된 댓글을 최상단으로 이동
+            const updatedComments = comments.map(
+               (c) =>
+                  c.id === updatedComment.id
+                     ? { ...updatedComment, selected: true } // ✅ 채택된 댓글 유지
+                     : { ...c, selected: false } // ✅ 다른 댓글은 해제
+            )
+
+            // ✅ selected = true인 댓글을 최상단으로 정렬
+            const sortedComments = [...updatedComments].sort((a, b) => (b.selected ? 1 : -1))
+
+            dispatch({ type: 'comments/updateComments', payload: sortedComments })
+         })
+         .catch((error) => {
+            console.error('❌ 댓글 채택 실패:', error)
+         })
+   }
+
+   // // ✅ 페이지네이션 상태 추가
+   // const [currentPage, setCurrentPage] = useState(1)
+   // const limit = 10 // 한 페이지당 댓글 10개
+
+   // useEffect(() => {
+   //    console.log(`📢 useEffect 실행됨! 현재 페이지: ${currentPage}`) // ✅ 페이지 변경 시 useEffect가 실행되는지 확인
+
+   //    if (postId) {
+   //       console.log(`📡 fetchCommentsThunk 호출! postId: ${postId}, page: ${currentPage}`)
+   //       dispatch(fetchCommentsThunk({ postId, page: currentPage, limit }))
+   //    }
+   // }, [dispatch, postId, currentPage]) // ✅ currentPage가 변경될 때 실행
+
+   // // ✅ 페이지 변경 핸들러
+   // const handlePageChange = (newPage) => {
+   //    console.log(`📢 페이지 변경 시도: ${newPage}`) // ✅ 클릭 시 실행 확인
+
+   //    if (newPage >= 1 && newPage <= totalPages) {
+   //       console.log(`✅ 페이지 변경 적용: ${newPage}`) // ✅ 이게 안 찍히면 조건에서 걸림
+   //       setCurrentPage(newPage)
+   //    } else {
+   //       console.error(`❌ 페이지 변경 실패! (범위 초과) newPage: ${newPage}, totalPages: ${totalPages}`)
+   //    }
+   // }
 
    return (
       <>
@@ -127,13 +177,20 @@ const CommentItem = ({ comment }) => {
          </CommentSection>
 
          {/* 🔥 이미지 미리보기 */}
-         {selectedImage && <ImagePreview src={selectedImage} alt="미리보기" />}
+         {selectedImage && newComment.trim() && isEditing === null && <ImagePreview src={selectedImage} alt="미리보기" />}
 
          {/* 🔥 댓글 렌더링 */}
          {comments.map((comment) => (
             <CommentBox key={comment.id}>
                <CommentText>
-                  <CommentAuthor>{comment.User?.nickname || '익명'}</CommentAuthor>
+                  <CommentAuthor>
+                     {comment.User?.nickname || '익명'}
+                     {comment.selected && (
+                        <SelectedTag>
+                           <FaCheck color="green" /> 채택됨
+                        </SelectedTag>
+                     )}
+                  </CommentAuthor>
 
                   {isEditing === comment.id ? (
                      <>
@@ -150,7 +207,7 @@ const CommentItem = ({ comment }) => {
                            <CancelButton onClick={() => setIsEditing(null)}>취소</CancelButton>
                         </EditContainer>
                         {/* 🔥 이미지 미리보기 */}
-                        {selectedImage && <ImagePreview src={selectedImage} alt="미리보기" />}
+                        {selectedImage && isEditing === comment.id && <ImagePreview src={selectedImage} alt="미리보기" />}
                      </>
                   ) : (
                      <>
@@ -166,6 +223,7 @@ const CommentItem = ({ comment }) => {
                      <CancelButton onClick={() => setIsEditing(null)}>취소</CancelButton>
                   ) : (
                      <>
+                        {user?.id !== comment.userId && !comment.selected && <SelectButton onClick={() => handleSelectComment(comment.id)}>채택</SelectButton>}
                         <EditButton onClick={() => startEditing(comment)}>수정</EditButton>
                         <SmallDeleteButton onClick={() => handleDelete(comment.id)}>삭제</SmallDeleteButton>
                      </>
@@ -173,6 +231,23 @@ const CommentItem = ({ comment }) => {
                </CommentActions>
             </CommentBox>
          ))}
+         {/* 🔥 페이지네이션 UI
+         <PaginationContainer>
+            <PageButton disabled={currentPage === 1} onClick={() => handlePageChange(currentPage - 1)}>
+               이전
+            </PageButton>
+            <PageNumber>
+               {currentPage} / {totalPages}
+            </PageNumber>
+            <PageButton
+               onClick={() => {
+                  console.log('🚀 버튼 클릭됨! 페이지 증가 시도')
+                  handlePageChange(currentPage + 1)
+               }}
+            >
+               다음
+            </PageButton>
+         </PaginationContainer> */}
       </>
    )
 }
@@ -257,6 +332,9 @@ const CommentImg = styled.img`
 
 const CommentAuthor = styled.p`
    font-weight: bold;
+   display: flex;
+   align-items: center; /* ✅ 체크 아이콘 + "채택됨"을 닉네임 옆에 배치 */
+   gap: 10px; /* ✅ 아이콘과 텍스트 간격 조정 */
 `
 
 const CommentContent = styled.p`
@@ -274,12 +352,12 @@ const CommentActions = styled.div`
    gap: 10px;
 `
 
-const ReportButton = styled.button`
-   background: none;
-   color: red;
-   border: none;
-   cursor: pointer;
-`
+// const ReportButton = styled.button`
+//    background: none;
+//    color: red;
+//    border: none;
+//    cursor: pointer;
+// `
 
 const SmallDeleteButton = styled.button`
    background: none;
@@ -302,21 +380,32 @@ const EditInput = styled.input`
 `
 
 const EditButton = styled.button`
-   background-color: #ff7a00;
-   color: white;
-   font-weight: bold;
-   padding: 5px 10px;
-   border-radius: 5px;
+   background: none;
+   color: blue;
+   border: none;
    cursor: pointer;
-   &:hover {
-      background-color: #e66a00;
-   }
 `
 const CancelButton = styled.button`
    background: none;
    color: gray;
    border: none;
    cursor: pointer;
+`
+const SelectButton = styled.button`
+   background: none;
+   color: green;
+   border: none;
+   cursor: pointer;
+`
+
+const SelectedTag = styled.span`
+   color: green;
+   font-weight: bold;
+   display: flex;
+   align-items: center;
+   gap: 3px;
+   margin-bottom: 5px;
+   font-size: 15px;
 `
 const EditImageUploadLabel = styled.label`
    display: flex;
@@ -335,4 +424,28 @@ const EditImageUploadLabel = styled.label`
 
 const EditImageInput = styled.input`
    display: none;
+`
+
+const PaginationContainer = styled.div`
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   margin-top: 20px;
+`
+const PageButton = styled.button`
+   background: #ff7a00;
+   color: white;
+   font-weight: bold;
+   padding: 8px 15px;
+   border-radius: 5px;
+   margin: 0 5px;
+   cursor: pointer;
+   &:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+   }
+`
+const PageNumber = styled.span`
+   font-weight: bold;
+   font-size: 16px;
 `

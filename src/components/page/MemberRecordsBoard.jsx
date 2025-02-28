@@ -22,9 +22,18 @@ const MemberRecordsBoard = () => {
    const handleChangePage = (event, newPage) => {
       setPage(newPage)
    }
+   const handleSearch = () => {
+      setPage(1) // 검색 시 첫 페이지로 이동
+   }
 
    // 🔍 검색 필터링
-   const filteredUsers = users.filter((user) => user[filter]?.toString().toLowerCase().includes(searchQuery.toLowerCase()))
+   const filteredUsers = users.filter((user) => {
+      if (filter === 'nickname') return user.nickname.toLowerCase().includes(searchQuery.toLowerCase())
+      if (filter === 'name') return user.name.toLowerCase().includes(searchQuery.toLowerCase())
+      if (filter === 'email') return user.email.toLowerCase().includes(searchQuery.toLowerCase())
+      if (filter === 'status') return user.status.toLowerCase().includes(searchQuery.toLowerCase())
+      return false
+   })
 
    // 📌 페이지네이션 적용
    const paginatedUsers = filteredUsers.slice((page - 1) * rowsPerPage, page * rowsPerPage)
@@ -80,7 +89,7 @@ const MemberRecordsBoard = () => {
                <MenuItem value="status">상태</MenuItem>
             </Select>
             <TextField value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="검색어 입력" sx={{ marginLeft: '10px', width: '400px', height: '40px' }} />
-            <Button variant="contained" color="warning" sx={{ marginLeft: '10px', width: '100px' }}>
+            <Button variant="contained" color="warning" sx={{ marginLeft: '10px', width: '100px' }} onClick={handleSearch}>
                검색
             </Button>
          </div>

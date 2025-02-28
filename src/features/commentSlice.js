@@ -31,7 +31,10 @@ export const fetchCommentsThunk = createAsyncThunk('comments/fetchComments', asy
 
       const response = await fetchComments({ postId: numericPostId, page, limit })
       console.log('📢 API 응답 데이터:', response) // ✅ 이거 콘솔 확인!!
-      return response
+      return {
+         comments: response.comments, // ✅ 댓글 데이터
+         totalPages: response.totalPages, // ✅ 총 페이지 수 (백엔드에서 전달)
+      }
    } catch (err) {
       return rejectWithValue(err.response?.data?.message || '댓글 목록 조회 실패')
    }
@@ -70,9 +73,9 @@ export const deleteCommentThunk = createAsyncThunk('comments/deleteComment', asy
 })
 
 // 댓글 채택 Thunk
-export const selectCommentThunk = createAsyncThunk('comments/selectComment', async (commentId, { rejectWithValue }) => {
+export const selectCommentThunk = createAsyncThunk('comments/selectComment', async (id, { rejectWithValue }) => {
    try {
-      const response = await selectComment(commentId) // 🔥 위에서 만든 selectComment API 호출
+      const response = await selectComment(id) // 🔥 위에서 만든 selectComment API 호출
       return response // ✅ 채택된 댓글 반환
    } catch (err) {
       return rejectWithValue(err.response?.data?.message || '댓글 채택 실패')
@@ -85,7 +88,7 @@ const commentSlice = createSlice({
    initialState: {
       comments: [], // 댓글 리스트
       comment: null, // 특정 댓글 상세 정보
-      pagination: null, // 페이징 정보
+      pagination: 1, // 페이징 정보
       loading: false,
       error: null,
    },
@@ -176,9 +179,16 @@ const commentSlice = createSlice({
          .addCase(selectCommentThunk.fulfilled, (state, action) => {
             state.loading = false
             const updatedComment = action.payload
+            // ✅ 기존 댓글 리스트에서 selected 값 유지하면서 업데이트
+            const updatedComments = state.comments.map(
+               (c) =>
+                  c.id === updatedComment.id
+                     ? { ...updatedComment, selected: true } // ✅ 채택된 댓글 유지
+                     : { ...c, selected: false } // ✅ 다른 댓글은 selected 해제
+            )
 
-            // ✅ 기존 댓글 리스트에서 채택된 댓글 업데이트
-            state.comments = state.comments.map((comment) => (comment.id === updatedComment.id ? updatedComment : { ...comment, selected: false }))
+            // ✅ selected = true인 댓글을 최상단으로 정렬
+            state.comments = [...updatedComments].sort((a, b) => (b.selected ? 1 : -1))
          })
          .addCase(selectCommentThunk.rejected, (state, action) => {
             state.loading = false

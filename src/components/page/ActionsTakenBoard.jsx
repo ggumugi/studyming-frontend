@@ -82,21 +82,20 @@ const ActionsTakenBoard = ({ category, isAuthenticated, user }) => {
       setEditingId(null)
    }
 
+   const handleSearch = () => {
+      setPage(1) // 검색 시 첫 페이지로 이동
+   }
+
    // 검색 필터링
-   const filteredReports = bannedUsers.map((user) => {
-      console.log('🚀 [DEBUG] 가공 전 user 객체:', user)
-      return {
-         bannedId: user.bannedId, // ✅ `bannedId` 유지!
-         reportedUser: user.reportedUser?.nickname || '알 수 없음',
-         reportedBy: user.reportedBy?.nickname || '알 수 없음',
-         reason: user.reason || '사유 없음',
-         startDate: user.startDate ? moment(user.startDate).format('YYYY-MM-DD') : '없음',
-         endDate: user.endDate ? moment(user.endDate).format('YYYY-MM-DD') : '없음',
-      }
+   const filteredBannedUsers = bannedUsers.filter((user) => {
+      if (filter === 'reportedUser' && user.reportedUser?.nickname) return user.reportedUser.nickname.toLowerCase().includes(searchQuery.toLowerCase())
+      if (filter === 'reportedBy' && user.reportedBy?.nickname) return user.reportedBy.nickname.toLowerCase().includes(searchQuery.toLowerCase())
+      if (filter === 'reason') return user.reason.toLowerCase().includes(searchQuery.toLowerCase())
+      return false
    })
 
    // 페이지네이션 적용
-   const paginatedReports = filteredReports.slice((page - 1) * rowsPerPage, page * rowsPerPage)
+   const paginatedReports = filteredBannedUsers.slice((page - 1) * rowsPerPage, page * rowsPerPage)
 
    return (
       <div style={{ width: '100%' }}>
@@ -116,8 +115,8 @@ const ActionsTakenBoard = ({ category, isAuthenticated, user }) => {
                      paginatedReports.map((user, index) => (
                         <TableRow key={user.bannedId || index}>
                            <TableCell sx={{ textAlign: 'center' }}>{index + 1 + (page - 1) * rowsPerPage}</TableCell>
-                           <TableCell sx={{ textAlign: 'center' }}>{user?.reportedUser || '알 수 없음'}</TableCell>
-                           <TableCell sx={{ textAlign: 'center' }}>{user?.reportedBy || '알 수 없음'}</TableCell>
+                           <TableCell sx={{ textAlign: 'center' }}>{user.reportedUser?.nickname || '알 수 없음'}</TableCell>
+                           <TableCell sx={{ textAlign: 'center' }}>{user.reportedBy?.nickname || '알 수 없음'}</TableCell>
                            <TableCell sx={{ textAlign: 'center' }}>{user.reason || '사유 없음'}</TableCell>
                            <TableCell sx={{ textAlign: 'center' }}>
                               {editingId === user.bannedId ? (
@@ -147,7 +146,7 @@ const ActionsTakenBoard = ({ category, isAuthenticated, user }) => {
                                  </div>
                               ) : (
                                  <Button variant="outlined" color="primary" sx={{ width: '120px', height: '30px' }} onClick={() => setEditingId(user.bannedId)}>
-                                    {user.startDate && user.endDate ? `${moment(user.startDate).format('YYYY-MM-DD')} ~ ${moment(user.endDate).format('YYYY-MM-DD')}` : '정지 기간 없음'}
+                                    {user.startDate && user.endDate ? `${user.startDate} ~ ${user.endDate}` : '정지 기간 없음'}
                                  </Button>
                               )}
                            </TableCell>
@@ -166,18 +165,18 @@ const ActionsTakenBoard = ({ category, isAuthenticated, user }) => {
 
          {/* 페이지네이션 */}
          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-            <Pagination count={Math.ceil(filteredReports.length / rowsPerPage)} page={page} onChange={(event, value) => setPage(value)} color="warning" shape="rounded" />
+            <Pagination count={Math.ceil(filteredBannedUsers.length / rowsPerPage)} page={page} onChange={(event, value) => setPage(value)} color="warning" shape="rounded" />
          </div>
 
          {/* 검색 필터 */}
          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
             <Select value={filter} onChange={(e) => setFilter(e.target.value)} sx={{ width: '165px' }}>
                <MenuItem value="reportedUser">신고된 회원</MenuItem>
-               <MenuItem value="reporter">신고한 회원</MenuItem>
+               <MenuItem value="reportedBy">신고한 회원</MenuItem>
                <MenuItem value="reason">사유</MenuItem>
             </Select>
             <TextField value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="검색어 입력" sx={{ marginLeft: '10px', width: '400px', height: '40px' }} />
-            <Button variant="contained" color="warning" sx={{ marginLeft: '10px', width: '100px' }}>
+            <Button variant="contained" color="warning" sx={{ marginLeft: '10px', width: '100px' }} onClick={handleSearch}>
                검색
             </Button>
          </div>

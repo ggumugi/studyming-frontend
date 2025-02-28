@@ -1,34 +1,59 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+
+import { getBannedUsers } from '../../features/bannedSlice'
+
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Select, MenuItem, Button, Pagination } from '@mui/material'
 
-const reportsData = [
-   { id: 1, reportedUser: '현수박박박박', banStartDate: '2025-02-20', banEndDate: '2025-02-27', reason: '명예훼손 또는 저작권이 침해되었습니다.' },
-   { id: 2, reportedUser: '강원식', banStartDate: '2025-02-20', banEndDate: '2025-05-27', reason: '불쾌한 표현이 있습니다' },
-   { id: 3, reportedUser: '박현수', banStartDate: '2025-02-20', banEndDate: '2025-03-27', reason: '음란물입니다' },
-   { id: 4, reportedUser: '식원강', banStartDate: '2025-02-20', banEndDate: '2025-03-07', reason: '스팸홍보/도배입니다' },
-   { id: 5, reportedUser: '수현박', banStartDate: '2025-02-20', banEndDate: '2025-03-07', reason: '욕설/생명경시/혐오/차별적 표현입니다' },
-   { id: 6, reportedUser: '강원식', banStartDate: '2025-02-20', banEndDate: '2026-01-07', reason: '그냥' },
-   { id: 7, reportedUser: '박현수', banStartDate: '2025-02-20', banEndDate: '2026-01-07', reason: '그냥' },
-   { id: 8, reportedUser: '강원식', banStartDate: '2025-02-20', banEndDate: '2026-01-07', reason: '담배충임' },
-   { id: 9, reportedUser: '박현수', banStartDate: '2025-02-20', banEndDate: '2026-01-07', reason: '아재개그충임' },
-]
-
 const BanRecordsBoard = () => {
-   const [reports] = useState(reportsData)
-   const [page, setPage] = useState(1)
-   const [rowsPerPage] = useState(8)
-   const [searchQuery, setSearchQuery] = useState('')
-   const [filter, setFilter] = useState('reportedUser')
+   const dispatch = useDispatch()
+   const { bannedUsers, loading } = useSelector((state) => state.banned)
+
+   useEffect(() => {
+      dispatch(getBannedUsers()) // 정지 목록 불러오기
+   }, [dispatch])
+
+   const [page, setPage] = React.useState(1)
+   const [rowsPerPage] = React.useState(8)
+   const [searchQuery, setSearchQuery] = React.useState('')
+   const [filter, setFilter] = React.useState('reportedUser')
 
    const handleChangePage = (event, newPage) => {
       setPage(newPage)
    }
 
+   const handleSearch = () => {
+      setPage(1) // 검색 시 첫 페이지로 이동
+   }
+
    // 검색 필터링
-   const filteredReports = reports.filter((report) => report[filter] && report[filter].toString().toLowerCase().includes(searchQuery.toLowerCase()))
+   // ✅ Redux에서 bannedUsers 가져오기
+   const filteredReports = bannedUsers.filter((user) => {
+      if (filter === 'reportedUser' && user.reportedUser?.nickname) {
+         return user.reportedUser.nickname.toLowerCase().includes(searchQuery.toLowerCase())
+      }
+      if (filter === 'reason' && user.reason) {
+         return user.reason.toLowerCase().includes(searchQuery.toLowerCase())
+      }
+      return false
+   })
 
    // 페이지네이션 적용
    const paginatedReports = filteredReports.slice((page - 1) * rowsPerPage, page * rowsPerPage)
+
+   //시간 변환
+   const formatDate = (isoString) => {
+      if (!isoString) return '날짜 없음'
+      return new Date(isoString).toLocaleString('ko-KR', {
+         year: 'numeric',
+         month: '2-digit',
+         day: '2-digit',
+         hour: '2-digit',
+         minute: '2-digit',
+         hour12: false, // 24시간 형식
+      })
+   }
+
    return (
       <div style={{ width: '100%' }}>
          <TableContainer component={Paper} sx={{ maxWidth: '100%', margin: 'auto' }}>
@@ -54,13 +79,14 @@ const BanRecordsBoard = () => {
                   </TableRow>
                </TableHead>
                <TableBody>
-                  {paginatedReports.map((row) => (
-                     <TableRow key={row.id}>
-                        <TableCell sx={{ width: '10%', textAlign: 'center', height: '64px' }}>{row.id}</TableCell>
-                        <TableCell sx={{ width: '15%', textAlign: 'center' }}>{row.reportedUser}</TableCell>
-                        <TableCell sx={{ width: '15%', textAlign: 'center' }}>{row.banStartDate}</TableCell>
-                        <TableCell sx={{ width: '15%', textAlign: 'center' }}>{row.banEndDate}</TableCell>
-                        <TableCell sx={{ width: '45%', textAlign: 'center' }}>{row.reason}</TableCell>
+                  {paginatedReports.map((user, index) => (
+                     <TableRow key={user.bannedId}>
+                        <TableCell sx={{ width: '10%', textAlign: 'center', height: '64px' }}>{index + 1}</TableCell>
+                        <TableCell sx={{ width: '15%', textAlign: 'center' }}>{user.reportedUser?.nickname || '알 수 없음'}</TableCell>
+                        <TableCell sx={{ width: '15%', textAlign: 'center' }}>{formatDate(user.startDate)}</TableCell>
+                        <TableCell sx={{ width: '15%', textAlign: 'center' }}>{formatDate(user.endDate)}</TableCell>
+
+                        <TableCell sx={{ width: '45%', textAlign: 'center' }}>{user.reason}</TableCell>
                      </TableRow>
                   ))}
                </TableBody>
@@ -86,7 +112,7 @@ const BanRecordsBoard = () => {
                <MenuItem value="reason">사유</MenuItem>
             </Select>
             <TextField value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="검색어 입력" sx={{ marginLeft: '10px', width: '400px', height: '40px' }} />
-            <Button variant="contained" color="warning" sx={{ marginLeft: '10px', width: '100px' }}>
+            <Button variant="contained" color="warning" sx={{ marginLeft: '10px', width: '100px' }} onClick={handleSearch}>
                검색
             </Button>
          </div>

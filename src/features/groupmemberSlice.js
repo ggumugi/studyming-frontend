@@ -75,6 +75,7 @@ export const transferGroupLeaderThunk = createAsyncThunk('groupmembers/transferL
 // 멤버 강퇴
 export const kickGroupMemberThunk = createAsyncThunk('groupmembers/kick', async ({ groupId, userId }, { rejectWithValue }) => {
    try {
+      console.log('🔥 Redux 강퇴 요청 - groupId:', groupId, 'userId:', userId) // ✅ 확인용
       const response = await kickGroupMember(groupId, userId) // API 호출
       return { userId, groupId }
    } catch (error) {
