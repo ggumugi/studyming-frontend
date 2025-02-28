@@ -91,10 +91,17 @@ const bannedSlice = createSlice({
             state.loading = true
             state.error = null
          })
+         // ✅ 신고 목록 불러오기 시 BANNED 회원 신고도 포함
          .addCase(getReports.fulfilled, (state, action) => {
             state.loading = false
-            state.reports = action.payload
+
+            // 🚨 이미 정지된 회원의 신고도 남아 있도록 유지
+            state.reports = action.payload.map((report) => ({
+               ...report,
+               isBanned: report.isBanned, // ✅ 추가된 isBanned 값 유지
+            }))
          })
+
          .addCase(getReports.rejected, (state, action) => {
             state.loading = false
             state.error = action.payload
@@ -147,8 +154,11 @@ const bannedSlice = createSlice({
          .addCase(applyBan.fulfilled, (state, action) => {
             state.loading = false
             state.bannedUsers.push(action.payload)
-            state.reports = state.reports.filter((r) => r.id !== action.payload.reportId) // ✅ 신고에서 삭제
+
+            // 🔥 "신고된 회원"의 모든 신고를 삭제하지 말고 "특정 신고(reportId)만 삭제" 유지!
+            state.reports = state.reports.filter((r) => r.id !== action.payload.reportId) // ✅ reportId만 삭제 유지
          })
+
          .addCase(applyBan.rejected, (state, action) => {
             state.loading = false
             state.error = action.payload
