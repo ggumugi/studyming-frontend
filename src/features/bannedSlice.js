@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { fetchReports, fetchBannedUsers, reportUser, banUser, unbanUser, updateBanPeriod } from '../api/bannedApi'
+import { fetchReports, fetchBannedUsers, reportUser, banUser, unbanUser, updateBanPeriod, removeReport as deleteReportApi } from '../api/bannedApi'
 
 // ✅ 신고 목록 가져오기 (비동기 요청)
 export const getReports = createAsyncThunk('banned/getReports', async (_, { rejectWithValue }) => {
@@ -75,6 +75,15 @@ export const removeBan = createAsyncThunk('banned/removeBan', async (userId, { r
    }
 })
 
+// ✅ 신고 삭제 액션 추가
+export const removeReport = createAsyncThunk('banned/removeReport', async (reportId, { rejectWithValue }) => {
+   try {
+      return await deleteReportApi(reportId)
+   } catch (error) {
+      return rejectWithValue(error)
+   }
+})
+
 const bannedSlice = createSlice({
    name: 'banned',
    initialState: {
@@ -83,7 +92,12 @@ const bannedSlice = createSlice({
       loading: false,
       error: null,
    },
-   reducers: {},
+   reducers: {
+      // 🚀 새로운 정지 항목을 추가하는 액션
+      addToBannedList: (state, action) => {
+         state.bannedUsers.push(action.payload)
+      },
+   },
    extraReducers: (builder) => {
       builder
          // 신고 목록 불러오기
@@ -111,9 +125,10 @@ const bannedSlice = createSlice({
             state.loading = true
             state.error = null
          })
+         // ✅ Redux 상태 업데이트 확인
          .addCase(getBannedUsers.fulfilled, (state, action) => {
             state.loading = false
-            console.log('🚀 Redux 상태 업데이트 (bannedUsers):', action.payload) // ✅ 여기 추가
+            console.log('🚀 Redux 상태 업데이트 (bannedUsers):', action.payload) // ✅ 여기에 추가
             state.bannedUsers = action.payload
          })
 
@@ -173,6 +188,16 @@ const bannedSlice = createSlice({
          })
          .addCase(removeBan.rejected, (state, action) => {
             state.loading = false
+            state.error = action.payload
+         })
+         //신고 삭제
+         .addCase(removeReport.pending, (state) => {
+            state.loading = true
+         })
+         .addCase(removeReport.fulfilled, (state, action) => {
+            state.reports = state.reports.filter((r) => r.id !== action.payload.reportId)
+         })
+         .addCase(removeReport.rejected, (state, action) => {
             state.error = action.payload
          })
    },

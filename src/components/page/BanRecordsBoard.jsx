@@ -42,16 +42,16 @@ const BanRecordsBoard = () => {
    const paginatedReports = filteredReports.slice((page - 1) * rowsPerPage, page * rowsPerPage)
 
    //시간 변환
-   const formatDate = (isoString) => {
-      if (!isoString) return '날짜 없음'
-      return new Date(isoString).toLocaleString('ko-KR', {
-         year: 'numeric',
-         month: '2-digit',
-         day: '2-digit',
-         hour: '2-digit',
-         minute: '2-digit',
-         hour12: false, // 24시간 형식
-      })
+   // formatDate 함수 수정
+   function formatDate(dateString) {
+      if (!dateString) return 'X' // null, undefined 또는 빈 문자열인 경우 'X' 반환
+
+      const date = new Date(dateString)
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+
+      return `${year}-${month}-${day}`
    }
 
    return (
@@ -83,9 +83,8 @@ const BanRecordsBoard = () => {
                      <TableRow key={user.bannedId}>
                         <TableCell sx={{ width: '10%', textAlign: 'center', height: '64px' }}>{index + 1}</TableCell>
                         <TableCell sx={{ width: '15%', textAlign: 'center' }}>{user.reportedUser?.nickname || '알 수 없음'}</TableCell>
-                        <TableCell sx={{ width: '15%', textAlign: 'center' }}>{formatDate(user.startDate)}</TableCell>
-                        <TableCell sx={{ width: '15%', textAlign: 'center' }}>{formatDate(user.endDate)}</TableCell>
-
+                        <TableCell sx={{ width: '15%', textAlign: 'center' }}>{user.startDate ? formatDate(user.startDate) : 'X'}</TableCell>
+                        <TableCell sx={{ width: '15%', textAlign: 'center' }}>{user.endDate ? formatDate(user.endDate) : 'X'}</TableCell>
                         <TableCell sx={{ width: '45%', textAlign: 'center' }}>{user.reason}</TableCell>
                      </TableRow>
                   ))}
