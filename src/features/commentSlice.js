@@ -50,14 +50,10 @@ export const fetchCommentByIdThunk = createAsyncThunk('comments/fetchCommentById
 //  댓글 수정 Thunk
 export const updateCommentThunk = createAsyncThunk('comments/updateComment', async ({ id, commentData }, { rejectWithValue }) => {
    try {
-      console.log('🛠 댓글 수정 요청:', { id, commentData }) // ✅ 디버깅 로그 추가
-
-      const response = await updateComment({ ...commentData, commentId: id }) // ✅ id 포함하여 전달
-
-      console.log('✅ 댓글 수정 성공:', response.comment) // ✅ 요청 성공 시 로그 출력
+      console.log('🛠 댓글 수정 요청:', { id, commentData }) // ✅ id 확인
+      const response = await updateComment(id, commentData)
       return response.comment
    } catch (err) {
-      console.error('❌ 댓글 수정 실패:', err.response?.data?.message || err.message) // ✅ 오류 로그 추가
       return rejectWithValue(err.response?.data?.message || '댓글 수정 실패')
    }
 })
