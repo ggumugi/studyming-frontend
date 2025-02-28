@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { signupUser, loginUser, checkIdDuplicate, checkNicknameDuplicate, logoutUser, checkAuthStatus, sendVerificationCode, verifyCodeAndFindId, checkIdExists, checkEmailMatches, updatePassword, googleLoginApi, verifyCodepw, kakaoLoginApi, getKakaoUserInfo } from '../api/authApi' // ✅ 수정된 API
+import { signupUser, loginUser, checkIdDuplicate, checkNicknameDuplicate, logoutUser, checkAuthStatus, sendVerificationCode, verifyCodeAndFindId, checkIdExists, checkEmailMatches, updatePassword, googleLoginApi, verifyCodepw, kakaoLoginApi, getKakaoUserInfo, fetchUsers } from '../api/authApi' // ✅ 수정된 API
 
 // 회원가입
 export const signupUserThunk = createAsyncThunk('auth/signupUser', async (userData, { rejectWithValue }) => {
@@ -161,10 +161,23 @@ export const fetchKakaoUserInfoThunk = createAsyncThunk('auth/fetchKakaoUserInfo
       return rejectWithValue(error.message) // 에러 처리
    }
 })
+
+// API에서 유저 리스트 가져오기
+export const fetchUsersThunk = createAsyncThunk('auth/fetchUsers', async (_, { rejectWithValue }) => {
+   try {
+      const users = await fetchUsers() // 서버에서 유저 리스트 가져오기
+      console.log('✅ 서버에서 가져온 회원 데이터:', users)
+      return users
+   } catch (error) {
+      return rejectWithValue(error.message || '회원 목록 불러오기 실패')
+   }
+})
+
 const authSlice = createSlice({
    name: 'auth',
    initialState: {
       user: null,
+      users: [],
       isAuthenticated: false, // 로그인 상태: 로그인이 되어 있으면 true, 그렇지 않으면 false
       loading: false,
       error: null,
@@ -375,6 +388,21 @@ const authSlice = createSlice({
             state.loading = false // 로딩 완료
          })
          .addCase(fetchKakaoUserInfoThunk.rejected, (state, action) => {
+            state.loading = false // 로딩 완료
+            state.error = action.payload // 오류 메시지 저장
+         })
+
+      // 유저 리스트 가져오기
+      builder
+         .addCase(fetchUsersThunk.pending, (state) => {
+            state.loading = true // 로딩 상태 설정
+            state.error = null // 오류 초기화
+         })
+         .addCase(fetchUsersThunk.fulfilled, (state, action) => {
+            state.loading = false // 로딩 완료
+            state.users = action.payload // 유저 리스트 저장
+         })
+         .addCase(fetchUsersThunk.rejected, (state, action) => {
             state.loading = false // 로딩 완료
             state.error = action.payload // 오류 메시지 저장
          })

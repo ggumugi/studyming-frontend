@@ -200,10 +200,14 @@ const Item = styled.li`
 `
 
 const Text = styled.span`
+   color: #69c6ec;
    cursor: pointer;
+   font-size: clamp(16px, 2vw, 21px);
+   font-weight: 700;
    &:hover {
       text-decoration: underline;
    }
+   margin-bottom: 20px;
 `
 
 const InputWrapper = styled.div`
