@@ -8,6 +8,7 @@ import Report from '../shared/Report' // 벤실험 코드
 import { submitReport } from '../../features/bannedSlice'
 const BoardList = ({ category }) => {
    const dispatch = useDispatch()
+   const selectedCategory = useSelector((state) => state.posts.category)
    const posts = useSelector((state) => state.posts.posts)
    const user = useSelector((state) => state.auth.user)
    const pagination = useSelector((state) => state.posts.pagination)
@@ -50,7 +51,7 @@ const BoardList = ({ category }) => {
          {/* :흰색_확인_표시: 게시판 제목 + 글쓰기 버튼 */}
          <Header>
             <Title>{category} 게시판</Title>
-            <WriteButton onClick={() => navigate('/board/create')}>글쓰기</WriteButton> {/* :흰색_확인_표시: BoardCreate.jsx로 이동 */}
+            {(selectedCategory !== 'noti' || user?.role === 'ADMIN') && <WriteButton onClick={() => navigate('/board/create')}>글쓰기</WriteButton>}
          </Header>
          {loading ? (
             <LoadingText>로딩 중...</LoadingText>

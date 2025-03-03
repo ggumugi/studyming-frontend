@@ -13,6 +13,8 @@ const BoardDetail = () => {
    const navigate = useNavigate()
    const { id } = useParams() // ✅ URL에서 postId 가져오기
    const post = useSelector((state) => state.posts.post)
+   const user = useSelector((state) => state.auth.user)
+   const selectedCategory = useSelector((state) => state.posts.category)
 
    useEffect(() => {
       if (id) {
@@ -70,11 +72,20 @@ const BoardDetail = () => {
          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <Label>{post.title}</Label>
             <SubInfo>
-               <ButtonGroup>
-                  <EditButton onClick={() => navigate(`/board/edit/${post.id}`)}>수정</EditButton>
-
-                  <DeleteButton onClick={handleDelete}>삭제</DeleteButton>
-               </ButtonGroup>
+               {/* ✅ 정보 게시판(noti)일 때만 관리자에게만 수정/삭제 버튼 보이기 */}
+               {selectedCategory === 'noti'
+                  ? user?.role === 'ADMIN' && (
+                       <ButtonGroup>
+                          <EditButton onClick={() => navigate(`/board/edit/${post.id}`)}>수정</EditButton>
+                          <DeleteButton onClick={handleDelete}>삭제</DeleteButton>
+                       </ButtonGroup>
+                    )
+                  : (user?.role === 'ADMIN' || user?.id === post?.userId) && (
+                       <ButtonGroup>
+                          <EditButton onClick={() => navigate(`/board/edit/${post.id}`)}>수정</EditButton>
+                          <DeleteButton onClick={handleDelete}>삭제</DeleteButton>
+                       </ButtonGroup>
+                    )}
                작성자: {post?.User?.nickname} | {new Date(post.createdAt).toLocaleDateString()}
             </SubInfo>
          </div>
@@ -86,7 +97,7 @@ const BoardDetail = () => {
                {post.Images.map((image) => {
                   const imagePath = `http://localhost:8000/${image.path}`
                   console.log('이미지 최종 경로:', imagePath) // ✅ 최종 경로 확인
-                  return <img key={image.id} src={imagePath} alt="게시글 이미지" />
+                  return <Image key={image.id} src={imagePath} alt="게시글 이미지" />
                })}
             </ImageContainer>
          )}
@@ -264,4 +275,17 @@ const BackButton = styled.button`
    }
 `
 
-const ImageContainer = styled.div``
+const ImageContainer = styled.div`
+   display: flex;
+   flex-wrap: wrap;
+   gap: 10px; /* 이미지 간 간격 */
+   justify-content: center; /* 가운데 정렬 */
+   max-width: 100%; /* 부모 컨테이너를 넘지 않도록 설정 */
+   overflow: hidden; /* 넘치는 이미지 숨김 */
+`
+
+const Image = styled.img`
+   max-width: 100%; /* 부모 요소 내에서 넘치지 않도록 */
+   height: auto; /* 가로 비율 유지 */
+   object-fit: contain; /* 비율 유지하면서 크기 조절 */
+`

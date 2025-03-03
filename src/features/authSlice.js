@@ -182,8 +182,15 @@ const authSlice = createSlice({
       loading: false,
       error: null,
       step: 1, // 비밀번호 찾기 단계
+      status: 'idle',
    },
-   reducers: {},
+   reducers: {
+      logout: (state) => {
+         state.user = null
+         state.status = 'idle'
+         state.error = null
+      },
+   },
    extraReducers: (builder) => {
       // 회원가입
       builder
@@ -208,10 +215,15 @@ const authSlice = createSlice({
             state.error = null
          })
          .addCase(loginUserThunk.fulfilled, (state, action) => {
-            console.log('✅ 로그인 성공:', action.payload)
+            if (action.payload.status === 'BANNED') {
+               state.error = action.payload.endDate ? `정지된 계정입니다. ${action.payload.endDate}까지 로그인이 불가능합니다.` : '영구 정지된 계정입니다.'
+               state.user = null
+               return
+            }
+            state.status = 'succeeded'
+            state.user = action.payload
             state.loading = false
             state.isAuthenticated = true
-            state.user = action.payload
          })
          .addCase(loginUserThunk.rejected, (state, action) => {
             console.log('❌ 로그인 실패:', action.payload)
@@ -409,4 +421,5 @@ const authSlice = createSlice({
    },
 })
 
+export const { logout } = authSlice.actions
 export default authSlice.reducer

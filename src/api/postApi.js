@@ -90,39 +90,50 @@ export const fetchPosts = async ({ page, category, limit, searchType, searchKeyw
 // }
 
 // ✅ 게시글 수정 API 요청
+/* export const updatePost = async (id, postData, imagesToRemove) => {
+   try {
+      const formData = new FormData()
+      formData.append('title', postData.title)
+      formData.append('content', postData.content)
+
+      // 삭제할 이미지 ID 추가
+      if (imagesToRemove?.length > 0) {
+         formData.append('removeImageIds', JSON.stringify(imagesToRemove))
+      }
+
+      // 새 이미지 추가
+      if (postData.images?.length > 0) {
+         postData.images.forEach((file) => {
+            formData.append('images', file)
+         })
+      }
+
+      const response = await studymingApi.put(`/post/${id}`, formData, {
+         headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      return response
+   } catch (error) {
+      console.error('게시글 수정 오류:', error)
+      throw error
+   }
+} */
 export const updatePost = async (id, postData, imagesToRemove) => {
    try {
       const config = {
          headers: {
-            'Content-Type': 'multipart/form-data', // 파일 전송시 반드시 지정
+            'Content-Type': 'multipart/form-data',
          },
       }
-      // const formData = new FormData()
-      // formData.append('title', postData.title)
-      // formData.append('content', postData.content)
 
-      // ✅ 삭제할 이미지 ID 목록 추가
-      if (imagesToRemove && imagesToRemove.length > 0) {
-         postData.append('removeImageIds', JSON.stringify(imagesToRemove))
-      }
-
-      // ✅ 새 이미지 추가 (undefined 체크)
-      if (postData.images && postData.images.length > 0) {
-         postData.images.forEach((image) => {
-            postData.append('images', image)
-         })
-      }
-
-      for (const pair of postData.entries()) {
-      }
-
+      // ✅ 수정된 부분: 이미지 관련 로직 제거
       const response = await studymingApi.put(`/post/${id}`, postData, config)
       return response
    } catch (error) {
-      console.error(`API Request 오류: ${error.message}`)
+      console.error(`API 요청 오류: ${error.message}`)
       throw error
    }
 }
+
 //포스트 삭제
 export const deletePost = async (id) => {
    try {
