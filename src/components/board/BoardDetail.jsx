@@ -13,6 +13,8 @@ const BoardDetail = () => {
    const navigate = useNavigate()
    const { id } = useParams() // ✅ URL에서 postId 가져오기
    const post = useSelector((state) => state.posts.post)
+   const user = useSelector((state) => state.auth.user)
+   const selectedCategory = useSelector((state) => state.posts.category)
 
    useEffect(() => {
       if (id) {
@@ -70,11 +72,20 @@ const BoardDetail = () => {
          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <Label>{post.title}</Label>
             <SubInfo>
-               <ButtonGroup>
-                  <EditButton onClick={() => navigate(`/board/edit/${post.id}`)}>수정</EditButton>
-
-                  <DeleteButton onClick={handleDelete}>삭제</DeleteButton>
-               </ButtonGroup>
+               {/* ✅ 정보 게시판(noti)일 때만 관리자에게만 수정/삭제 버튼 보이기 */}
+               {selectedCategory === 'noti'
+                  ? user?.role === 'ADMIN' && (
+                       <ButtonGroup>
+                          <EditButton onClick={() => navigate(`/board/edit/${post.id}`)}>수정</EditButton>
+                          <DeleteButton onClick={handleDelete}>삭제</DeleteButton>
+                       </ButtonGroup>
+                    )
+                  : (user?.role === 'ADMIN' || user?.id === post?.userId) && (
+                       <ButtonGroup>
+                          <EditButton onClick={() => navigate(`/board/edit/${post.id}`)}>수정</EditButton>
+                          <DeleteButton onClick={handleDelete}>삭제</DeleteButton>
+                       </ButtonGroup>
+                    )}
                작성자: {post?.User?.nickname} | {new Date(post.createdAt).toLocaleDateString()}
             </SubInfo>
          </div>

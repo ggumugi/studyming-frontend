@@ -45,13 +45,18 @@ const BoardCreate = ({ user, category, onSubmit, initialValues = {} }) => {
 
    const handleImageUpload = (e) => {
       const files = Array.from(e.target.files)
-      console.log('업로드된 파일:', files)
+      console.log('📌 업로드된 파일:', files)
 
-      if (files.length > 0) {
-         setImageFiles((prev) => [...prev, ...files]) // ✅ 이전 상태 보존
-         const previews = files.map((file) => URL.createObjectURL(file)).filter(Boolean) // ✅ undefined 값 제거
-         setImages((prev) => [...prev.filter(Boolean), ...previews]) // ✅ undefined 값 제거 후 추가
+      // 🔥 현재 업로드된 이미지 개수 체크
+      const totalImages = images.length + files.length
+      if (totalImages > 10) {
+         alert('이미지는 최대 10개까지 업로드할 수 있습니다.')
+         return
       }
+
+      setImageFiles((prev) => [...prev, ...files]) // ✅ 기존 이미지 유지
+      const previews = files.map((file) => URL.createObjectURL(file))
+      setImages((prev) => [...prev, ...previews]) // ✅ 미리보기 추가
    }
 
    // ✅ 기존 이미지 삭제
