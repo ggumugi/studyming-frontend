@@ -36,10 +36,8 @@ const StudyGroupPage = ({ isAuthenticated, user }) => {
       switch (selectedMenu) {
          case '채팅':
             return <Chat studygroup={studygroup} groupmembers={groupmembers} />
-         case '화면공유':
+         case '공부방':
             return <ScreenShare studygroup={studygroup} groupmembers={groupmembers} />
-         case '카메라':
-            return <Cam studygroup={studygroup} groupmembers={groupmembers} />
          default:
             return <p>잘못된 메뉴 선택</p>
       }
@@ -98,7 +96,7 @@ const StudyGroupPage = ({ isAuthenticated, user }) => {
                      </ModalContent>
                   </Modal>
                )}
-               {/* <Timer /> */}
+               <Timer />
             </Container>
          )}
       </>

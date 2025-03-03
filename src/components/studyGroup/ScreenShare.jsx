@@ -1,690 +1,396 @@
 import React, { useEffect, useState, useRef } from 'react'
+import { JitsiMeeting } from '@jitsi/react-sdk'
 import { useDispatch, useSelector } from 'react-redux'
+import { updateGroupMemberThunk, participateInGroupThunk } from '../../features/groupmemberSlice'
 import styled from 'styled-components'
-import Peer from 'peerjs'
-import { updateScreenShareStatusThunk, fetchActivePeersThunk, setIsSharing } from '../../features/screenShareSlice'
-import { logPeerConnectionStatus } from '../../api/screenShareApi'
 
-const ScreenShare = ({ groupmembers, studygroup }) => {
+const ScreenShare = ({ studygroup, groupmembers }) => {
    const dispatch = useDispatch()
+   const user = useSelector((state) => state.auth.user)
+   const [api, setApi] = useState(null)
+   const [isScreenSharing, setIsScreenSharing] = useState(false)
+   const [statusMessage, setStatusMessage] = useState('')
+   const jitsiIframeRef = useRef(null)
+   const localStreamRef = useRef(null) // 로컬 캠 스트림을 저장할 참조
 
-   // 상태 관리
-   const [myStream, setMyStream] = useState(null)
-   const [peers, setPeers] = useState({})
-   const [remoteStreams, setRemoteStreams] = useState({})
-   const [connecting, setConnecting] = useState(false)
-   const [errorMessage, setErrorMessage] = useState(null)
+   // 현재 사용자의 그룹 멤버 정보 찾기
+   const currentMember = groupmembers?.find((member) => member.userId === user?.id)
 
-   // Redux 상태
-   const screenShareState = useSelector((state) => state.screenShare || {})
-   const { isSharing, activePeers } = screenShareState
+   const leaderMember = groupmembers?.find((member) => member.role === 'leader')
 
-   // 참조 객체
-   const peerRef = useRef(null)
-   const connectionRef = useRef({})
-   const videoRefs = useRef({})
+   // 그룹 ID를 회의실 ID로 사용
+   const roomName = `studyming_${studygroup?.id}_room`
 
-   // 사용자 정보
-   const authState = useSelector((state) => state.auth || {})
-   const currentUser = authState.user || {}
-
-   // 그룹 ID
-   const groupId = studygroup?.id
-
-   // 활성 피어 목록 조회
    useEffect(() => {
-      if (groupId) {
-         dispatch(fetchActivePeersThunk(groupId))
-      }
-   }, [dispatch, groupId])
-
-   // PeerJS 초기화 및 연결 설정
-   useEffect(() => {
-      if (!groupId || !currentUser.id) return
-
-      // 기존 연결 정리
-      if (peerRef.current) {
-         peerRef.current.destroy()
-      }
-
-      // 고유 피어 ID 생성 (사용자 ID + 그룹 ID 조합)
-      const peerId = `user-${currentUser.id}-group-${groupId}`
-
-      // PeerJS 인스턴스 생성
-      const peer = new Peer(peerId, {
-         host: process.env.REACT_APP_PEERJS_HOST || 'localhost',
-         port: process.env.REACT_APP_PEERJS_PORT || 8002,
-         path: process.env.REACT_APP_PEERJS_PATH || '/peerjs',
-         debug: 2,
-      })
-
-      peerRef.current = peer
-
-      // 연결 성공 이벤트
-      peer.on('open', (id) => {
-         console.log('PeerJS 연결 성공:', id)
-         logPeerConnectionStatus(id, 'connected')
-
-         // 그룹의 다른 멤버들에게 자신의 존재 알림
-         notifyPresence()
-      })
-
-      // 연결 오류 이벤트
-      peer.on('error', (err) => {
-         console.error('PeerJS 오류:', err)
-         logPeerConnectionStatus(peerId, 'error', { error: err })
-         setErrorMessage(`연결 오류: ${err.type}`)
-      })
-
-      // 다른 피어로부터 연결 요청 수신
-      peer.on('connection', (conn) => {
-         handleConnection(conn)
-      })
-
-      // 통화 수신 이벤트
-      peer.on('call', (call) => {
-         console.log('화면 공유 호출 수신:', call.peer)
-         logPeerConnectionStatus(call.peer, 'incoming call')
-
-         // 호출 응답 (자신의 스트림이 있으면 전송, 없으면 빈 스트림)
-         const emptyStream = new MediaStream()
-         call.answer(myStream || emptyStream)
-
-         // 스트림 수신 처리
-         call.on('stream', (remoteStream) => {
-            console.log('원격 스트림 수신:', call.peer)
-            logPeerConnectionStatus(call.peer, 'received stream')
-
-            // 원격 스트림 저장
-            setRemoteStreams((prev) => ({
-               ...prev,
-               [call.peer]: remoteStream,
-            }))
-         })
-
-         // 호출 종료 처리
-         call.on('close', () => {
-            console.log('호출 종료:', call.peer)
-            logPeerConnectionStatus(call.peer, 'call closed')
-            setRemoteStreams((prev) => {
-               const newStreams = { ...prev }
-               delete newStreams[call.peer]
-               return newStreams
-            })
-         })
-
-         // 호출 객체 저장
-         setPeers((prev) => ({
-            ...prev,
-            [call.peer]: call,
-         }))
-      })
-
-      // 컴포넌트 언마운트 시 정리
-      return () => {
-         // 모든 연결 종료
-         Object.values(connectionRef.current).forEach((conn) => {
-            if (conn) conn.close()
-         })
-
-         // 모든 피어 연결 종료
-         Object.values(peers).forEach((call) => {
-            if (call) call.close()
-         })
-
-         // 스트림 정리
-         if (myStream) {
-            myStream.getTracks().forEach((track) => track.stop())
-         }
-
-         // PeerJS 인스턴스 정리
-         if (peerRef.current) {
-            peerRef.current.destroy()
-         }
-
-         // 화면 공유 상태 업데이트 (DB)
-         if (currentUser.id && groupId && isSharing) {
-            dispatch(
-               updateScreenShareStatusThunk({
-                  groupId,
-                  userId: currentUser.id,
-                  shareState: false,
-               })
-            )
-         }
-      }
-   }, [groupId, currentUser.id, dispatch, isSharing])
-
-   // 다른 멤버들에게 자신의 존재 알림
-   const notifyPresence = () => {
-      if (groupmembers && peerRef.current) {
-         groupmembers.forEach((member) => {
-            // 자신이 아닌 멤버에게만 연결
-            if (member.userId !== currentUser.id) {
-               const remotePeerId = `user-${member.userId}-group-${groupId}`
-               connectToPeer(remotePeerId)
-            }
-         })
-      }
-   }
-
-   // 피어 연결 처리
-   const handleConnection = (conn) => {
-      console.log('새 데이터 연결 수신:', conn.peer)
-      logPeerConnectionStatus(conn.peer, 'new connection')
-
-      // 연결 이벤트 처리
-      conn.on('open', () => {
-         console.log('데이터 연결 열림:', conn.peer)
-         logPeerConnectionStatus(conn.peer, 'connection open')
-
-         // 연결 객체 저장
-         connectionRef.current[conn.peer] = conn
-
-         // 데이터 수신 처리
-         conn.on('data', (data) => {
-            console.log('데이터 수신:', data)
-            logPeerConnectionStatus(conn.peer, 'data received', data)
-
-            // 화면 공유 시작/중지 메시지 처리
-            if (data.type === 'screen-share-status') {
-               // 원격 피어의 화면 공유 상태 업데이트
-               // (필요시 구현)
-            }
-         })
-
-         // 연결 종료 처리
-         conn.on('close', () => {
-            console.log('데이터 연결 종료:', conn.peer)
-            logPeerConnectionStatus(conn.peer, 'connection closed')
-            delete connectionRef.current[conn.peer]
-         })
-      })
-   }
-
-   // 피어 연결 시도
-   const connectToPeer = (remotePeerId) => {
-      if (!peerRef.current) return
-
-      // 이미 연결된 경우 무시
-      if (connectionRef.current[remotePeerId]) return
-
-      console.log('피어 연결 시도:', remotePeerId)
-      logPeerConnectionStatus(remotePeerId, 'connecting')
-
-      // 데이터 연결 생성
-      const conn = peerRef.current.connect(remotePeerId)
-
-      // 연결 성공 시 처리
-      conn.on('open', () => {
-         console.log('데이터 연결 성공:', remotePeerId)
-         logPeerConnectionStatus(remotePeerId, 'connected')
-
-         // 연결 객체 저장
-         connectionRef.current[remotePeerId] = conn
-
-         // 현재 화면 공유 상태 전송
-         conn.send({
-            type: 'screen-share-status',
-            isSharing: isSharing,
-         })
-
-         // 데이터 수신 처리
-         conn.on('data', (data) => {
-            console.log('데이터 수신:', data)
-            logPeerConnectionStatus(remotePeerId, 'data received', data)
-
-            // 화면 공유 상태 메시지 처리
-            if (data.type === 'screen-share-status') {
-               // 원격 피어의 화면 공유 상태 업데이트
-               // (필요시 구현)
-            }
-         })
-
-         // 연결 종료 처리
-         conn.on('close', () => {
-            console.log('데이터 연결 종료:', remotePeerId)
-            logPeerConnectionStatus(remotePeerId, 'connection closed')
-            delete connectionRef.current[remotePeerId]
-         })
-      })
-
-      // 연결 오류 처리
-      conn.on('error', (err) => {
-         console.error('데이터 연결 오류:', err)
-         logPeerConnectionStatus(remotePeerId, 'connection error', { error: err })
-      })
-   }
-
-   // 화면 공유 시작
-   const startScreenShare = async () => {
-      try {
-         setConnecting(true)
-         setErrorMessage(null)
-
-         // 화면 공유 스트림 가져오기
-         const stream = await navigator.mediaDevices.getDisplayMedia({
-            video: {
-               cursor: 'always',
-               width: { ideal: 1280 },
-               height: { ideal: 720 },
-               frameRate: { max: 15 },
-            },
-            audio: false,
-         })
-
-         // 화면 공유 중지 이벤트 처리
-         stream.getVideoTracks()[0].onended = () => {
-            stopScreenShare()
-         }
-
-         setMyStream(stream)
-
-         // Redux 상태 업데이트
-         dispatch(setIsSharing(true))
-
-         // 자신의 비디오 요소에 스트림 설정
-         if (videoRefs.current.local) {
-            videoRefs.current.local.srcObject = stream
-         }
-
-         // 화면 공유 상태 업데이트 (DB)
-         if (currentUser.id) {
-            dispatch(
-               updateScreenShareStatusThunk({
-                  groupId,
-                  userId: currentUser.id,
-                  shareState: true,
-               })
-            )
-         }
-
-         // 모든 연결된 피어에게 화면 공유 상태 알림
-         Object.values(connectionRef.current).forEach((conn) => {
-            if (conn && conn.open) {
-               conn.send({
-                  type: 'screen-share-status',
-                  isSharing: true,
-               })
-            }
-         })
-
-         // 모든 그룹 멤버에게 미디어 호출
-         if (groupmembers && peerRef.current) {
-            groupmembers.forEach((member) => {
-               // 자신이 아닌 멤버에게만 호출
-               if (member.userId !== currentUser.id) {
-                  const remotePeerId = `user-${member.userId}-group-${groupId}`
-
-                  // 미디어 호출 생성
-                  const call = peerRef.current.call(remotePeerId, stream)
-
-                  // 호출 이벤트 처리
-                  if (call) {
-                     // 스트림 수신 처리
-                     call.on('stream', (remoteStream) => {
-                        console.log('원격 스트림 수신 (호출 후):', remotePeerId)
-
-                        // 원격 스트림 저장
-                        setRemoteStreams((prev) => ({
-                           ...prev,
-                           [remotePeerId]: remoteStream,
-                        }))
-                     })
-
-                     // 호출 종료 처리
-                     call.on('close', () => {
-                        console.log('호출 종료:', remotePeerId)
-                        setRemoteStreams((prev) => {
-                           const newStreams = { ...prev }
-                           delete newStreams[remotePeerId]
-                           return newStreams
-                        })
-                     })
-
-                     // 호출 객체 저장
-                     setPeers((prev) => ({
-                        ...prev,
-                        [remotePeerId]: call,
-                     }))
-                  }
-               }
-            })
-         }
-
-         setConnecting(false)
-      } catch (err) {
-         console.error('화면 공유 시작 오류:', err)
-         setErrorMessage(err.message || '화면 공유를 시작할 수 없습니다.')
-         dispatch(setIsSharing(false))
-         setConnecting(false)
-      }
-   }
-
-   // 화면 공유 중지
-   const stopScreenShare = () => {
-      // 스트림 정리
-      if (myStream) {
-         myStream.getTracks().forEach((track) => track.stop())
-         setMyStream(null)
-      }
-
-      // Redux 상태 업데이트
-      dispatch(setIsSharing(false))
-
-      // 화면 공유 상태 업데이트 (DB)
-      if (currentUser.id && groupId) {
+      // 참가자 상태를 'on'으로 설정
+      if (currentMember && currentMember.status !== 'on') {
          dispatch(
-            updateScreenShareStatusThunk({
-               groupId,
-               userId: currentUser.id,
-               shareState: false,
+            participateInGroupThunk({
+               groupId: studygroup.id,
+               status: 'on',
             })
          )
       }
 
-      // 모든 연결된 피어에게 화면 공유 중지 알림
-      Object.values(connectionRef.current).forEach((conn) => {
-         if (conn && conn.open) {
-            conn.send({
-               type: 'screen-share-status',
-               isSharing: false,
-            })
+      // 컴포넌트 언마운트 시 화면 공유 상태 초기화
+      return () => {
+         if (currentMember && currentMember.shareState) {
+            dispatch(
+               updateGroupMemberThunk({
+                  groupId: studygroup.id,
+                  userId: user.id,
+                  updateData: { shareState: false },
+               })
+            )
+         }
+
+         // 참가자 상태를 'off'로 설정
+         if (currentMember && currentMember.status === 'on') {
+            dispatch(
+               participateInGroupThunk({
+                  groupId: studygroup.id,
+                  status: 'off',
+               })
+            )
+         }
+      }
+   }, [currentMember, dispatch, studygroup.id, user.id])
+
+   const handleApiReady = (apiObj) => {
+      setApi(apiObj)
+      console.log('Jitsi API 준비 완료')
+
+      // 초기 설정 - 비디오 비활성화
+      apiObj.executeCommand('toggleVideo')
+
+      // 참가자 수 제한 (최대 6명)
+      apiObj.addEventListener('participantJoined', (event) => {
+         console.log('참가자 입장:', event)
+         const participants = apiObj.getParticipantsInfo()
+         console.log('현재 참가자 수:', participants.length)
+
+         if (participants.length > 6) {
+            alert('최대 6명까지만 참여할 수 있습니다.')
+            apiObj.executeCommand('hangup')
          }
       })
 
-      // 모든 피어 연결 종료
-      Object.values(peers).forEach((call) => {
-         if (call) call.close()
+      // 화면 공유 상태 변경 이벤트 감지
+      apiObj.addEventListener('screenSharingStatusChanged', (event) => {
+         console.log('화면 공유 상태 변경:', event)
+         setIsScreenSharing(event.on)
+
+         // DB에 화면 공유 상태 업데이트
+         if (currentMember) {
+            dispatch(
+               updateGroupMemberThunk({
+                  groupId: studygroup.id,
+                  userId: user.id,
+                  updateData: { shareState: event.on },
+               })
+            )
+         }
+
+         if (event.on) {
+            setStatusMessage('화면 공유 중')
+         } else {
+            setStatusMessage('화면 공유가 중지되었습니다')
+            setTimeout(() => {
+               setStatusMessage('')
+            }, 3000)
+         }
       })
 
-      setPeers({})
+      // 회의 참가 완료 이벤트
+      apiObj.addEventListener('videoConferenceJoined', (event) => {
+         console.log('회의 참가 완료:', event)
+         setStatusMessage('회의에 참가했습니다')
+         setTimeout(() => {
+            setStatusMessage('')
+         }, 3000)
+      })
+
+      // 오류 이벤트
+      apiObj.addEventListener('errorOccurred', (error) => {
+         console.error('Jitsi 오류 발생:', error)
+         setStatusMessage(`오류: ${error.error}`)
+      })
    }
 
-   // 비디오 요소 업데이트
-   useEffect(() => {
-      // 내 스트림 설정
-      if (myStream && videoRefs.current.local) {
-         videoRefs.current.local.srcObject = myStream
+   const handleScreenShare = async () => {
+      if (!api) {
+         console.error('Jitsi API가 준비되지 않았습니다.')
+         setStatusMessage('Jitsi가 아직 준비되지 않았습니다. 잠시 후 다시 시도해주세요.')
+         return
       }
 
-      // 원격 스트림 설정
-      Object.entries(remoteStreams).forEach(([peerId, stream]) => {
-         if (videoRefs.current[peerId] && videoRefs.current[peerId].srcObject !== stream) {
-            videoRefs.current[peerId].srcObject = stream
+      console.log('화면 공유 버튼 클릭됨, 현재 상태:', isScreenSharing)
+
+      try {
+         // 이미 공유 중이면 중지
+         if (isScreenSharing) {
+            api.executeCommand('toggleShareScreen')
+            return
          }
-      })
-   }, [myStream, remoteStreams])
 
-   // 로딩 표시
-   if (connecting) {
-      return <LoadingContainer>화면 공유 연결 중...</LoadingContainer>
-   }
+         // 화면 공유 권한 요청
+         setStatusMessage('화면 공유 권한 요청 중...')
 
-   // 오류 표시
-   if (errorMessage) {
-      return (
-         <ErrorContainer>
-            <p>오류: {errorMessage}</p>
-            <RetryButton onClick={() => setErrorMessage(null)}>다시 시도</RetryButton>
-         </ErrorContainer>
-      )
-   }
+         try {
+            // 사용자에게 화면 공유 권한 요청
+            const stream = await navigator.mediaDevices.getDisplayMedia({
+               video: {
+                  cursor: 'always',
+               },
+               audio: false,
+            })
 
-   // 피어 ID에서 사용자 ID 추출
-   const extractUserId = (peerId) => {
-      const match = peerId.match(/user-(\d+)-group-/)
-      return match ? match[1] : peerId
-   }
+            console.log('화면 공유 권한 허용됨')
+            setStatusMessage('화면 공유 권한이 허용되었습니다. 공유를 시작합니다...')
 
-   // 사용자 ID로 멤버 정보 찾기
-   const findMemberByUserId = (userId) => {
-      return groupmembers?.find((member) => member.userId.toString() === userId)
+            // Jitsi의 비디오 트랙을 교체
+            api.executeCommand('replaceTrack', stream.getVideoTracks()[0])
+
+            // 화면 공유 종료 감지
+            stream.getVideoTracks()[0].addEventListener('ended', () => {
+               console.log('사용자가 화면 공유를 종료했습니다.')
+               setIsScreenSharing(false)
+
+               // DB에 화면 공유 상태 업데이트
+               if (currentMember) {
+                  dispatch(
+                     updateGroupMemberThunk({
+                        groupId: studygroup.id,
+                        userId: user.id,
+                        updateData: { shareState: false },
+                     })
+                  )
+               }
+
+               setStatusMessage('화면 공유가 종료되었습니다.')
+               setTimeout(() => {
+                  setStatusMessage('')
+               }, 3000)
+            })
+
+            // Jitsi 화면 공유 명령 실행
+            api.executeCommand('toggleShareScreen')
+         } catch (permissionError) {
+            console.error('화면 공유 권한 오류:', permissionError)
+            setStatusMessage('화면 공유 권한이 거부되었습니다.')
+
+            if (permissionError.name === 'NotAllowedError') {
+               alert('화면 공유 권한이 거부되었습니다. 브라우저 설정에서 권한을 허용해주세요.')
+            } else {
+               alert(`화면 공유 오류: ${permissionError.message}`)
+            }
+         }
+      } catch (error) {
+         console.error('화면 공유 중 오류 발생:', error)
+         setStatusMessage(`화면 공유 오류: ${error.message}`)
+         alert('화면 공유를 시작할 수 없습니다. 브라우저 콘솔에서 오류를 확인해주세요.')
+      }
    }
 
    return (
       <Container>
-         {/* 제어 패널 */}
-         <ControlPanel>
-            {!isSharing ? <StartButton onClick={startScreenShare}>화면 공유 시작</StartButton> : <StopButton onClick={stopScreenShare}>화면 공유 중지</StopButton>}
+         <MeetingContainer>
+            {statusMessage && <StatusMessage>{statusMessage}</StatusMessage>}
 
-            {/* 디버깅 정보 (개발 중에만 표시) */}
-            <DebugInfo>
-               연결 상태: {Object.keys(connectionRef.current).length}개 연결됨 | 피어 ID: {peerRef.current?.id || '연결 중...'}
-            </DebugInfo>
-         </ControlPanel>
+            <JitsiMeeting
+               domain="meet.jit.si"
+               roomName={roomName}
+               configOverwrite={{
+                  startWithAudioMuted: true,
+                  startWithVideoMuted: true,
+                  prejoinPageEnabled: false,
+                  disableDeepLinking: true,
+                  disableInitialGUM: true,
+                  toolbarButtons: [
+                     'microphone',
+                     'camera',
+                     'desktop', // 화면 공유 버튼 추가
+                     'hangup',
+                     'participants-pane',
+                     'settings',
+                  ],
+                  desktopSharingEnabled: true,
+                  desktopSharingChromeEnabled: true,
+                  desktopSharingFirefoxEnabled: true,
+                  enableInsecureRoomNameWarning: false,
+                  desktopSharingFrameRate: {
+                     min: 5,
+                     max: 30,
+                  },
+                  hideConferenceSubject: true,
+                  hideConferenceTimer: false,
+                  defaultLocalDisplayName: user?.nickname || '사용자',
+                  watermark: {
+                     enabled: false,
+                     logo: '',
+                  },
+                  backgroundColor: '#000000',
+               }}
+               interfaceConfigOverwrite={{
+                  DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
+                  SHOW_JITSI_WATERMARK: false,
+                  SHOW_WATERMARK_FOR_GUESTS: false,
+                  DEFAULT_BACKGROUND: '#000000',
+                  DEFAULT_LOCAL_DISPLAY_NAME: user?.nickname || '사용자',
+                  TOOLBAR_BUTTONS: [
+                     'microphone',
+                     'camera',
+                     'desktop', // 화면 공유 버튼 추가
+                     'hangup',
+                     'participants-pane',
+                  ],
+                  SHARING_FEATURES: ['desktop'],
+                  SETTINGS_SECTIONS: ['devices', 'language', 'moderator'],
+                  DESKTOP_SHARING_ENABLE_LOCALHOST: true,
+               }}
+               userInfo={{
+                  displayName: user?.nickname || '사용자',
+               }}
+               onApiReady={handleApiReady}
+               getIFrameRef={(iframeRef) => {
+                  if (iframeRef) {
+                     jitsiIframeRef.current = iframeRef
+                     iframeRef.style.height = '600px'
+                     iframeRef.style.backgroundColor = '#000000'
 
-         {/* 화면 표시 영역 */}
-         <ScreenGrid>
-            {/* 내 화면 (공유 중일 때만 표시) */}
-            {isSharing && (
-               <ScreenBox $isLocal={true}>
-                  <Video
-                     ref={(el) => {
-                        videoRefs.current.local = el
-                     }}
-                     autoPlay
-                     playsInline
-                     muted
-                  />
-                  <Nickname>내 화면 (공유 중)</Nickname>
-               </ScreenBox>
-            )}
+                     // iframe 로드 후 스타일 적용 시도
+                     iframeRef.onload = () => {
+                        try {
+                           const iframeDocument = iframeRef.contentWindow.document
+                           const style = document.createElement('style')
+                           style.textContent = `
+                    body { background-color: #000 !important; }
+                  `
+                           iframeDocument.head.appendChild(style)
+                        } catch (e) {
+                           console.warn('iframe 스타일 적용 실패:', e)
+                        }
+                     }
+                  }
+               }}
+            />
+         </MeetingContainer>
 
-            {/* 다른 참가자 화면 */}
-            {Object.entries(remoteStreams).map(([peerId, stream]) => {
-               const userId = extractUserId(peerId)
-               const member = findMemberByUserId(userId)
-               const nickname = member?.User?.nickname || `사용자 ${userId}`
-
-               return (
-                  <ScreenBox key={peerId} $isLocal={false}>
-                     <Video
-                        ref={(el) => {
-                           videoRefs.current[peerId] = el
-                        }}
-                        autoPlay
-                        playsInline
-                     />
-                     <Nickname>{nickname}</Nickname>
-                  </ScreenBox>
-               )
-            })}
-
-            {/* 화면 공유 없을 때 안내 */}
-            {!isSharing && Object.keys(remoteStreams).length === 0 && (
-               <EmptyMessage>
-                  화면 공유 중인 참가자가 없습니다. <br />
-                  '화면 공유 시작' 버튼을 클릭하여 화면을 공유해보세요.
-               </EmptyMessage>
-            )}
-         </ScreenGrid>
-
-         {/* 참가자 목록 */}
-         <ParticipantList>
-            <h3>참가자 목록</h3>
-            <ul>
-               {groupmembers &&
-                  groupmembers.map((member) => {
-                     const isCurrentUser = member.userId === currentUser.id
-                     const nickname = member.User?.nickname || `사용자 ${member.userId}`
-
-                     // 화면 공유 중인지 확인
-                     const memberIsSharing = isCurrentUser ? isSharing : Object.keys(remoteStreams).some((peerId) => extractUserId(peerId) === member.userId.toString())
-
-                     return (
-                        <ParticipantItem key={member.userId} $isCurrentUser={isCurrentUser}>
-                           {nickname} {isCurrentUser && '(나)'}
-                           {memberIsSharing && <ShareIcon>🖥️</ShareIcon>}
-                        </ParticipantItem>
-                     )
-                  })}
-            </ul>
-         </ParticipantList>
+         <SidePanel>
+            <PanelTitle>참가자 ({groupmembers?.length || 0}/6)</PanelTitle>
+            {groupmembers.map((member) => (
+               <ParticipantItem key={member.userId}>
+                  <ParticipantName>
+                     {member.User?.nickname || '사용자'}
+                     {member.role === 'leader' && <LeaderBadge>방장</LeaderBadge>}
+                  </ParticipantName>
+                  <ParticipantStatus>{member.status === 'on' ? '접속 중' : '오프라인'}</ParticipantStatus>
+               </ParticipantItem>
+            ))}
+            {!leaderMember && <NoLeaderWarning>현재 방장이 없습니다. 모든 참가자가 회의에 참여할 수 있습니다.</NoLeaderWarning>}
+         </SidePanel>
       </Container>
    )
 }
 
 export default ScreenShare
 
-// Styled Components
+// 스타일 컴포넌트
 const Container = styled.div`
    display: flex;
-   flex-direction: column;
-   width: 100%;
    height: calc(100vh - 200px);
-   min-height: 500px;
-`
-
-const ControlPanel = styled.div`
-   display: flex;
-   justify-content: center;
-   align-items: center;
-   margin-bottom: 20px;
-`
-
-const StartButton = styled.button`
-   background: #4caf50;
-   color: white;
-   border: none;
-   border-radius: 4px;
-   padding: 10px 20px;
-   font-size: 16px;
-   cursor: pointer;
-   transition: background 0.3s;
-
-   &:hover {
-      background: #45a049;
-   }
-`
-
-const StopButton = styled(StartButton)`
-   background: #f44336;
-
-   &:hover {
-      background: #d32f2f;
-   }
-`
-
-const DebugInfo = styled.div`
-   font-size: 12px;
-   color: #666;
-   margin-left: 20px;
-   background: #f5f5f5;
-   padding: 5px 10px;
-   border-radius: 4px;
-`
-
-const ScreenGrid = styled.div`
-   display: grid;
-   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
    gap: 20px;
-   flex: 1;
-   overflow: auto;
-   padding: 10px;
 `
 
-const ScreenBox = styled.div`
+const MeetingContainer = styled.div`
    position: relative;
-   background: #000;
-   border-radius: 8px;
+   flex: 1;
+   background-color: #000;
+   border-radius: 10px;
    overflow: hidden;
-   aspect-ratio: 16 / 9;
-   border: 2px solid ${(props) => (props.$isLocal ? '#4caf50' : '#ddd')};
+
+   & iframe {
+      background-color: #000;
+      border-radius: 10px;
+      width: 100%;
+   }
 `
 
-const Video = styled.video`
-   width: 100%;
-   height: 100%;
-   object-fit: contain;
-`
-
-const Nickname = styled.div`
+const StatusMessage = styled.div`
    position: absolute;
-   bottom: 10px;
-   left: 10px;
-   background: rgba(0, 0, 0, 0.6);
+   top: 10px;
+   left: 50%;
+   transform: translateX(-50%);
+   background-color: rgba(0, 0, 0, 0.7);
    color: white;
-   padding: 5px 10px;
-   border-radius: 4px;
+   padding: 8px 16px;
+   border-radius: 20px;
    font-size: 14px;
+   z-index: 100;
 `
 
-const EmptyMessage = styled.div`
-   grid-column: 1 / -1;
-   display: flex;
-   justify-content: center;
-   align-items: center;
-   height: 300px;
-   background: #f5f5f5;
-   border-radius: 8px;
-   text-align: center;
-   color: #666;
-   font-size: 16px;
-   line-height: 1.6;
-`
-
-const ParticipantList = styled.div`
-   width: 100%;
-   margin-top: 20px;
+const SidePanel = styled.div`
+   width: 250px;
    background-color: #f5f5f5;
-   border-radius: 8px;
+   border-radius: 10px;
    padding: 15px;
-   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+   overflow-y: auto;
+`
 
-   h3 {
-      margin-top: 0;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #ddd;
-   }
+const PanelTitle = styled.h3`
+   margin-top: 0;
+   padding-bottom: 10px;
+   border-bottom: 1px solid #ddd;
+   color: #333;
+`
 
-   ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-   }
+const ParticipantsList = styled.ul`
+   list-style: none;
+   padding: 0;
+   margin: 0;
 `
 
 const ParticipantItem = styled.li`
    padding: 10px;
-   background-color: ${(props) => (props.$isCurrentUser ? '#e3f2fd' : 'white')};
-   border-radius: 4px;
-   display: flex;
-   align-items: center;
-   justify-content: space-between;
-   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-   min-width: 150px;
+   margin-bottom: 8px;
+   border-radius: 8px;
+   background-color: #fff;
+   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 `
 
-const ShareIcon = styled.span`
-   margin-left: 8px;
-   font-size: 16px;
+const ParticipantName = styled.div`
+   font-weight: bold;
+   display: flex;
+   align-items: center;
+   gap: 5px;
 `
 
-const LoadingContainer = styled.div`
-   display: flex;
-   justify-content: center;
-   align-items: center;
-   height: 300px;
-   font-size: 16px;
+const LeaderBadge = styled.span`
+   background-color: #ff7a00;
+   color: white;
+   font-size: 11px;
+   padding: 2px 6px;
+   border-radius: 10px;
+`
+
+const ParticipantStatus = styled.div`
+   font-size: 12px;
+   color: #666;
+   margin-top: 3px;
+`
+
+const ParticipantInfo = styled.div`
+   padding: 15px;
+   text-align: center;
    color: #666;
 `
 
-const ErrorContainer = styled.div`
-   display: flex;
-   flex-direction: column;
-   justify-content: center;
-   align-items: center;
-   height: 300px;
-   font-size: 16px;
-   color: #d32f2f;
+const NoLeaderWarning = styled.div`
+   margin-top: 15px;
+   padding: 10px;
+   background-color: #fff3cd;
+   border-radius: 5px;
+   font-size: 12px;
+   color: #856404;
    text-align: center;
-   padding: 20px;
-`
-
-const RetryButton = styled(StartButton)`
-   margin-top: 20px;
 `

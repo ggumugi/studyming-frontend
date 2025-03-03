@@ -16,6 +16,7 @@ import studyLikeSliceReducer from '../features/likedSlice'
 import groupmemberSliceReducer from '../features/groupmemberSlice'
 import timeReducer from '../features/timeSlice'
 import screenShareReducer from '../features/screenShareSlice'
+import grouptimeReducer from '../features/grouptimeSlice'
 
 const store = configureStore({
    reducer: {
@@ -35,6 +36,7 @@ const store = configureStore({
       groupmembers: groupmemberSliceReducer,
       time: timeReducer,
       screenShare: screenShareReducer,
+      grouptime: grouptimeReducer,
    },
 })
 

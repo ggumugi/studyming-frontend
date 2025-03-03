@@ -7,7 +7,7 @@ const GroupSidebar = ({ selectedMenu, setSelectedMenu, isAuthenticated, user, st
    return (
       <SidebarContainer>
          <MenuList>
-            {['채팅', '화면공유', '카메라'].map((item) => (
+            {['채팅', '공부방'].map((item) => (
                <MenuItem key={item} $isActive={selectedMenu === item}>
                   {/* ✅ `onClick`을 StyledButton이 아니라 `MenuItem`에 추가해야 제대로 동작함! */}
                   <StyledButton onClick={() => setSelectedMenu(item)}>{item}</StyledButton>
