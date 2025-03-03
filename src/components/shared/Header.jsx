@@ -69,7 +69,7 @@ const Header = ({ isAuthenticated, user }) => {
          <HeaderContent>
             {/* 📌 왼쪽 영역: 로고 + 네비게이션 메뉴 */}
             <LeftSection>
-               <Link to="/">
+               <Link to={isAuthenticated ? '/home' : '/'}>
                   <Logo src="/img/studyming-logo.png" alt="스터디밍 로고" />
                </Link>
 

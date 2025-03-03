@@ -38,8 +38,6 @@ const StudyGroupPage = ({ isAuthenticated, user }) => {
             return <Chat studygroup={studygroup} groupmembers={groupmembers} user={user} />
          case '화면공유':
             return <ScreenShare studygroup={studygroup} groupmembers={groupmembers} />
-         case '카메라':
-            return <Cam studygroup={studygroup} groupmembers={groupmembers} />
          default:
             return <p>잘못된 메뉴 선택</p>
       }
@@ -98,7 +96,7 @@ const StudyGroupPage = ({ isAuthenticated, user }) => {
                      </ModalContent>
                   </Modal>
                )}
-               {/* <Timer /> */}
+               <Timer />
             </Container>
          )}
       </>
