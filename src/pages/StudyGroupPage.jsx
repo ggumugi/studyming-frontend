@@ -35,7 +35,7 @@ const StudyGroupPage = ({ isAuthenticated, user }) => {
    const renderComponent = () => {
       switch (selectedMenu) {
          case '채팅':
-            return <Chat studygroup={studygroup} groupmembers={groupmembers} />
+            return <Chat studygroup={studygroup} groupmembers={groupmembers} user={user} />
          case '화면공유':
             return <ScreenShare studygroup={studygroup} groupmembers={groupmembers} />
          case '카메라':
