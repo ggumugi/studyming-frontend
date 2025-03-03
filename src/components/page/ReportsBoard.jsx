@@ -42,7 +42,7 @@ const ReportsBoard = () => {
 
    // 적용 버튼 클릭 시 알림
    // ✅ 적용 버튼 클릭 시 동작
-   const handleApply = async (reportId, reportedUser) => {
+   const handleApply = (reportId, reportedUser) => {
       console.log('🚀 적용 버튼 클릭됨 - 현재 banPeriods 상태:', banPeriods)
       const banDays = banPeriods[reportId]
 
@@ -50,29 +50,34 @@ const ReportsBoard = () => {
 
       // 🚀 "없음" 선택 시 신고 삭제
       if (banDays === '없음') {
-         try {
-            await dispatch(removeReport(reportId)).unwrap()
-            setLocalReports((prev) => prev.filter((report) => report.id !== reportId))
+         dispatch(removeReport(reportId))
+            .unwrap()
+            .then(() => {
+               setLocalReports((prev) => prev.filter((report) => report.id !== reportId))
 
-            // 🚀 신고 삭제 후 정지 목록 다시 불러오기 (무한 루프 방지)
-            setTimeout(() => dispatch(getBannedUsers()), 500) // ✅ 0.5초 후 한 번만 실행
+               // 🚀 신고 삭제 후 정지 목록 다시 불러오기 (무한 루프 방지)
+               setTimeout(() => dispatch(getBannedUsers()), 500) // ✅ 0.5초 후 한 번만 실행
 
-            alert('🚨 신고가 삭제되었으며 BanRecordsBoard에 추가되었습니다.')
-         } catch (error) {
-            alert('❌ 신고 삭제 실패.')
-         }
+               alert('🚨 신고가 삭제되었으며 BanRecordsBoard에 추가되었습니다.')
+            })
+            .catch(() => {
+               alert('❌ 신고 삭제 실패.')
+            })
+
          return
       }
 
       // 🚀 "없음"이 아닐 경우 정지 적용 로직 실행
-      try {
-         const res = await dispatch(applyBan({ reportId, adminId: 1, banDays })).unwrap()
-         alert(res.message)
-         await dispatch(getReports())
-         setLocalReports((prev) => prev.filter((report) => report.id !== reportId))
-      } catch (error) {
-         alert('❌ 정지 처리에 실패했습니다.')
-      }
+      dispatch(applyBan({ reportId, adminId: 1, banDays }))
+         .unwrap()
+         .then((res) => {
+            alert(res.message)
+            dispatch(getReports())
+            setLocalReports((prev) => prev.filter((report) => report.id !== reportId))
+         })
+         .catch(() => {
+            alert('❌ 정지 처리에 실패했습니다.')
+         })
    }
 
    const handleSearch = () => {
@@ -81,13 +86,13 @@ const ReportsBoard = () => {
 
    // 검색 필터링 (닉네임 데이터가 `ReportedUser.nickname`에 있으므로 수정)
    const filteredReports = localReports.filter((report) => {
-      if (filter === 'reportedUser' && report.reportedUser?.nickname) {
+      if (filter === 'reportedUser' && report?.reportedUser?.nickname) {
          return report.reportedUser.nickname.toLowerCase().includes(searchQuery.toLowerCase())
       }
-      if (filter === 'reporter' && report.reportedBy?.nickname) {
+      if (filter === 'reporter' && report?.reportedBy?.nickname) {
          return report.reportedBy.nickname.toLowerCase().includes(searchQuery.toLowerCase())
       }
-      if (filter === 'reason' && report.reason) {
+      if (filter === 'reason' && report?.reason) {
          return report.reason.toLowerCase().includes(searchQuery.toLowerCase())
       }
       return false

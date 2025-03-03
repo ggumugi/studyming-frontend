@@ -86,7 +86,7 @@ const BoardDetail = () => {
                {post.Images.map((image) => {
                   const imagePath = `http://localhost:8000/${image.path}`
                   console.log('이미지 최종 경로:', imagePath) // ✅ 최종 경로 확인
-                  return <img key={image.id} src={imagePath} alt="게시글 이미지" />
+                  return <Image key={image.id} src={imagePath} alt="게시글 이미지" />
                })}
             </ImageContainer>
          )}
@@ -264,4 +264,17 @@ const BackButton = styled.button`
    }
 `
 
-const ImageContainer = styled.div``
+const ImageContainer = styled.div`
+   display: flex;
+   flex-wrap: wrap;
+   gap: 10px; /* 이미지 간 간격 */
+   justify-content: center; /* 가운데 정렬 */
+   max-width: 100%; /* 부모 컨테이너를 넘지 않도록 설정 */
+   overflow: hidden; /* 넘치는 이미지 숨김 */
+`
+
+const Image = styled.img`
+   max-width: 100%; /* 부모 요소 내에서 넘치지 않도록 */
+   height: auto; /* 가로 비율 유지 */
+   object-fit: contain; /* 비율 유지하면서 크기 조절 */
+`

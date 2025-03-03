@@ -16,9 +16,14 @@ export const loginUser = async (credentials) => {
    try {
       const response = await studymingApi.post('/auth/login', credentials)
 
+      // ✅ 서버에서 "BANNED" 상태인지 확인
+      if (response.data.status === 'BANNED') {
+         throw new Error(response.data.endDate ? `정지된 계정입니다. ${response.data.endDate}까지 로그인이 불가능합니다.` : '영구 정지된 계정입니다.')
+      }
+
       return response.data
    } catch (error) {
-      console.error('Login failed', error)
+      console.error('❌ 로그인 실패:', error.message)
       throw error
    }
 }

@@ -20,6 +20,10 @@ const BoardCreate = ({ user, category, onSubmit, initialValues = {} }) => {
       console.log('images 상태:', images) // ✅ 현재 상태 확인
    }, [images])
 
+   useEffect(() => {
+      console.log('🛠 삭제된 이미지 리스트 변경됨:', removedImages)
+   }, [removedImages]) // ✅ removedImages가 변경될 때마다 콘솔 찍기
+
    // 기존 게시글이 있다면 (수정 모드), 초기값 설정
    useEffect(() => {
       if (initialValues) {
@@ -51,65 +55,67 @@ const BoardCreate = ({ user, category, onSubmit, initialValues = {} }) => {
    }
 
    // ✅ 기존 이미지 삭제
-   const handleRemoveImage = (imageId) => {
-      setImages(images.filter((image) => image.id !== imageId)) // ✅ 화면에서 제거
-      setRemovedImages([...removedImages, imageId]) // ✅ 삭제할 이미지 ID 저장
+   const handleRemoveImage = (target) => {
+      // 기존 이미지 삭제 (ID로 처리)
+      if (typeof target === 'number' || (typeof target === 'string' && !isNaN(target))) {
+         const imageId = Number(target)
+         setImages((prev) => prev.filter((img) => img.id !== imageId))
+         setRemovedImages((prev) => [...prev, imageId])
+      }
+      // 새 이미지 삭제 (preview URL로 처리)
+      else {
+         setImageFiles((prev) => prev.filter((file) => URL.createObjectURL(file) !== target))
+         setImages((prev) => prev.filter((preview) => preview !== target))
+      }
    }
 
-   const handleSubmit = useCallback(() => {
+   const handleSubmit = useCallback(async () => {
       if (!title.trim() || !content.trim()) {
          alert('제목과 내용을 입력해주세요!')
          return
       }
-      console.log('📌 현재 입력된 값 확인')
-      console.log('제목:', title)
-      console.log('내용:', content)
-      console.log('삭제할 이미지 목록:', removedImages)
-      console.log('새로 추가한 이미지 목록:', imageFiles)
 
       const formData = new FormData()
       formData.append('title', title)
       formData.append('content', content)
-      formData.append('category', category)
-      /*  imageFiles.forEach((file) => {
-         formData.append('images', file)
-      }) */
+      formData.append('category', category || initialValues.category || 'free') // ✅ 기존 카테고리 유지
 
-      // formData가 제대로 값이 들어가는지 확인
-      console.log('🚀 formData 확인')
-      console.log('formData title:', formData.get('title'))
-      console.log('formData content:', formData.get('content'))
-
-      // ✅ 삭제할 이미지 리스트 추가
       if (removedImages.length > 0) {
          formData.append('removeImageIds', JSON.stringify(removedImages))
       }
 
-      // ✅ 새 이미지 추가 (imageFiles가 존재하는 경우만 추가)
       if (imageFiles.length > 0) {
-         imageFiles.forEach((file) => {
-            formData.append('images', file)
-         })
+         imageFiles.forEach((file) => formData.append('images', file))
       }
-      console.log('🚀 최종 formData:', formData)
+
+      console.log('📌 수정 요청 formData:', {
+         title,
+         content,
+         category,
+         removedImages,
+         imageFiles,
+      })
 
       if (initialValues) {
-         // ✅ 게시글 수정 모드
-         dispatch(updatePostThunk({ id: initialValues.id, postData: formData, imagesToRemove: removedImages }))
-            .unwrap()
-            .then(() => {
-               alert('게시글이 수정되었습니다!')
-               navigate(`/board/detail/${initialValues.id}`)
-            })
-            .catch((error) => {
-               console.error('게시글 수정 실패:', error)
-               alert(`게시글 수정 실패: ${error?.message || '알 수 없는 오류'}`)
-            })
+         try {
+            const response = await dispatch(
+               updatePostThunk({
+                  id: initialValues.id,
+                  postData: formData,
+                  imagesToRemove: removedImages,
+               })
+            ).unwrap()
+
+            console.log('✅ 수정 완료:', response)
+            navigate(`/board/detail/${initialValues.id}`) // ✅ 수정 완료 후 해당 게시글 상세 페이지로 이동!
+         } catch (error) {
+            console.error('🚨 수정 실패:', error)
+            alert('수정 중 오류가 발생했습니다.')
+         }
       } else {
-         // 새 게시글 작성 모드
          onSubmit(formData)
       }
-   }, [title, content, category, imageFiles, onSubmit, initialValues, dispatch, navigate])
+   }, [title, content, category, removedImages, imageFiles, initialValues, dispatch, navigate])
 
    return (
       <Container>
@@ -138,31 +144,26 @@ const BoardCreate = ({ user, category, onSubmit, initialValues = {} }) => {
 
          {/* ✅ 기존 이미지 표시 및 삭제 기능 */}
          <UploadContainer>
-            {/* ✅ 기존 이미지 표시 (undefined 값 체크 후 필터링) */}
-            {initialValues?.Images?.filter((image) => image?.path)?.map((image) => (
-               <ImagePreview key={image.id || image.path}>
-                  <img
-                     src={`http://localhost:8000/${image.path}`}
-                     alt="기존 이미지"
-                     onError={(e) => (e.target.style.display = 'none')} // ✅ 깨진 이미지 숨김
-                  />
-                  <DeleteButton onClick={() => handleRemoveImage(image.id)}>삭제</DeleteButton>
-               </ImagePreview>
-            ))}
+            {images
+               .filter((image) => typeof image === 'object' && image?.path)
+               .map((image) => (
+                  <ImagePreview key={image.id}>
+                     <img src={`http://localhost:8000/${image.path}`} alt="기존 이미지" />
+                     <DeleteButton onClick={() => handleRemoveImage(image.id)}>삭제</DeleteButton>
+                  </ImagePreview>
+               ))}
          </UploadContainer>
 
          <ButtonContainer>
             <UploadContainer>
-               {imageFiles.length > 0 &&
-                  imageFiles.map((file, index) => {
-                     const previewURL = URL.createObjectURL(file)
-                     return (
-                        <ImagePreview key={index}>
-                           <img src={previewURL} alt="미리보기" style={{ width: '100px', marginLeft: '10px' }} />
-                           <DeleteButton onClick={() => handleRemoveImage(index)}>삭제</DeleteButton>
-                        </ImagePreview>
-                     )
-                  })}
+               {images
+                  .filter((image) => typeof image === 'string')
+                  .map((preview, index) => (
+                     <ImagePreview key={preview}>
+                        <img src={preview} alt="미리보기" />
+                        <DeleteButton onClick={() => handleRemoveImage(preview)}>삭제</DeleteButton>
+                     </ImagePreview>
+                  ))}
             </UploadContainer>
          </ButtonContainer>
          <SubmitButton onClick={handleSubmit}>{initialValues ? '수정하기' : '글쓰기'}</SubmitButton>
@@ -228,8 +229,12 @@ const ButtonContainer = styled.div`
 
 const UploadContainer = styled.div`
    display: flex;
+   flex-wrap: wrap; /* ✅ 넘치면 자동으로 줄바꿈 */
    justify-content: flex-start;
    align-items: center;
+   gap: 10px; /* 이미지 간 간격 */
+   width: 100%;
+   max-width: 100%; /* 부모 컨테이너를 넘지 않도록 설정 */
 `
 
 const UploadButton = styled.label`
@@ -292,10 +297,12 @@ const ImagePreview = styled.div`
    display: flex;
    flex-direction: column;
    align-items: center;
+   width: calc(25% - 10px); /* ✅ 한 줄에 4개 배치, 10px 간격 고려 */
+   max-width: 150px; /* ✅ 이미지 크기 제한 */
    margin: 10px;
 
    img {
-      width: 100px;
+      width: 100%;
       height: auto;
       border-radius: 5px;
    }

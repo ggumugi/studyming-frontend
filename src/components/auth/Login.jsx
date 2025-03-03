@@ -36,7 +36,6 @@ const Login = () => {
          setRememberMe(true)
       }
    }, [])
-
    const handleChange = (e) => {
       setFormData({ ...formData, [e.target.name]: e.target.value })
    }
@@ -112,29 +111,52 @@ const Login = () => {
 
    const handleSubmit = (e) => {
       e.preventDefault()
+
       if (rememberMe) {
-         localStorage.setItem('savedLoginId', formData.loginId) //체크 시 아이디 저장
+         localStorage.setItem('savedLoginId', formData.loginId)
       } else {
-         localStorage.removeItem('savedLoginId') //체크 해제 시 삭제
+         localStorage.removeItem('savedLoginId')
       }
 
       dispatch(loginUserThunk(formData))
          .unwrap()
          .then((user) => {
-            alert(`로그인 성공하였습니다! ${user.nickname}님 환영합니다!`)
+            if (!user) {
+               alert('🚨 로그인 실패: 서버에서 응답이 없습니다. 다시 시도해주세요.')
+               return
+            }
+
+            if (user.status === 'BANNED') {
+               // ✅ 정지된 회원이면 alert 창으로 관리자 이메일과 문의 안내 포함
+               const adminEmail = 'admin@yourwebsite.com' // 🔥 관리자 이메일 설정
+               const message = user.endDate
+                  ? `🚨 로그인 실패 🚨\n\n📅 정지 기간: ${user.endDate}까지\n\n❗ 만약 이 조치가 부당하다고 생각되시면 관리자에게 문의해 주세요.\n📩 관리자 이메일: ${adminEmail}`
+                  : `🚨 로그인 실패 🚨\n\n⛔ 계정이 영구 정지되었습니다.\n\n❗ 만약 이 조치가 부당하다고 생각되시면 관리자에게 문의해 주세요.\n📩 관리자 이메일: ${adminEmail}`
+
+               alert(message) // 🔥 alert 실행
+               return
+            }
+
+            alert(`✅ 로그인 성공! ${user.nickname}님 환영합니다! 🎉`)
             navigate('/home') // ✅ 로그인 성공 후 메인 페이지 이동
          })
          .catch((err) => {
             console.error('❌ 로그인 실패:', err)
 
+            // 서버 응답이 없거나 기타 오류일 경우
+            const errorMessage = err?.message || '🚨 로그인 실패.'
+
+            alert(errorMessage) // 🔥 alert 실행
+
             if (err === '6개월 미접속으로 휴면 계정이 되었습니다. 비밀번호를 변경해주세요.') {
-               alert('6개월 미접속으로 휴면 계정이 되었습니다. 비밀번호를 변경해주세요.')
-               navigate('/find/password') // ✅ 비밀번호 변경 페이지로 이동
+               alert('🛑 휴면 계정입니다! 비밀번호를 변경한 후 다시 로그인해주세요.')
+               navigate('/find/password')
             } else {
-               setShouldShowError(true)
+               setShouldShowError(true) // 🔥 UI에 반영
             }
          })
    }
+
    const handleGoogleLogin = (credentialResponse) => {
       const decoded = jwtDecode(credentialResponse.credential)
       const sns = 'google'
@@ -168,7 +190,9 @@ const Login = () => {
          })
    }
 
-   const displayError = shouldShowError && error !== 'Request failed with status code 400'
+   /*    const displayError = shouldShowError && error !== 'Request failed with status code 400' */
+   //인풋창 항상 빨간색이어서 수정
+   const displayError = !!error && error !== 'Request failed with status code 400'
 
    return (
       <Wrapper>
@@ -265,11 +289,14 @@ const StyledTextField = styled(TextField)`
    margin-bottom: 0 !important; /* 🔥 입력 필드 간 간격을 줄임 */
    margin-top: 0 !important;
    padding: 0 !important;
+   & .MuiFormHelperText-root {
+      display: block;
+      text-align: right;
+   }
 `
 
 const RememberMeWrapper = styled.div`
-   align-self: flex-start;
-   margin-bottom: 40px; /* 체크박스와 로그인 버튼 간 간격 추가 */
+   margin: 15px 0 40px 0;
 `
 
 const StyledButton = styled(Button)`
