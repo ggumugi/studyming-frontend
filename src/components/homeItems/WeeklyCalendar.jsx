@@ -134,7 +134,7 @@ const WeeklyCalendar = () => {
    return (
       <Container>
          <Header>
-            <h3 style={{ fontSize: '20px', fontWeight: '300' }}>
+            <h3 style={{ fontSize: 'clamp(14px, 2vw, 20px)', fontWeight: '300' }}>
                {format(startWeek, 'yyyy년 MM월 dd일')} ~ {format(addDays(startWeek, 6), 'MM월 dd일')}
             </h3>
          </Header>

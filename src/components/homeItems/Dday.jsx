@@ -145,7 +145,7 @@ const Title = styled.div`
    display: flex;
    justify-content: space-between;
    align-items: center;
-   font-size: 20px;
+   font-size: clamp(14px, 2vw, 20px);
    font-weight: 300;
 `
 
@@ -174,9 +174,11 @@ const Item = styled.li`
    font-size: 14px;
    padding: 8px 0;
    display: grid;
-   grid-template-columns: 2fr 1fr 1fr;
+   grid-template-columns: auto 1fr auto;
    align-items: center;
    gap: 10px;
+   justify-content: space-between;
+   text-align: center;
 `
 
 const DdayLeft = styled.div`
