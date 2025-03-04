@@ -38,7 +38,7 @@ const StudyGroupPage = ({ isAuthenticated, user }) => {
       switch (selectedMenu) {
          case '채팅':
             return <Chat studygroup={studygroup} groupmembers={groupmembers} user={user} />
-         case '화면공유':
+         case '공부방':
             return <ScreenShare studygroup={studygroup} groupmembers={groupmembers} />
          default:
             return <p>잘못된 메뉴 선택</p>
@@ -83,7 +83,7 @@ const StudyGroupPage = ({ isAuthenticated, user }) => {
                stack: err.stack,
                response: err.response?.data,
             })
-            alert('스터디에 참여할 수 없습니다.')
+            alert('스터디를 나가지 못했습니다.')
          })
          .finally(() => setIsModalOpen(false)) // 모달 닫기
    }

@@ -3,13 +3,13 @@ import { useSelector, useDispatch } from 'react-redux'
 import { fetchTimeData } from '../../features/timeSlice'
 import '../../styles/studyTimeCard.css'
 
-const YesterdayTimeCard = ({ userId, title }) => {
+const YesterdayTimeCard = ({ user, title }) => {
    const dispatch = useDispatch()
    const { YTime, loading } = useSelector((state) => state.time)
 
    useEffect(() => {
-      if (userId) dispatch(fetchTimeData(userId))
-   }, [dispatch, userId])
+      if (user) dispatch(fetchTimeData(user.id))
+   }, [dispatch, user])
 
    return (
       <div className="study-time-card">

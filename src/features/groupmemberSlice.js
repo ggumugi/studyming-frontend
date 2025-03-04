@@ -26,7 +26,7 @@ export const createGroupMemberThunk = createAsyncThunk('groupmembers/create', as
 export const participateInGroupThunk = createAsyncThunk('groupmember/participate', async ({ groupId, status }, { rejectWithValue }) => {
    try {
       console.log(`그룹 참여 상태 변경 요청: 그룹 ID ${groupId}, 상태 ${status}`)
-      const response = await updateGroupMember(groupId, status)
+      const response = await participateInGroup(groupId, status)
       return response.data
    } catch (error) {
       console.error(`그룹 참여 상태 변경 실패:`, error)
