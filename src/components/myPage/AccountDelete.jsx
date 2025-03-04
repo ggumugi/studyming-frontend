@@ -3,6 +3,9 @@ import styled from 'styled-components'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import { verifyPassword } from '../../api/authApi'
+// 비밀번호 확인 API 추가
+
 const AccountDelete = () => {
    const [confirmPassword, setConfirmPassword] = useState(false)
    const [deleting, setDeleting] = useState(false)

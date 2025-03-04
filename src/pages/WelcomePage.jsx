@@ -48,12 +48,16 @@ const HeroSection = () => {
             <SubTitle>
                <strong>스터디밍</strong>과 함께 성장을 시작해보세요
             </SubTitle>
-            <Button>시작하기 →</Button>
+            <Button>
+               <Link to="/login">시작하기 →</Link>
+            </Button>
             <FooterText>
                스터디밍이 처음이신가요?
                <br />
                <Link>
-                  <span>소개페이지로 이동 →</span>
+                  <span>
+                     <Link to="/info">소개페이지로 이동 →</Link>
+                  </span>
                </Link>
             </FooterText>
          </Card>

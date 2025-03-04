@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { createGroupMember, deleteGroupMember, updateGroupMember, getGroupMembers, getGroupMemberById, participateInGroup, transferGroupLeader, kickGroupMember } from '../api/groupmemberApi'
+import { createGroupMember, deleteGroupMember, updateGroupMember, getGroupMembers, getGroupMemberById, participateInGroup, transferGroupLeader, kickGroupMember, getUserStudyGroups } from '../api/groupmemberApi'
 
 // 그룹 멤버 전체 불러오기
 export const fetchGroupMembersThunk = createAsyncThunk('groupmembers/fetchAll', async (groupId, { rejectWithValue }) => {
@@ -83,10 +83,24 @@ export const kickGroupMemberThunk = createAsyncThunk('groupmembers/kick', async 
    }
 })
 
+// 로그인한 유저의 참여 중인 스터디 개수 가져오기
+// features/groupmemberSlice.js
+export const fetchUserStudyCountThunk = createAsyncThunk('groupmembers/fetchUserStudyCount', async (_, { rejectWithValue }) => {
+   try {
+      const response = await getUserStudyGroups()
+      console.log('🟢 API 응답:', response.data) // 응답 데이터 로그
+      return response.data.studyGroups?.length || 0 // 옵셔널 체이닝 추가
+   } catch (error) {
+      console.error('🔴 API 에러:', error.response)
+      return rejectWithValue(error.response?.data?.message || '데이터 불러오기 실패')
+   }
+})
+
 // 슬라이스 생성
 const groupmemberSlice = createSlice({
    name: 'groupmembers',
    initialState: {
+      userStudyCount: 0, // 참여 중인 스터디 개수
       groupmembers: [],
       groupmember: [],
       loading: false,
@@ -210,6 +224,20 @@ const groupmemberSlice = createSlice({
             state.loading = false
             state.error = action.payload
             alert(action.payload)
+         })
+
+         //스터디 개수 가져오기
+         .addCase(fetchUserStudyCountThunk.pending, (state) => {
+            state.loading = true
+            state.error = null
+         })
+         .addCase(fetchUserStudyCountThunk.fulfilled, (state, action) => {
+            state.loading = false
+            state.userStudyCount = action.payload // 개수 저장
+         })
+         .addCase(fetchUserStudyCountThunk.rejected, (state, action) => {
+            state.loading = false
+            state.error = action.payload
          })
    },
 })
