@@ -37,8 +37,8 @@ const StudyGroupPage = ({ isAuthenticated, user }) => {
    const renderComponent = () => {
       switch (selectedMenu) {
          case '채팅':
-            return <Chat studygroup={studygroup} groupmembers={groupmembers} />
-         case '공부방':
+            return <Chat studygroup={studygroup} groupmembers={groupmembers} user={user} />
+         case '화면공유':
             return <ScreenShare studygroup={studygroup} groupmembers={groupmembers} />
          default:
             return <p>잘못된 메뉴 선택</p>

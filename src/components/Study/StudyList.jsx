@@ -17,7 +17,7 @@ const StudyList = () => {
    const navigate = useNavigate()
 
    // Redux에서 로그인한 사용자 정보 & 스터디 그룹 데이터 가져오기
-   const { studygroups, studygroup, loadinsg } = useSelector((state) => state.studygroups)
+   const { studygroups, studygroup, loading } = useSelector((state) => state.studygroups)
 
    const [hashtagsMap, setHashtagsMap] = useState({}) // 🔥 해시태그를 개별적으로 저장할 상태
 
@@ -32,39 +32,42 @@ const StudyList = () => {
     * ✅ 1. 좋아요 상태 및 개수 불러오기 (로그인 유저 변경되거나, 그룹 리스트 변경 시) 이거도 then으로 수정
     */
    useEffect(() => {
-      if (studygroupList.length > 0) {
+      if (studygroups.length > 0) {
          const fetchLikesData = async () => {
             const newLikedStatus = {}
             const newLikeCounts = {}
 
             await Promise.all(
-               studygroupList.map(async (study) => {
+               studygroups.map(async (study) => {
                   try {
-                     const likeStatusRes = await dispatch(checkUserLikeStatusThunk(study.id))
-                     const likeCountRes = await dispatch(fetchStudyLikesThunk(study.id))
+                     const likeCount = await dispatch(fetchStudyLikesThunk(study.id)).unwrap()
+                     newLikeCounts[study.id] = likeCount // ✅ 좋아요 개수 저장
 
-                     newLikedStatus[study.id] = likeStatusRes.payload
-                     newLikeCounts[study.id] = likeCountRes.payload
+                     if (user) {
+                        const likeStatus = await dispatch(checkUserLikeStatusThunk(study.id)).unwrap()
+                        newLikedStatus[study.id] = likeStatus
+                     }
                   } catch (error) {
                      console.error('❌ 좋아요 데이터 불러오기 오류:', error)
                   }
                })
             )
 
-            setLikedStatus(newLikedStatus)
-            setLikeCounts(newLikeCounts)
+            setLikeCounts(newLikeCounts) // ✅ 로그인 여부 관계없이 좋아요 숫자는 유지
+            if (user) {
+               setLikedStatus(newLikedStatus) // ✅ 로그인 시 Redux에서 불러온 값 유지
+            }
          }
 
          fetchLikesData()
       }
-   }, [dispatch, studygroupList, user]) // ✅ 유저 변경 시 실행됨
-
+   }, [dispatch, studygroups, user]) // ✅ 유저 변경 시 실행됨
    /**
     * ✅ 2. 로그아웃 시 좋아요 초기화 (회색 하트 유지)
     */
    useEffect(() => {
       if (!user) {
-         setLikedStatus({}) // 🔥 로그아웃하면 모든 하트를 회색으로 변경
+         setLikedStatus({}) //  로그아웃하면 모든 하트를 회색으로 변경
       }
    }, [user])
 
@@ -72,6 +75,8 @@ const StudyList = () => {
     * ✅ 3. 좋아요 클릭 핸들러 (UI 즉시 반영 후, Redux 요청)
     */
    const handleLikeClick = (groupId) => {
+      if (!user) return // 로그인하지 않으면 클릭 불가능
+
       const isLiked = likedStatus[groupId] // 현재 좋아요 상태
 
       // ✅ UI에서 즉시 반영
@@ -85,26 +90,22 @@ const StudyList = () => {
          [groupId]: isLiked ? prev[groupId] - 1 : prev[groupId] + 1, // ✅ 좋아요 개수 변경
       }))
 
-      // ✅ Redux Thunk 실행 후, 서버 응답 반영
+      // ✅ Redux Thunk 실행 후 서버 응답 반영
       dispatch(toggleStudyLikeThunk(groupId))
+         .unwrap()
          .then((response) => {
-            if (response.error) {
-               console.error('❌ 좋아요 요청 실패:', response.error)
-            } else {
-               // ✅ 최신 값으로 다시 업데이트
-               setLikedStatus((prev) => ({
-                  ...prev,
-                  [groupId]: response.payload.liked,
-               }))
+            setLikedStatus((prev) => ({
+               ...prev,
+               [groupId]: response.liked,
+            }))
 
-               setLikeCounts((prev) => ({
-                  ...prev,
-                  [groupId]: response.payload.likeCount,
-               }))
-            }
+            setLikeCounts((prev) => ({
+               ...prev,
+               [groupId]: response.likeCount,
+            }))
          })
          .catch((error) => {
-            console.error('❌ 좋아요 요청 중 오류 발생:', error)
+            console.error('❌ 좋아요 요청 오류:', error)
          })
    }
 
@@ -288,11 +289,12 @@ const StudyList = () => {
                               e.stopPropagation() // 카드 클릭 이벤트 방지
                               handleLikeClick(study.id)
                            }}
+                           style={{ pointerEvents: user ? 'auto' : 'none' }} // 🔥 로그아웃 시 클릭 비활성화
                         >
                            <FaHeart
                               style={{
-                                 color: likedStatus[study.id] ? 'red' : 'gray',
-                                 cursor: 'pointer',
+                                 color: user ? (likedStatus[study.id] ? 'red' : 'gray') : 'gray', // 🔥 로그아웃 시 회색 유지
+                                 cursor: user ? 'pointer' : 'default',
                                  transition: 'color 0.2s ease-in-out',
                               }}
                            />
@@ -338,11 +340,12 @@ const StudyList = () => {
                               e.stopPropagation() // 카드 클릭 이벤트 방지
                               handleLikeClick(study.id)
                            }}
+                           style={{ pointerEvents: user ? 'auto' : 'none' }} // 🔥 로그아웃 시 클릭 비활성화
                         >
                            <FaHeart
                               style={{
-                                 color: likedStatus[study.id] ? 'red' : 'gray',
-                                 cursor: 'pointer',
+                                 color: user ? (likedStatus[study.id] ? 'red' : 'gray') : 'gray', // 🔥 로그아웃 시 회색 유지
+                                 cursor: user ? 'pointer' : 'default',
                                  transition: 'color 0.2s ease-in-out',
                               }}
                            />

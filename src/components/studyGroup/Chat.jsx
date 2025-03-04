@@ -1,104 +1,193 @@
 import React, { useEffect, useState, useRef } from 'react'
-import io from 'socket.io-client'
+import { io } from 'socket.io-client'
+import { TextField, Button, Box, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material'
 
-const socket = io(process.env.REACT_APP_SOCKET_SERVER_URL)
+// ✅ 채팅 서버 연결
+const chatSocket = io(process.env.REACT_APP_CHAT_SOCKET_SERVER_URL)
 
-const Chat = ({ userId, groupId }) => {
+const Chat = ({ studygroup, groupmembers, user }) => {
+   const groupId = studygroup?.id
+   const userId = user.id
+
    const [message, setMessage] = useState('')
    const [messages, setMessages] = useState([])
-   const [typing, setTyping] = useState(false) // 입력 중 상태
-   const messagesEndRef = useRef(null) // 스크롤 하단 고정
+   const messagesEndRef = useRef(null)
+   const chatBoxRef = useRef(null) // ✅ 채팅창 스크롤을 위한 ref 추가
 
-   // 과거 채팅 내역 불러오기
+   const [myItems, setMyItems] = useState([]) // ✅ 내 아이템 목록
+   const [openItemDialog, setOpenItemDialog] = useState(false) // ✅ 아이템 선택창 상태
+
+   if (!userId || !groupId) {
+      console.error('❌ userId 또는 groupId가 없습니다.')
+   }
+
+   // ✅ 채팅방 참가 및 메시지 초기 로드
    useEffect(() => {
-      socket.emit('fetch_messages', { roomId: groupId })
+      if (groupId) {
+         chatSocket.emit('join_room', { roomId: groupId })
+         chatSocket.emit('fetch_messages', { roomId: groupId })
+         chatSocket.emit('fetch_myitems', { userId }) // ✅ 내 아이템 목록 요청
+      }
 
-      socket.on('fetch_messages', (history) => {
-         setMessages(history)
+      chatSocket.on('fetch_messages', (newMessages) => {
+         if (!Array.isArray(newMessages)) {
+            console.error('❌ 서버에서 받은 데이터가 배열이 아님:', newMessages)
+            return
+         }
+
+         console.log('📨 과거 메시지 수신:', newMessages.length, '개')
+
+         setMessages(newMessages) // ✅ 기존 메시지를 덮어쓰기
+      })
+
+      chatSocket.on('receive_message', (newMessage) => {
+         console.log('📩 새 메시지 수신:', newMessage)
+         setMessages((prevMessages) => [...prevMessages, newMessage])
+         scrollToBottom() // ✅ 새 메시지가 오면 스크롤 하단 유지
+      })
+      chatSocket.on('fetch_myitems', (items) => {
+         console.log('🎁 내 아이템 목록 수신:', items)
+         setMyItems(items)
       })
 
       return () => {
-         socket.off('fetch_messages')
+         chatSocket.off('fetch_messages')
+         chatSocket.off('receive_message')
+         chatSocket.off('fetch_myitems')
       }
    }, [groupId])
 
-   // 새 메시지 수신
-   useEffect(() => {
-      socket.on('receive_message', (newMessage) => {
-         setMessages((prevMessages) => [...prevMessages, newMessage])
-      })
+   // ✅ 아이템 전송
+   const sendItem = (item) => {
+      sendMessage(item.img, 'image') // ✅ 아이템 이미지 URL을 전송
+      setOpenItemDialog(false) // ✅ 아이템 선택창 닫기
+   }
 
-      socket.on('user_typing', (data) => {
-         if (data.userId !== userId) {
-            setTyping(true)
-         }
-      })
-
-      socket.on('user_stopped_typing', (data) => {
-         if (data.userId !== userId) {
-            setTyping(false)
-         }
-      })
-
-      return () => {
-         socket.off('receive_message')
-         socket.off('user_typing')
-         socket.off('user_stopped_typing')
+   // ✅ 스크롤을 아래로 자동 이동 (새로운 메시지가 오면)
+   const scrollToBottom = () => {
+      if (chatBoxRef.current) {
+         chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight
       }
-   }, [userId])
+   }
 
-   // 메시지 전송
+   useEffect(() => {
+      scrollToBottom() // ✅ 초기 메시지 로드 후 스크롤을 하단으로
+   }, [messages])
+
+   // ✅ 메시지 전송
    const sendMessage = () => {
-      if (message.trim() !== '') {
+      if (message.trim() !== '' && userId && groupId) {
          const chatData = {
             senderId: userId,
             groupId,
             content: message,
             messageType: 'text',
          }
-         socket.emit('send_message', chatData)
+
+         console.log('📨 메시지 전송:', chatData)
+         chatSocket.emit('send_message', chatData)
          setMessage('')
-      }
-   }
-
-   // 입력 감지
-   const handleTyping = (e) => {
-      setMessage(e.target.value)
-
-      if (e.target.value.trim() !== '') {
-         socket.emit('user_typing', { roomId: groupId, userId })
       } else {
-         socket.emit('user_stopped_typing', { roomId: groupId, userId })
+         console.error('❌ 메시지 전송 실패: userId 또는 groupId가 없음.')
       }
    }
 
-   // 스크롤을 하단으로 유지
-   useEffect(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-   }, [messages])
+   // ✅ 엔터키로 메시지 전송
+   const handleKeyDown = (e) => {
+      if (e.key === 'Enter') {
+         e.preventDefault()
+         sendMessage()
+      }
+   }
 
    return (
       <div className="chat-container">
          <h2>채팅</h2>
 
-         {/* 메시지 출력 영역 */}
-         <div className="chat-box">
+         {/* ✅ 채팅창 자체에 스크롤 적용 */}
+         {/* <div
+            ref={chatBoxRef}
+            className="chat-box"
+            style={{
+               height: '600px', // ✅ 고정된 높이
+               overflowY: 'auto', // ✅ 내부 스크롤 활성화
+               border: '1px solid #ccc',
+               padding: '10px',
+               display: 'flex',
+               flexDirection: 'column',
+            }}
+         >
             {messages.map((msg, index) => (
                <div key={index} className={`chat-message ${msg.senderId === userId ? 'mine' : 'others'}`}>
-                  <strong>{msg.senderId}:</strong> {msg.content}
+                  <strong>{msg.senderNickname || msg.senderId}:</strong> {msg.content}
                </div>
             ))}
-            <div ref={messagesEndRef} />
-         </div>
+         </div> */}
 
-         {/* 입력 중 알림 */}
-         {typing && <p className="typing-indicator">상대방이 입력 중입니다...</p>}
+         <div
+            ref={chatBoxRef}
+            className="chat-box"
+            style={{
+               height: '400px',
+               overflowY: 'auto',
+               border: '1px solid #ccc',
+               padding: '10px',
+               display: 'flex',
+               flexDirection: 'column',
+            }}
+         >
+            {messages.map((msg, index) => (
+               <div key={index} className={`chat-message ${msg.senderId === userId ? 'mine' : 'others'}`}>
+                  {msg.messageType === 'image' ? (
+                     <img src={msg.content} alt="아이템 이미지" style={{ width: '100px', height: '100px' }} />
+                  ) : (
+                     <strong>
+                        {msg.senderNickname || msg.senderId}: {msg.content}{' '}
+                     </strong>
+                  )}
+               </div>
+            ))}
+         </div>
 
          {/* 입력창 */}
-         <div className="chat-input">
-            <input type="text" value={message} onChange={handleTyping} placeholder="메시지를 입력하세요..." />
-            <button onClick={sendMessage}>전송</button>
-         </div>
+         <Box className="chat-input">
+            <TextField
+               fullWidth
+               variant="outlined"
+               value={message}
+               onChange={(e) => setMessage(e.target.value)}
+               placeholder="메시지를 입력하세요"
+               onKeyDown={handleKeyDown}
+               sx={{
+                  marginRight: 1,
+                  '& .MuiInputBase-input': {
+                     padding: '8px',
+                  },
+               }}
+            />
+            <Button onClick={() => setOpenItemDialog(true)}>내 아이템</Button>
+            <Button onClick={sendMessage}>전송</Button>
+         </Box>
+         {/* ✅ 아이템 선택창 */}
+         <Dialog open={openItemDialog} onClose={() => setOpenItemDialog(false)}>
+            <DialogTitle>내 아이템</DialogTitle>
+            <DialogContent>
+               {myItems.length > 0 ? (
+                  myItems.map((item) => (
+                     <div key={item.id} onClick={() => sendItem(item)} style={{ cursor: 'pointer', marginBottom: '10px' }}>
+                        <img src={`http://localhost:8000${item.img}`} alt={`http://localhost:8000${item.img}`} style={{ width: '100px', height: '100px' }} />
+                        <p>{item.name}</p>
+                        {console.log('myItems', myItems)}
+                     </div>
+                  ))
+               ) : (
+                  <p>아이템이 없습니다.</p>
+               )}
+            </DialogContent>
+            <DialogActions>
+               <Button onClick={() => setOpenItemDialog(false)}>닫기</Button>
+            </DialogActions>
+         </Dialog>
       </div>
    )
 }

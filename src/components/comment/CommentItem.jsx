@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import { createCommentThunk, updateCommentThunk, fetchCommentsThunk, deleteCommentThunk, selectCommentThunk } from '../../features/commentSlice'
 import { FaImage, FaCheck } from 'react-icons/fa' // 🔥 이미지 아이콘 추가
 
-const CommentItem = ({ comment }) => {
+const CommentItem = () => {
    const { id: postId } = useParams() // ✅ 동적 postId 가져오기
    const dispatch = useDispatch()
 
@@ -18,16 +18,27 @@ const CommentItem = ({ comment }) => {
    const [imageFile, setImageFile] = useState(null) // 실제 업로드할 파일
 
    const comments = useSelector((state) => state.comments.comments)
+   const totalPages = useSelector((state) => state.comments.totalPages) // 🔥 전체 페이지 수
+   const currentPage = useSelector((state) => state.comments.currentPage) // 🔥 현재 페이지
    const user = useSelector((state) => state.auth.user)
-   const totalPages = useSelector((state) => state.comments.totalPages) // ✅ 총 페이지 수 가져오기
+   const post = useSelector((state) => state.posts.posts.find((p) => p.id === parseInt(postId, 10)))
+
+   const [page, setPage] = useState(1) // ✅ 현재 페이지
 
    // ✅ 이미지 선택 핸들러
    const handleImageChange = (e) => {
       const file = e.target.files[0]
       if (file) {
+         e.target.value = null // ✅ 같은 파일 연속 선택 가능하도록 설정
          setSelectedImage(URL.createObjectURL(file)) // 미리보기 설정
          setImageFile(file) // 실제 파일 저장
       }
+   }
+
+   // ✅ 이미지 삭제 핸들러 추가
+   const handleRemoveImage = () => {
+      setSelectedImage(null) // 미리보기 이미지 삭제
+      setImageFile(null) // 업로드 파일 삭제
    }
 
    // ✅ 댓글 등록
@@ -58,7 +69,6 @@ const CommentItem = ({ comment }) => {
 
    // ✅ 수정 버튼 클릭 시 해당 댓글을 입력창으로 변경
    const startEditing = (comment) => {
-      console.log('🛠 수정 시작 - 댓글 ID:', comment.id) // ✅ 수정할 댓글 ID 확인
       setIsEditing(comment.id)
       setEditModeComment(comment.content)
       setSelectedImage(comment.img ? `http://localhost:8000${comment.img}` : null)
@@ -66,10 +76,6 @@ const CommentItem = ({ comment }) => {
 
    // 댓글 수정 확정
    const handleEditComment = () => {
-      console.log('🛠 수정 요청 ID 확인:', isEditing) // ✅ id 확인 로그 추가
-      console.log('🛠 수정 요청 내용:', editModeComment) // ✅ 수정할 내용 확인
-      console.log('🛠 수정 요청 이미지:', imageFile) // ✅ 이미지 확인
-
       if (!editModeComment.trim() && !imageFile) {
          console.error('❌ 수정할 내용 또는 이미지가 없습니다.')
          return
@@ -111,53 +117,31 @@ const CommentItem = ({ comment }) => {
       }
    }
 
-   // ✅ 댓글 채택 함수
+   // ✅ 댓글 채택 함수 (Redux 상태 즉시 반영 + 최상단 이동)
    const handleSelectComment = (id) => {
       dispatch(selectCommentThunk(id))
          .unwrap()
-         .then((updatedComment) => {
-            // ✅ 채택된 댓글을 최상단으로 이동
-            const updatedComments = comments.map(
-               (c) =>
-                  c.id === updatedComment.id
-                     ? { ...updatedComment, selected: true } // ✅ 채택된 댓글 유지
-                     : { ...c, selected: false } // ✅ 다른 댓글은 해제
-            )
+         .then(() => {
+            console.log('✅ 댓글 채택 성공')
 
-            // ✅ selected = true인 댓글을 최상단으로 정렬
-            const sortedComments = [...updatedComments].sort((a, b) => (b.selected ? 1 : -1))
-
-            dispatch({ type: 'comments/updateComments', payload: sortedComments })
+            // ✅ Redux 상태를 즉시 갱신하여 UI에 반영 (채택 로고가 즉시 보이게 함)
+            dispatch(fetchCommentsThunk({ postId })) // 🔥 Redux에서 새 데이터 불러오기
          })
          .catch((error) => {
             console.error('❌ 댓글 채택 실패:', error)
          })
    }
 
-   // // ✅ 페이지네이션 상태 추가
-   // const [currentPage, setCurrentPage] = useState(1)
-   // const limit = 10 // 한 페이지당 댓글 10개
+   //페이징 버튼 함수
+   useEffect(() => {
+      if (postId) {
+         dispatch(fetchCommentsThunk({ postId, page, limit: 10 }))
+      }
+   }, [dispatch, postId, page]) // ✅ 페이지 변경될 때마다 댓글 다시 불러오기
 
-   // useEffect(() => {
-   //    console.log(`📢 useEffect 실행됨! 현재 페이지: ${currentPage}`) // ✅ 페이지 변경 시 useEffect가 실행되는지 확인
-
-   //    if (postId) {
-   //       console.log(`📡 fetchCommentsThunk 호출! postId: ${postId}, page: ${currentPage}`)
-   //       dispatch(fetchCommentsThunk({ postId, page: currentPage, limit }))
-   //    }
-   // }, [dispatch, postId, currentPage]) // ✅ currentPage가 변경될 때 실행
-
-   // // ✅ 페이지 변경 핸들러
-   // const handlePageChange = (newPage) => {
-   //    console.log(`📢 페이지 변경 시도: ${newPage}`) // ✅ 클릭 시 실행 확인
-
-   //    if (newPage >= 1 && newPage <= totalPages) {
-   //       console.log(`✅ 페이지 변경 적용: ${newPage}`) // ✅ 이게 안 찍히면 조건에서 걸림
-   //       setCurrentPage(newPage)
-   //    } else {
-   //       console.error(`❌ 페이지 변경 실패! (범위 초과) newPage: ${newPage}, totalPages: ${totalPages}`)
-   //    }
-   // }
+   const handlePageChange = (newPage) => {
+      setPage(newPage)
+   }
 
    return (
       <>
@@ -176,8 +160,13 @@ const CommentItem = ({ comment }) => {
             <CommentButton onClick={handleAddComment}>등록</CommentButton>
          </CommentSection>
 
-         {/* 🔥 이미지 미리보기 */}
-         {selectedImage && newComment.trim() && isEditing === null && <ImagePreview src={selectedImage} alt="미리보기" />}
+         {/* 🔥 이미지 미리보기 및 삭제 버튼 */}
+         {selectedImage && isEditing === null && (
+            <ImagePreviewContainer>
+               <ImagePreview src={selectedImage} alt="미리보기" />
+               <RemoveImageButton onClick={handleRemoveImage}>삭제</RemoveImageButton>
+            </ImagePreviewContainer>
+         )}
 
          {/* 🔥 댓글 렌더링 */}
          {comments.map((comment) => (
@@ -206,8 +195,13 @@ const CommentItem = ({ comment }) => {
                            <EditButton onClick={handleEditComment}>수정 완료</EditButton>
                            <CancelButton onClick={() => setIsEditing(null)}>취소</CancelButton>
                         </EditContainer>
-                        {/* 🔥 이미지 미리보기 */}
-                        {selectedImage && isEditing === comment.id && <ImagePreview src={selectedImage} alt="미리보기" />}
+                        {/* 🔥 수정 중일 때 미리보기 및 삭제 버튼 */}
+                        {selectedImage && isEditing === comment.id && (
+                           <ImagePreviewContainer>
+                              <ImagePreview src={selectedImage} alt="미리보기" />
+                              <RemoveImageButton onClick={handleRemoveImage}>삭제</RemoveImageButton>
+                           </ImagePreviewContainer>
+                        )}
                      </>
                   ) : (
                      <>
@@ -223,31 +217,33 @@ const CommentItem = ({ comment }) => {
                      <CancelButton onClick={() => setIsEditing(null)}>취소</CancelButton>
                   ) : (
                      <>
-                        {user?.id !== comment.userId && !comment.selected && <SelectButton onClick={() => handleSelectComment(comment.id)}>채택</SelectButton>}
-                        <EditButton onClick={() => startEditing(comment)}>수정</EditButton>
-                        <SmallDeleteButton onClick={() => handleDelete(comment.id)}>삭제</SmallDeleteButton>
+                        {post?.userId && user?.id === post.userId && user?.id !== comment.userId && !comment.selected && <SelectButton onClick={() => handleSelectComment(comment.id)}>채택</SelectButton>}
+                        {/* ✅ 로그인한 유저 본인의 댓글만 수정/삭제 가능 */}
+                        {user?.id === comment.userId && (
+                           <>
+                              <EditButton onClick={() => startEditing(comment)}>수정</EditButton>
+                              <SmallDeleteButton onClick={() => handleDelete(comment.id)}>삭제</SmallDeleteButton>
+                           </>
+                        )}
                      </>
                   )}
                </CommentActions>
             </CommentBox>
          ))}
-         {/* 🔥 페이지네이션 UI
+         {/* 🔥 페이징 버튼 UI */}
          <PaginationContainer>
-            <PageButton disabled={currentPage === 1} onClick={() => handlePageChange(currentPage - 1)}>
-               이전
+            <PageButton disabled={page === 1} onClick={() => handlePageChange(page - 1)}>
+               ◀ 이전
             </PageButton>
-            <PageNumber>
-               {currentPage} / {totalPages}
-            </PageNumber>
-            <PageButton
-               onClick={() => {
-                  console.log('🚀 버튼 클릭됨! 페이지 증가 시도')
-                  handlePageChange(currentPage + 1)
-               }}
-            >
-               다음
+            {[...Array(totalPages)].map((_, i) => (
+               <PageButton key={i + 1} onClick={() => handlePageChange(i + 1)} active={page === i + 1}>
+                  {i + 1}
+               </PageButton>
+            ))}
+            <PageButton disabled={page === totalPages} onClick={() => handlePageChange(page + 1)}>
+               다음 ▶
             </PageButton>
-         </PaginationContainer> */}
+         </PaginationContainer>
       </>
    )
 }
@@ -421,7 +417,27 @@ const EditImageUploadLabel = styled.label`
       background-color: #e66a00;
    }
 `
+const ImagePreviewContainer = styled.div`
+   display: flex;
+   flex-direction: column;
+   align-items: flex-start;
+   margin-top: 10px;
+`
 
+const RemoveImageButton = styled.button`
+   margin-top: 5px;
+   background: #ff4d4d;
+   color: white;
+   border: none;
+   padding: 5px 10px;
+   border-radius: 5px;
+   cursor: pointer;
+   font-size: 12px;
+
+   &:hover {
+      background: #cc0000;
+   }
+`
 const EditImageInput = styled.input`
    display: none;
 `
@@ -433,19 +449,23 @@ const PaginationContainer = styled.div`
    margin-top: 20px;
 `
 const PageButton = styled.button`
-   background: #ff7a00;
-   color: white;
+   background: none; /* ✅ 배경색 없음 */
+   border: none; /* ✅ 외곽선 없음 */
+   color: black; /* ✅ 기본 글씨색 검정 */
    font-weight: bold;
    padding: 8px 15px;
    border-radius: 5px;
    margin: 0 5px;
    cursor: pointer;
-   &:disabled {
-      background: #ccc;
-      cursor: not-allowed;
+   transition: color 0.2s ease-in-out; /* ✅ 부드러운 색상 전환 */
+
+   &:hover {
+      color: #ff7a00; /* ✅ hover 시 주황색 */
    }
-`
-const PageNumber = styled.span`
-   font-weight: bold;
-   font-size: 16px;
+
+   ${(props) =>
+      props.active &&
+      `
+      color: #ff7a00; /* ✅ 선택된 페이지는 주황색 */
+   `}
 `

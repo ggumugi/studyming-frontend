@@ -89,3 +89,14 @@ export const kickGroupMember = async (groupId, userId) => {
       throw error
    }
 }
+
+// 로그인한 유저의 참여 중인 스터디 목록 가져오기
+export const getUserStudyGroups = async () => {
+   try {
+      const response = await studymingApi.get('/groupmember/user') // 백엔드 API 요청
+      return response
+   } catch (error) {
+      console.error(`API 오류: ${error.message}`)
+      throw error
+   }
+}

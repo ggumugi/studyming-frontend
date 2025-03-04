@@ -1,8 +1,22 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+
 import styled from 'styled-components'
 import { AiOutlineDown } from 'react-icons/ai' // 드롭다운 아이콘
 
+import { fetchUserStudyCountThunk } from '../../features/groupmemberSlice'
+
 const RealTimeAccess = () => {
+   const dispatch = useDispatch()
+
+   // 로그인한 유저의 참여 중인 스터디 개수 불러오기
+   const userStudyCount = useSelector((state) => state.groupmembers.userStudyCount)
+
+   // 로그인한 유저의 참여 중인 스터디 개수 불러오기
+   useEffect(() => {
+      dispatch(fetchUserStudyCountThunk())
+   }, [dispatch])
+
    // ✅ 참여 중인 스터디 목록 (임시 데이터)
    const studyList = [
       { id: 1, name: '고시생방', members: 6 },
@@ -26,7 +40,7 @@ const RealTimeAccess = () => {
          {/* 🔹 현재 참여 중인 스터디 개수 */}
          <Header>
             <StudyInfo>
-               참여 중인 스터디 <span>{studyList.length}</span>개
+               참여 중인 스터디 <span>{userStudyCount}</span>개
             </StudyInfo>
             <VisitButton>{selectedStudy.name} 바로가기 →</VisitButton>
          </Header>

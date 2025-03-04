@@ -127,33 +127,26 @@ const Login = () => {
             }
 
             if (user.status === 'BANNED') {
-               // ✅ 정지된 회원이면 alert 창으로 관리자 이메일과 문의 안내 포함
-               const adminEmail = 'admin@yourwebsite.com' // 🔥 관리자 이메일 설정
-               const message = user.endDate
-                  ? `🚨 로그인 실패 🚨\n\n📅 정지 기간: ${user.endDate}까지\n\n❗ 만약 이 조치가 부당하다고 생각되시면 관리자에게 문의해 주세요.\n📩 관리자 이메일: ${adminEmail}`
-                  : `🚨 로그인 실패 🚨\n\n⛔ 계정이 영구 정지되었습니다.\n\n❗ 만약 이 조치가 부당하다고 생각되시면 관리자에게 문의해 주세요.\n📩 관리자 이메일: ${adminEmail}`
+               const adminEmail = 'admin@yourwebsite.com'
+               const message = user.endDate ? `🚨 로그인 실패 🚨\n\n📅 정지 기간: ${user.endDate}까지\n\n❗ 관리자에게 문의하세요.\n📩 관리자 이메일: ${adminEmail}` : `🚨 로그인 실패 🚨\n\n⛔ 계정이 영구 정지되었습니다.\n\n❗ 관리자에게 문의하세요.\n📩 관리자 이메일: ${adminEmail}`
 
-               alert(message) // 🔥 alert 실행
+               alert(message)
+               return
+            }
+
+            // ✅ 휴면 계정이면 비밀번호 변경 페이지로 이동
+            if (user.status === 'SLEEP') {
+               alert('🛑 6개월 이상 미접속하여 휴면 계정이 되었습니다! 비밀번호 변경 후 다시 로그인해주세요.')
+               navigate('/find/password')
                return
             }
 
             alert(`✅ 로그인 성공! ${user.nickname}님 환영합니다! 🎉`)
-            navigate('/home') // ✅ 로그인 성공 후 메인 페이지 이동
+            navigate('/home')
          })
          .catch((err) => {
             console.error('❌ 로그인 실패:', err)
-
-            // 서버 응답이 없거나 기타 오류일 경우
-            const errorMessage = err?.message || '🚨 로그인 실패.'
-
-            alert(errorMessage) // 🔥 alert 실행
-
-            if (err === '6개월 미접속으로 휴면 계정이 되었습니다. 비밀번호를 변경해주세요.') {
-               alert('🛑 휴면 계정입니다! 비밀번호를 변경한 후 다시 로그인해주세요.')
-               navigate('/find/password')
-            } else {
-               setShouldShowError(true) // 🔥 UI에 반영
-            }
+            alert(err?.message || '🚨 로그인 실패.')
          })
    }
 
@@ -217,7 +210,7 @@ const Login = () => {
 
             {/* 아이디 찾기, 비밀번호 찾기, 회원가입 */}
             <FindLinks>
-               <LinkText to="/find-id">아이디 찾기</LinkText> |<LinkText to="/find-password">비밀번호 찾기</LinkText> |<LinkText to="/signup">회원가입</LinkText>
+               <LinkText to="/find/id">아이디 찾기</LinkText> |<LinkText to="/find/password">비밀번호 찾기</LinkText> |<LinkText to="/signup">회원가입</LinkText>
             </FindLinks>
 
             {/* SNS 로그인 */}

@@ -21,6 +21,11 @@ export const loginUser = async (credentials) => {
          throw new Error(response.data.endDate ? `정지된 계정입니다. ${response.data.endDate}까지 로그인이 불가능합니다.` : '영구 정지된 계정입니다.')
       }
 
+      // ✅ 휴면 계정 (SLEEP) 처리 🚨
+      if (response.data.status === 'SLEEP') {
+         throw new Error('6개월 미접속으로 인해 휴면 계정이 되었습니다. 비밀번호를 변경한 후 이용해 주세요.')
+      }
+
       return response.data
    } catch (error) {
       console.error('❌ 로그인 실패:', error.message)
@@ -220,5 +225,15 @@ export const fetchUsers = async () => {
    } catch (error) {
       console.error('❌ 유저 리스트 가져오기 실패:', error)
       throw error
+   }
+}
+
+// 비밀번호 검증 API 요청을 추가합니다.
+export const verifyPassword = async (password) => {
+   try {
+      const response = await studymingApi.post('/auth/verify-password', { password })
+      return response.data
+   } catch (error) {
+      throw error.response?.data?.message || '비밀번호 확인 중 오류 발생'
    }
 }
