@@ -72,6 +72,12 @@ const Signup = () => {
          newErrors.email = '올바른 이메일 형식에 맞춰서 작성해주세요(예시:studyming@google.com).'
       }
 
+      // ✅ 비밀번호 형식 검사 (최소 8자, 영문/숫자/특수문자 포함)
+      const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+      if (!passwordRegex.test(formData.password)) {
+         newErrors.password = '비밀번호는 최소 8자 이상, 영문/숫자/특수문자를 포함해야 합니다.'
+      }
+
       // 비밀번호 확인
       if (formData.password !== formData.confirmPassword) {
          newErrors.confirmPassword = '비밀번호가 일치하지 않습니다.'
@@ -230,6 +236,27 @@ const Signup = () => {
             navigate('/login')
          })
          .catch((error) => {
+            console.error('❌ 회원가입 실패 (서버 응답 전체):', error) // ✅ 전체 오류 로그 확인
+            // ✅ 백엔드 응답 메시지 확인 (일반적으로 `error.response.data.message` 형태일 가능성 높음)
+            const errorMsg = error?.response?.data?.message.trim() || error.message?.trim() || ''
+            console.log('📢 서버에서 받은 오류 메시지:', errorMsg) // ✅ 백엔드에서 어떤 메시지를 보내는지 확인
+
+            // ✅ 이메일 중복 체크 (다양한 가능성을 고려)
+            if (
+               errorMsg === '중복된 이메일입니다' || //  마침표 없는 경우
+               errorMsg === '중복된 이메일입니다.' || //마침표 있는 경우
+               errorMsg.includes('Duplicate entry') ||
+               errorMsg.includes('email must be unique')
+            ) {
+               alert('🚨 이미 가입된 이메일입니다! 다른 이메일을 사용해주세요.')
+               setErrors((prevErrors) => ({
+                  ...prevErrors,
+                  email: '이미 가입된 이메일입니다.',
+               }))
+               return
+            }
+            // ✅ 기타 회원가입 실패 처리 (예상치 못한 오류)
+            alert('🚨 회원가입 중 오류가 발생했습니다. 다시 시도해주세요.')
             console.error('회원가입 실패:', error)
             setErrors((prevErrors) => ({
                ...prevErrors,

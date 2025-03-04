@@ -31,7 +31,7 @@ export const fetchStudyLikesThunk = createAsyncThunk('studyLike/fetchLikes', asy
 export const checkUserLikeStatusThunk = createAsyncThunk('studyLike/checkStatus', async (groupId, { rejectWithValue }) => {
    try {
       const response = await checkUserLikeStatus(groupId)
-      return response.isLiked //  서버에서 받은 좋아요 상태 (true / false)
+      return response.liked //  서버에서 받은 좋아요 상태 (true / false)
    } catch (error) {
       return rejectWithValue(error.response?.data?.message || '좋아요 상태 조회 실패')
    }

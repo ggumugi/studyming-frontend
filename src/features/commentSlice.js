@@ -34,6 +34,7 @@ export const fetchCommentsThunk = createAsyncThunk('comments/fetchComments', asy
       return {
          comments: response.comments, // ✅ 댓글 데이터
          totalPages: response.totalPages, // ✅ 총 페이지 수 (백엔드에서 전달)
+         currentPage: page, // ✅ 현재 페이지 정보 추가
       }
    } catch (err) {
       return rejectWithValue(err.response?.data?.message || '댓글 목록 조회 실패')
@@ -88,7 +89,8 @@ const commentSlice = createSlice({
    initialState: {
       comments: [], // 댓글 리스트
       comment: null, // 특정 댓글 상세 정보
-      pagination: 1, // 페이징 정보
+      totalPages: 1,
+      currentPage: 1,
       loading: false,
       error: null,
    },
@@ -118,6 +120,8 @@ const commentSlice = createSlice({
          .addCase(fetchCommentsThunk.fulfilled, (state, action) => {
             console.log('📢 Redux 상태 업데이트 실행! 응답 데이터:', action.payload) // ✅ 확인!
             state.loading = false
+            state.totalPages = action.payload.totalPages
+            state.currentPage = action.payload.currentPage
             state.comments = action.payload.comments
             state.pagination = action.payload.pagination
          })

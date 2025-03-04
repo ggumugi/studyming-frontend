@@ -29,6 +29,7 @@ const FindPassword = () => {
          .unwrap()
          .then((result) => {
             if (result.success) {
+               alert('아이디가 확인되었습니다')
                setStep(2) // 이메일 입력 필드로 이동
             }
          })
@@ -43,6 +44,7 @@ const FindPassword = () => {
          .unwrap()
          .then((result) => {
             if (result.success) {
+               alert('이메일로 인증코드가 전송되었습니다')
                setStep(3) // 인증 코드 입력 필드로 이동
             }
          })
@@ -59,6 +61,7 @@ const FindPassword = () => {
          .unwrap()
          .then((result) => {
             if (result.success) {
+               alert('인증코드가 확인되었습니다')
                setStep(4) // 비밀번호 변경 페이지로 이동
             }
          })
@@ -84,12 +87,12 @@ const FindPassword = () => {
          .unwrap()
          .then((result) => {
             if (result.success) {
+               let message = '비밀번호가 성공적으로 변경되었습니다. 로그인 페이지로 이동합니다.'
                // ✅ 휴면 계정이 해제된 경우 메시지 추가
                if (result.message.includes('휴면 계정이 해제되었습니다')) {
-                  alert('성공적으로 휴면 해제가 되었습니다. 다시 로그인해 주십시오.')
-               } else {
-                  alert('비밀번호가 성공적으로 변경되었습니다. 로그인 페이지로 이동합니다.')
+                  message = '성공적으로 휴면 해제가 되었습니다. 다시 로그인해 주십시오.'
                }
+               alert(message)
                setStep(5) // ✅ 비밀번호 변경 완료
                navigate('/login')
             }

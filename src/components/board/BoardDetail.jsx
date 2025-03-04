@@ -210,40 +210,7 @@ const CommentButton = styled.button`
    }
 `
 
-const CommentBox = styled.div`
-   margin-top: 15px;
-   display: flex;
-   justify-content: space-between;
-   align-items: center;
-   padding: 10px 0;
-   border-bottom: 1px solid #eee;
-`
-
-const CommentText = styled.div`
-   display: flex;
-   flex-direction: column;
-`
-
-const CommentAuthor = styled.p`
-   font-weight: bold;
-`
-
-const CommentContent = styled.p`
-   margin-left: 20px;
-`
-
-const CommentDate = styled.p`
-   margin-left: 20px;
-   font-size: 12px;
-   color: gray;
-`
-
-const CommentActions = styled.div`
-   display: flex;
-   gap: 10px;
-`
-
-const ReportButton = styled.button`
+const ReprtButton = styled.button`
    background: none;
    color: red;
    border: none;
@@ -260,7 +227,8 @@ const SmallDeleteButton = styled.button`
 const ButtonWrapper = styled.div`
    display: flex;
    justify-content: center;
-   margin-top: 20px;
+   margin-top: 10px;
+   margin-bottom: 10px; /* 🔥 푸터랑 간격 유지 */
 `
 
 const BackButton = styled.button`
