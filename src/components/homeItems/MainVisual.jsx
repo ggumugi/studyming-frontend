@@ -143,6 +143,12 @@ const ArrowButton = styled.button`
    cursor: pointer;
    transition: 0.3s;
 
+   /* 왼쪽 화살표 */
+   ${({ $left }) => $left && `left: clamp(5px, 4vw, -50px);`}
+
+   /* 오른쪽 화살표 */
+   ${({ $right }) => $right && `right: clamp(5px, 4vw, -50px);`}
+   
    &:hover {
       background: rgba(255, 255, 255, 0.2);
    }

@@ -85,7 +85,7 @@ const Header = ({ isAuthenticated, user }) => {
 
                      {/* 📌 게시판 드롭다운 버튼 */}
                      <NavItem onClick={handleBoardClick} $isOpen={boardOpen}>
-                        게시판 {boardOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                        게시판 {boardOpen ? <KeyboardArrowUpIcon style={{ fontSize: ' clamp(14px, 2vw, 20px)' }} /> : <KeyboardArrowDownIcon style={{ fontSize: ' clamp(14px, 2vw, 20px)' }} />}
                      </NavItem>
 
                      {/* 📌 게시판 드롭다운 메뉴 */}
@@ -111,14 +111,16 @@ const Header = ({ isAuthenticated, user }) => {
             <RightSection>
                {isAuthenticated ? (
                   <>
-                     <NotificationIcon />
+                     <NotificationIcon style={{ fontSize: ' clamp(14px, 2vw, 20px)' }} />
 
                      {/* 📌 유저 닉네임 + 로그아웃 버튼 추가 */}
                      <UserWrapper>
-                        <UserMenu onClick={handleUserClick} $isOpen={userOpen}>
-                           {user?.nickname} 님 {userOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                        <UserMenu onClick={handleUserClick} $isOpen={userOpen} style={{ fontSize: ' clamp(14px, 1vw, 20px)' }}>
+                           {user?.nickname} 님 {userOpen ? <KeyboardArrowUpIcon style={{ fontSize: ' clamp(14px, 2vw, 20px)' }} /> : <KeyboardArrowDownIcon style={{ fontSize: ' clamp(14px, 2vw, 20px)' }} />}
                         </UserMenu>
-                        <LogoutButton onClick={handleLogout}>로그아웃</LogoutButton>
+                        <LogoutButton onClick={handleLogout} style={{ fontSize: ' clamp(14px, 1vw, 20px)' }}>
+                           로그아웃
+                        </LogoutButton>
                      </UserWrapper>
 
                      {/* 📌 사용자 드롭다운 메뉴 */}
@@ -178,22 +180,23 @@ const LeftSection = styled.div`
 
 const Logo = styled.img`
    height: 25px;
-   margin-right: 100px;
+   margin-right: clamp(20px, 4vw, 100px);
 `
 
 const NavMenu = styled.ul`
    display: flex;
-   gap: 80px;
+   gap: clamp(20px, 4vw, 80px);
+   align-items: center;
 `
 
 const NavItem = styled.li`
-   font-size: 20px;
+   font-size: clamp(14px, 1vw, 20px);
    font-weight: 300;
    color: ${(props) => (props.$isOpen ? '#ff7f00' : '#000')};
    cursor: pointer;
    display: flex;
    align-items: center;
-   gap: 5px;
+   gap: 3px;
    &:hover {
       color: #ff7f00;
    }
@@ -202,7 +205,7 @@ const NavItem = styled.li`
 const RightSection = styled.div`
    display: flex;
    align-items: center;
-   gap: 30px;
+   gap: clamp(10px, 2vw, 50px);
 `
 
 const NotificationIcon = styled(FaRegBell)`
@@ -220,7 +223,6 @@ const UserMenu = styled.div`
    color: ${(props) => (props.$isOpen ? '#ff7f00' : '#000')};
    display: flex;
    align-items: center;
-   gap: 5px;
    cursor: pointer;
 
    &:hover {
@@ -242,7 +244,7 @@ const CustomMenuItem = styled(MenuItem)`
 const UserWrapper = styled.div`
    display: flex;
    align-items: center;
-   gap: 15px;
+   gap: clamp(10px, 2vw, 50px);
 `
 
 const LogoutButton = styled.button`
