@@ -11,10 +11,7 @@ import RealTimeAccess from '../components/homeItems/RealTimeAccess'
 import DdayLine from '../components/homeItems/Dday' // ✅ D-day 추가
 import Mindset from '../components/homeItems/Mindset' // ✅ 다짐 추가
 
-const Home = () => {
-   const user = useSelector((state) => state.auth.user) // Redux에서 user 가져오기
-   console.log('📌 부모 컴포넌트의 userId:', user?.id)
-
+const Home = ({ isAuthenticated, user }) => {
    return (
       <HomeContainer>
          {/* ✅ 메인 비주얼 (캐러셀) */}
@@ -24,13 +21,13 @@ const Home = () => {
 
          {/* 공부 시간 카드 3개 배치 */}
          <StudyTimeWrapper>
-            <TodayTimeCard userId={user?.id} title="오늘 공부 시간" />
+            <TodayTimeCard user={user} title="오늘 공부 시간" />
          </StudyTimeWrapper>
          <StudyTimeWrapper>
-            <YesterdayTimeCard userId={user?.id} title="어제 공부 시간" />
+            <YesterdayTimeCard user={user} title="어제 공부 시간" />
          </StudyTimeWrapper>
          <StudyTimeWrapper>
-            <TotalTimeCard userId={user?.id} title="총 공부시간" />
+            <TotalTimeCard user={user} title="총 공부시간" />
          </StudyTimeWrapper>
 
          {/* 다짐 & D-day (새로운 배치) */}

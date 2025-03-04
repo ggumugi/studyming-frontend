@@ -1,15 +1,37 @@
 import React, { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { fetchAllTimeData } from '../../features/timeSlice'
+import { fetchAllTimeData, fetchTimeData } from '../../features/timeSlice'
 import '../../styles/studyTimeCard.css'
 
-const TotalTimeCard = ({ userId, title }) => {
+const TotalTimeCard = ({ user, title }) => {
    const dispatch = useDispatch()
-   const { allTime, loading } = useSelector((state) => state.time)
+   const { allTime, time, loading } = useSelector((state) => state.time)
 
    useEffect(() => {
-      if (userId) dispatch(fetchAllTimeData(userId))
-   }, [dispatch, userId])
+      if (user) {
+         dispatch(fetchAllTimeData(user.id))
+         dispatch(fetchTimeData(user.id))
+      }
+   }, [dispatch, user])
+
+   // "HH:MM:SS" → 초 단위 변환 함수
+   const timeToSeconds = (timeString) => {
+      if (!timeString) return 0
+      const [hours, minutes, seconds] = timeString.split(':').map(Number)
+      return (hours || 0) * 3600 + (minutes || 0) * 60 + (seconds || 0)
+   }
+
+   // 초 단위 → "HH:MM:SS" 변환 함수
+   const secondsToTime = (totalSeconds) => {
+      const hours = Math.floor(totalSeconds / 3600)
+      const minutes = Math.floor((totalSeconds % 3600) / 60)
+      const seconds = totalSeconds % 60
+      return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+   }
+
+   // 두 시간을 초로 변환 후 합산
+   const totalSeconds = timeToSeconds(allTime) + timeToSeconds(time)
+   const totalStudyTime = secondsToTime(totalSeconds)
 
    return (
       <div className="study-time-card">
@@ -17,10 +39,9 @@ const TotalTimeCard = ({ userId, title }) => {
             <h3 className="title">{title}</h3>
             <div className="underline"></div>
          </div>
-         <span className="time-display">{loading ? '로딩 중...' : allTime}</span>
+         <span className="time-display">{loading ? '로딩 중...' : totalStudyTime}</span>
       </div>
    )
 }
-/* 오늘 & 어제 & 총 공부시간 카드 디자인 동일하지만 내용이 달라서
-스타일 컴포넌트가 아닌 외부 CSS로 사용  */
+
 export default TotalTimeCard

@@ -4,7 +4,7 @@ import { TextField, Button } from '@mui/material'
 import { Google } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 
-const MyInfo = () => {
+const MyInfo = ({ isAuthenticated, user }) => {
    const [confirmPassword, setConfirmPassword] = useState(false)
    const [editing, setEditing] = useState(false)
    const [password, setPassword] = useState('')
