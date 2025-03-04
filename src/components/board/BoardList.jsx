@@ -21,6 +21,14 @@ const BoardList = ({ category }) => {
    // const [isWriting, setIsWriting] = useState(false)
    const [isReportOpen, setIsReportOpen] = useState(false) // 벤실험 코드
    const [targetUser, setTargetUser] = useState(null) // 벤실험 코드
+
+   const reverseCategoryMap = {
+      free: '자유',
+      QnA: '질문',
+      noti: '정보',
+      inquiry: '문의',
+   }
+
    const handleOpenReport = (user) => {
       setTargetUser(user)
       setIsReportOpen(true)
@@ -50,7 +58,7 @@ const BoardList = ({ category }) => {
       <Container>
          {/* :흰색_확인_표시: 게시판 제목 + 글쓰기 버튼 */}
          <Header>
-            <Title>{category} 게시판</Title>
+            <Title>{reverseCategoryMap[category]} 게시판</Title>
             {(selectedCategory !== 'noti' || user?.role === 'ADMIN') && <WriteButton onClick={() => navigate('/board/create')}>글쓰기</WriteButton>}
          </Header>
          {loading ? (
