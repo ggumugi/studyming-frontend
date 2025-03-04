@@ -227,3 +227,13 @@ export const fetchUsers = async () => {
       throw error
    }
 }
+
+// 비밀번호 검증 API 요청을 추가합니다.
+export const verifyPassword = async (password) => {
+   try {
+      const response = await studymingApi.post('/auth/verify-password', { password })
+      return response.data
+   } catch (error) {
+      throw error.response?.data?.message || '비밀번호 확인 중 오류 발생'
+   }
+}

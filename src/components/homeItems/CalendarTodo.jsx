@@ -177,6 +177,7 @@ const DateDisplay = styled.h3`
 
 const InputSection = styled.div`
    display: flex;
+   flex-direction: column;
    align-items: center;
    gap: 10px;
    width: 100%;
@@ -186,11 +187,11 @@ const InputWrapper = styled.div`
    display: flex;
    flex-direction: column;
    position: relative;
-   flex: 1; /* ⬅️ 입력창이 버튼과 함께 가로 정렬되도록 설정 */
+   width: 100%;
 `
 
 const Input = styled.input`
-   flex: 1;
+   width: 100%;
    padding: 10px;
    border: 1px solid #ddd;
    border-radius: 5px;
@@ -203,6 +204,7 @@ const Input = styled.input`
 
 const AddButton = styled.button`
    background: #ff7a00;
+   width: 100%;
    color: white;
    border: none;
    padding: 10px 15px;
