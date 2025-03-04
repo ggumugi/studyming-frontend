@@ -23,12 +23,14 @@ export const createGroupMemberThunk = createAsyncThunk('groupmembers/create', as
 })
 
 // 그룹 멤버 참여
-export const participateInGroupThunk = createAsyncThunk('groupmembers/participate', async ({ groupId, status }, { rejectWithValue }) => {
+export const participateInGroupThunk = createAsyncThunk('groupmember/participate', async ({ groupId, status }, { rejectWithValue }) => {
    try {
-      const response = await participateInGroup(groupId, status) // API 호출 함수
-      return response.data // 응답 데이터 반환
+      console.log(`그룹 참여 상태 변경 요청: 그룹 ID ${groupId}, 상태 ${status}`)
+      const response = await updateGroupMember(groupId, status)
+      return response.data
    } catch (error) {
-      return rejectWithValue(error.response?.data?.message || '그룹 멤버 상태 변경 실패')
+      console.error(`그룹 참여 상태 변경 실패:`, error)
+      return rejectWithValue(error.response?.data?.message || '스터디 그룹 참여 상태를 변경할 수 없습니다.')
    }
 })
 

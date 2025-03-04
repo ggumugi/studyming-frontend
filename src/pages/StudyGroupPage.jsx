@@ -10,6 +10,7 @@ import Timer from '../components/shared/Timer'
 
 import { fetchStudygroupByIdThunk } from '../features/studygroupSlice'
 import { fetchGroupMembersThunk, participateInGroupThunk } from '../features/groupmemberSlice'
+import { updateGrouptimeThunk } from '../features/grouptimeSlice'
 import Ejection from '../components/shared/Ejection'
 
 const StudyGroupPage = ({ isAuthenticated, user }) => {
@@ -18,6 +19,7 @@ const StudyGroupPage = ({ isAuthenticated, user }) => {
    const { id } = useParams()
    const { studygroup } = useSelector((state) => state.studygroups)
    const { groupmembers } = useSelector((state) => state.groupmembers.groupmember)
+   const { formattedTime } = useSelector((state) => state.grouptime) // 추가: 타이머 시간 가져오기
    const [selectedMenu, setSelectedMenu] = useState('채팅')
    const [isModalOpen, setIsModalOpen] = useState(false) // 모달 상태 관리
    const [isEjectionModalOpen, setIsEjectionModalOpen] = useState(false)
@@ -57,16 +59,35 @@ const StudyGroupPage = ({ isAuthenticated, user }) => {
       setIsModalOpen(true) // 모달 열기
    }
 
+   // 수정: 나가기 버튼 클릭 시 타이머 시간 저장 후 그룹 상태 변경
    const handleConfirmExit = () => {
-      dispatch(participateInGroupThunk({ groupId: id, status: 'off' }))
+      // 현재 타이머 시간 저장
+      console.log('나가기 시작: 시간 저장 시도', { groupId: id, time: formattedTime })
+
+      dispatch(updateGrouptimeThunk({ groupId: id, time: formattedTime }))
          .unwrap()
-         .then(() => navigate('/home'))
+         .then((result) => {
+            console.log('시간 저장 성공:', result)
+            // 스터디 그룹 참여 상태 변경 (off)
+            console.log('그룹 상태 변경 시도', { groupId: id, status: 'off' })
+            return dispatch(participateInGroupThunk({ groupId: id, status: 'off' })).unwrap()
+         })
+         .then((result) => {
+            console.log('그룹 상태 변경 성공:', result)
+            navigate('/home')
+         })
          .catch((err) => {
-            console.error('스터디 참여 실패: ', err)
+            console.error('스터디 나가기 실패 상세 정보:', {
+               error: err,
+               message: err.message,
+               stack: err.stack,
+               response: err.response?.data,
+            })
             alert('스터디에 참여할 수 없습니다.')
          })
          .finally(() => setIsModalOpen(false)) // 모달 닫기
    }
+
    console.log('studygroup ', studygroup, 'groupmembers', groupmembers)
 
    return (
