@@ -4,7 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Menu, MenuItem } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
-import { FaRegBell } from 'react-icons/fa'
+import { FaRegEnvelope } from 'react-icons/fa'
 import { useCallback } from 'react'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
@@ -35,6 +35,8 @@ const Header = ({ isAuthenticated, user }) => {
    // 📌 유저 드롭다운 상태
    const [userAnchor, setUserAnchor] = useState(null)
    const userOpen = Boolean(userAnchor)
+
+   // const [hasNotification, setHasNotification] = useState(false) // 알림 상태(로고 조건부때문에 임시로 해둔 주석이예영 알림기능 개발 후  편하신대로 맘껏바꾸셔도돼영)
 
    // 📌 게시판 카테고리 매핑
    const categoryMap = {
@@ -112,6 +114,13 @@ const Header = ({ isAuthenticated, user }) => {
                {isAuthenticated ? (
                   <>
                      <NotificationIcon style={{ fontSize: ' clamp(14px, 2vw, 20px)' }} />
+                     {/* 조건부 렌더링 예시 (알림기능 개발 후 하면 될 듯!!!!!!!)
+                     {hasNotification ? (
+                        <FaEnvelope style={{ fontSize: 'clamp(14px, 2vw, 20px)' }} />  // 알림 있음 상태
+                     ) : (
+                      <NotificationIcon style={{ fontSize: 'clamp(14px, 2vw, 20px)' }} /> 
+                       // 알림 없음 상태
+                     )} */}
 
                      {/* 📌 유저 닉네임 + 로그아웃 버튼 추가 */}
                      <UserWrapper>
@@ -208,7 +217,7 @@ const RightSection = styled.div`
    gap: clamp(10px, 2vw, 50px);
 `
 
-const NotificationIcon = styled(FaRegBell)`
+const NotificationIcon = styled(FaRegEnvelope)`
    font-size: 22px;
    color: #ff7f00;
    cursor: pointer;

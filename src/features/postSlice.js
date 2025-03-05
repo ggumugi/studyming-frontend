@@ -88,6 +88,9 @@ const postSlice = createSlice({
       setCategory: (state, action) => {
          state.category = action.payload
       },
+      resetPost: (state) => {
+         state.post = null // ✅ 글쓰기 페이지 이동 시 기존 `post` 데이터 초기화
+      },
    },
    extraReducers: (builder) => {
       //게시물 등록
@@ -180,4 +183,4 @@ const postSlice = createSlice({
 })
 
 export default postSlice.reducer
-export const { setCategory } = postSlice.actions // ✅ setCategory 액션 추가
+export const { setCategory, resetPost } = postSlice.actions // ✅ setCategory 액션 추가
