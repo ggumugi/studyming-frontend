@@ -202,7 +202,7 @@ const Item = styled.li`
 const Text = styled.span`
    color: #69c6ec;
    cursor: pointer;
-   font-size: clamp(16px, 2vw, 20px);
+   font-size: clamp(14px, 2vw, 20px);
    font-weight: 700;
    &:hover {
       text-decoration: underline;
