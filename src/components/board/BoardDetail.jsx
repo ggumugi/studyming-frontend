@@ -156,6 +156,7 @@ const EditButton = styled.button`
 
 const DeleteButton = styled.button`
    background-color: #ff5733;
+   margin: 0 0 10px 10px;
    color: white;
    padding: 8px 15px;
    border-radius: 20px;

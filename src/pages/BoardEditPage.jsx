@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
+
+import styled from 'styled-components'
+
 import BoardSidebar from '../components/sidebar/BoardSidebar'
 import BoardCreate from '../components/board/BoardCreate'
 import { fetchPostByIdThunk, updatePostThunk } from '../features/postSlice'
@@ -33,11 +36,19 @@ function BoardEditPage({ isAuthenticated, user }) {
    )
 
    return (
-      <div style={{ display: 'flex' }}>
+      <BoardContainer>
          <BoardSidebar selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
-         {post && <BoardCreate user={user} onSubmit={handleSubmit} isAuthenticated={isAuthenticated} selectedCategory={selectedCategory} initialValues={post} />}
-      </div>
+         <>{post && <BoardCreate user={user} onSubmit={handleSubmit} isAuthenticated={isAuthenticated} selectedCategory={selectedCategory} initialValues={post} />}</>
+      </BoardContainer>
    )
 }
+const BoardContainer = styled.div`
+   display: flex;
+   flex-direction: row;
+   width: 100%;
 
+   @media (max-width: 965px) {
+      flex-direction: column !important;
+   }
+`
 export default BoardEditPage

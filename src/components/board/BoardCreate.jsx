@@ -202,6 +202,9 @@ const Container = styled.div`
    background-color: #fff;
    display: flex;
    flex-direction: column;
+   @media (max-width: 965px) {
+      padding: 0px 70px 0 70px;
+   }
 `
 
 const Header = styled.div`
