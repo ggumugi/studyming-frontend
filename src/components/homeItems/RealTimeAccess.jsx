@@ -111,7 +111,6 @@ const RealTimeAccess = () => {
                         <UserIcon key={member.userId} $isOnline={member.status === 'on'}>
                            <UserImage src={`${process.env.PUBLIC_URL}/img/${member.status === 'on' ? 'happyMing.png' : 'cryingMing.png'}`} alt="user" />
                            <p>{member.User ? member.User.nickname : '알 수 없음'}</p>
-                           {member.role === 'leader' && <LeaderBadge>방장</LeaderBadge>}
                         </UserIcon>
                      ))}
                   </UserList>
