@@ -60,10 +60,17 @@ const Signup = () => {
 
    // 입력 변경 핸들러
    const handleChange = (e) => {
+      const { name, value } = e.target
+
+      // 닉네임 길이 체크 (6자 이하만 입력)
+      if (name === 'nickname' && value.length > 6) {
+         return // 6자 이상 입력되면 값 변경하지 않음
+      }
       setFormData({ ...formData, [e.target.name]: e.target.value })
    }
 
-   const validate = () => {
+   const validate = (e) => {
+      const { name, value } = e.target
       let newErrors = {}
 
       // 이메일 형식 검사 및 비밀번호 일치 확인
@@ -84,7 +91,7 @@ const Signup = () => {
       }
 
       // ✅ 닉네임 길이 검사 (최대 6자)
-      if (formData.nickname && formData.nickname.length > 6) {
+      if (name === 'nickname' && value.length > 6) {
          newErrors.nickname = '닉네임은 최대 6자까지만 가능합니다.'
       }
 
@@ -289,6 +296,7 @@ const Signup = () => {
                         onBlur={checkDuplicateNickname} // ✅ 입력 후 포커스 아웃 시 자동 실행
                         error={!!errors.nickname}
                         helperText={errors.nickname || successMessages.nickname || ''}
+                        placeholder="닉네임은 6자 이하로 작성해주세요"
                      />
                   </InputRow>
 
@@ -359,9 +367,10 @@ const FormContainer = styled.div`
 `
 
 const Title = styled.h2`
-   font-weight: bold;
+   font-weight: 300;
    text-align: left;
    color: black;
+   font-size: clamp(14px, 2vw, 20px);
 `
 
 const StyledDivider = styled.div`
@@ -387,6 +396,10 @@ const StyledTextField = styled(TextField)`
    width: 100%;
    &.MuiTextField-root {
       margin-bottom: 20px;
+   }
+
+   label {
+      font-size: clamp(12px, 1vw, 14px);
    }
 `
 

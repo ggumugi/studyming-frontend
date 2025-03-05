@@ -117,7 +117,7 @@ export default BoardDetail
 //
 const Container = styled.div`
    width: 100%;
-   padding: 70px 70px 0 70px;
+   padding: 0px 70px 0 70px;
 `
 
 const Header = styled.div`

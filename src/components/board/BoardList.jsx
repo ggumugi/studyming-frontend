@@ -48,7 +48,7 @@ const BoardList = ({ category }) => {
    } // 벤실험 코드
    useEffect(() => {
       dispatch(fetchPostsThunk({ page, category, limit: rowsPerPage, searchType, searchKeyword }))
-   }, [dispatch, page, category, rowsPerPage, searchType, searchKeyword])
+   }, [dispatch, page, category, rowsPerPage, searchType])
    const handleChangePage = (event, newPage) => {
       setPage(newPage)
    }
@@ -137,6 +137,9 @@ export default BoardList
 const Container = styled.div`
    width: 100%;
    padding: 70px 70px 0 70px;
+   @media (max-width: 965px) {
+      padding: 0 70px 0 70px;
+   }
 `
 const Header = styled.div`
    display: flex;
@@ -196,7 +199,10 @@ const SearchContainer = styled.div`
    display: flex;
    justify-content: center;
    align-items: center;
-   margin-top: 20px;
+   margin-top: 50px;
+   @media (max-width: 965px) {
+      margin-bottom: 120px;
+   }
 `
 const StyledSelect = styled(Select)`
    width: 120px;

@@ -128,6 +128,10 @@ const Nickname = styled.p`
 
 const ReasonList = styled.div`
    margin-bottom: 20px;
+
+   input {
+      margin-right: 10px;
+   }
 `
 
 const Reason = styled.label`
