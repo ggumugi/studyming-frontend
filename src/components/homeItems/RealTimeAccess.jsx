@@ -105,7 +105,7 @@ const Header = styled.div`
 `
 
 const StudyInfo = styled.div`
-   font-size: 20px;
+   font-size: clamp(14px, 2vw, 20px);
    font-weight: 300;
    color: #333;
    span {
@@ -122,7 +122,7 @@ const VisitButton = styled.button`
    padding: 8px 12px;
    border-radius: 25px;
    cursor: pointer;
-   font-size: 14px;
+   font-size: clamp(10px, 1vw, 14px);
    font-weight: 300;
 
    &:hover {
@@ -154,7 +154,7 @@ const SelectBox = styled.div`
    display: flex;
    align-items: center;
    justify-content: space-between;
-   font-size: 16px;
+   font-size: clamp(12px, 1vw, 16px);
    font-weight: 400;
    color: #333;
 
@@ -164,7 +164,7 @@ const SelectBox = styled.div`
 `
 
 const MemberCount = styled.div`
-   font-size: 16px;
+   font-size: clamp(12px, 1vw, 16px);
    font-weight: 300;
    color: #666;
    margin-top: 5px;
@@ -193,7 +193,7 @@ const DropdownItem = styled.li`
    display: flex;
    justify-content: space-between;
    align-items: center;
-   font-size: 16px;
+   font-size: clamp(12px, 1vw, 16px);
    cursor: pointer;
    color: #333;
 
@@ -213,7 +213,7 @@ const DropdownItem = styled.li`
 
 /* 🔹 실시간 접속 현황 */
 const SectionTitle = styled.h3`
-   font-size: 20px;
+   font-size: clamp(14px, 2vw, 20px);
    font-weight: 300;
    color: #ff7a00;
    margin-top: 30px;

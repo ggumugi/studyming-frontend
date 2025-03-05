@@ -193,7 +193,7 @@ const Wrapper = styled.div`
    padding: 0px 40px 40px 40px;
    width: 100%;
    max-width: 800px; /* 적절한 최대 너비 유지 */
-   margin: 0 auto; /* 좌우 중앙 정렬 */
+   margin: 30px auto 0 auto; /* 좌우 중앙 정렬 */
 
    @media (max-width: 768px) {
       padding: 20px;
@@ -210,13 +210,14 @@ const TitleContainer = styled.div`
 `
 
 const Title = styled.h2`
-   font-size: 32px;
+   font-size: clamp(16px, 2vw, 20px);
+   font-weight: 300;
    margin-bottom: 10px;
 `
 
 const StyledDivider = styled.div`
    width: 100%;
-   height: 3px;
+   height: 2px;
    background-color: #ff7a00;
    margin-bottom: 20px;
 `
@@ -239,19 +240,24 @@ const DetailRow = styled.div`
    @media (max-width: 768px) {
       flex-direction: column;
       align-items: flex-start;
+      gap: 0;
    }
 `
 
 const LabelText = styled.span`
    flex: 0 0 150px;
-   font-size: 16px;
-   font-weight: bold;
+   font-size: clamp(14px, 2vw, 16px);
+   font-weight: 300;
    text-align: left;
+   @media (max-width: 768px) {
+      flex: 0 0 25px;
+   }
 `
 
 const DetailText = styled.span`
-   font-size: 16px;
-   color: #333;
+   font-size: clamp(14px, 2vw, 16px);
+   color: #8e8e8e;
+   font-weight: 300;
    text-align: left;
    flex: 1;
 `
@@ -271,23 +277,27 @@ const Tag = styled.span`
 
 const EtiquetteText = styled.p`
    font-size: 14px;
+   font-weight: 300;
    line-height: 1.5;
-   color: #666;
-
+   color: #8e8e8e;
    padding: 10px;
    border-radius: 5px;
+
+   word-break: break-word; /* 긴 단어도 줄바꿈 */
+   overflow-wrap: break-word; /* 자동 줄바꿈 */
+   white-space: normal; /* 텍스트가 자동으로 여러 줄로 표시됨 */
 `
 
 const SubmitButton = styled.button`
    padding: 12px 20px;
    background-color: #ff7a00;
    color: white;
-   font-size: 16px;
+   font-size: clamp(14px, 2vw, 16px);
    border: none;
    border-radius: 5px;
    cursor: pointer;
    margin-top: 30px; /* 버튼과 마지막 항목 사이 간격 추가 */
-   width: 70%;
+   width: 100%;
 
    &:hover {
       background-color: #e66e00;
@@ -298,12 +308,12 @@ const SubmitButton2 = styled.button`
    padding: 12px 20px;
    background-color: #3498db;
    color: white;
-   font-size: 16px;
+   font-size: clamp(14px, 2vw, 16px);
    border: none;
    border-radius: 5px;
    cursor: pointer;
    margin-top: 30px; /* 버튼과 마지막 항목 사이 간격 추가 */
-   width: 70%;
+   width: 100%;
    &:hover {
       background-color: #2980b9;
    }
@@ -311,7 +321,7 @@ const SubmitButton2 = styled.button`
 const ButtonWrapper = styled.div`
    display: flex;
    justify-content: center;
-   margin-top: 20px;
+   margin-top: 50px;
 `
 
 const BackButton = styled.button`
@@ -321,6 +331,6 @@ const BackButton = styled.button`
    padding: 10px 20px;
    border: none;
    font-weight: 400;
-   font-size: 16px;
+   font-size: clamp(14px, 2vw, 16px);
    cursor: pointer;
 `

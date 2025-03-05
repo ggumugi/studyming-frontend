@@ -21,6 +21,14 @@ const BoardList = ({ category }) => {
    // const [isWriting, setIsWriting] = useState(false)
    const [isReportOpen, setIsReportOpen] = useState(false) // 벤실험 코드
    const [targetUser, setTargetUser] = useState(null) // 벤실험 코드
+
+   const reverseCategoryMap = {
+      free: '자유',
+      QnA: '질문',
+      noti: '정보',
+      inquiry: '문의',
+   }
+
    const handleOpenReport = (user) => {
       setTargetUser(user)
       setIsReportOpen(true)
@@ -50,7 +58,7 @@ const BoardList = ({ category }) => {
       <Container>
          {/* :흰색_확인_표시: 게시판 제목 + 글쓰기 버튼 */}
          <Header>
-            <Title>{category} 게시판</Title>
+            <Title>{reverseCategoryMap[category]} 게시판</Title>
             {(selectedCategory !== 'noti' || user?.role === 'ADMIN') && <WriteButton onClick={() => navigate('/board/create')}>글쓰기</WriteButton>}
          </Header>
          {loading ? (
@@ -178,26 +186,48 @@ const StyledSelect = styled(Select)`
    height: 45px;
    border-radius: 5px;
    background-color: white;
+
+   /* 기본 상태 테두리 */
+   & .MuiOutlinedInput-notchedOutline {
+      border-color: #ccc !important;
+   }
+
+   /* 선택되었을 때(Focused) 테두리 색상 */
+   &.Mui-focused .MuiOutlinedInput-notchedOutline {
+      border-color: #aaa !important;
+   }
+
+   /* 마우스를 올렸을 때(Hover) 테두리 색상 */
+   &:hover .MuiOutlinedInput-notchedOutline {
+      border-color: #aaa !important;
+   }
 `
+
 const StyledInput = styled.input`
    max-width: 700px;
    width: 100%;
    height: 45px;
    padding: 0 10px;
-   margin-left: 10px;
+   margin: 0 10px;
    border: 1px solid #ccc;
    border-radius: 5px;
+   outline: none; /* 기본 브라우저 포커스 테두리 제거 */
+
+   &:focus {
+      border: 2px solid #aaa !important; /* 포커스 시 테두리 색 변경 */
+   }
 `
+
 const SearchButton = styled(Button)`
    margin-left: 10px;
+   border: 1px solid #ccc !important;
    height: 45px;
-   background-color: #ff7a00;
-   color: white;
+   font-weight: 400 !important;
+   color: black !important;
    font-weight: bold;
-   padding: 10px 20px;
+   padding: 10px 10px;
    border-radius: 5px;
-   transition: background-color 0.3s;
    &:hover {
-      background-color: #e66a00;
+      background-color: transparent !important; /* 🔥 파란색 배경 제거 */
    }
 `

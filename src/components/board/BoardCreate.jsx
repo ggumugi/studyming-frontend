@@ -16,6 +16,12 @@ const BoardCreate = ({ user, category, onSubmit, initialValues = {} }) => {
    const [removedImages, setRemovedImages] = useState([]) // ✅ 삭제할 기존 이미지 목록
    const [titleError, setTitleError] = useState(false)
 
+   const reverseCategoryMap = {
+      free: '자유',
+      QnA: '질문',
+      noti: '정보',
+      inquiry: '문의',
+   }
    useEffect(() => {
       console.log('images 상태:', images) // ✅ 현재 상태 확인
    }, [images])
@@ -125,7 +131,7 @@ const BoardCreate = ({ user, category, onSubmit, initialValues = {} }) => {
    return (
       <Container>
          <Header>
-            <Title>{category} 게시판</Title>
+            <Title>{reverseCategoryMap[category]} 게시판</Title>
          </Header>
 
          <FormGroup>

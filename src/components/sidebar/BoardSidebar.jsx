@@ -37,6 +37,7 @@ const BoardSidebar = () => {
                {Object.keys(categoryMap).map((item) => (
                   <MenuItem key={item} $isActive={categoryMap[item] === selectedCategory} onClick={() => handleCategoryClick(item)}>
                      <StyledButton>{item}</StyledButton>
+                     {console.log('item1', item)}
                      {categoryMap[item] === selectedCategory && <ActiveIndicator />}
                   </MenuItem>
                ))}
@@ -56,13 +57,12 @@ const Container = styled.div`
 `
 
 const SidebarContainer = styled.nav`
-   width: 220px;
+   width: 200px;
    height: 100vh;
    padding: 20px;
    display: flex;
    flex-direction: column;
    border-right: 1px solid #ddd;
-   align-items: flex-end;
 `
 
 const MenuList = styled.ul`
@@ -76,15 +76,16 @@ const MenuList = styled.ul`
 `
 
 const MenuItem = styled.li`
+   flex-direction: column;
    position: relative;
    display: flex;
+   margin-right: 20px;
    justify-content: center;
    font-size: 20px;
    font-weight: ${(props) => (props.$isActive ? '500' : '300')};
    color: ${(props) => (props.$isActive ? '#FF7A00' : '#000')};
    cursor: pointer;
 `
-
 const StyledButton = styled.button`
    all: unset;
    text-decoration: none;

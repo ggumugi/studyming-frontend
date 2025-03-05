@@ -114,7 +114,7 @@ const Mindset = () => {
                   </Item>
                ))
             ) : (
-               <p>다짐이 없습니다.</p>
+               <p style={{ fontSize: 'clamp(14px, 2vw, 16px)', color: '#777' }}>다짐이 없습니다.</p>
             )}
          </List>
 
@@ -165,7 +165,7 @@ const Title = styled.div`
    display: flex;
    justify-content: space-between;
    align-items: center;
-   font-size: 20px;
+   font-size: clamp(14px, 2vw, 20px);
    font-weight: 300;
 `
 
@@ -202,7 +202,7 @@ const Item = styled.li`
 const Text = styled.span`
    color: #69c6ec;
    cursor: pointer;
-   font-size: clamp(16px, 2vw, 21px);
+   font-size: clamp(14px, 2vw, 20px);
    font-weight: 700;
    &:hover {
       text-decoration: underline;

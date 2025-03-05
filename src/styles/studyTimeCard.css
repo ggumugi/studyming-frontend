@@ -22,7 +22,7 @@
 }
 
 .title {
-   font-size: 20px !important;
+   font-size: clamp(14px, 2vw, 20px) !important;
    font-weight: 300;
    color: #333;
    margin-left: 10px; /* ⬅️ 왼쪽 여백 */

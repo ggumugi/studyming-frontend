@@ -171,7 +171,7 @@ const NavButton = styled.button`
 const DateDisplay = styled.h3`
    margin: 0;
 
-   font-size: 20px;
+   font-size: clamp(14px, 2vw, 20px);
    font-weight: 300;
 `
 

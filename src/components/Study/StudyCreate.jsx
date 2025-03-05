@@ -306,20 +306,22 @@ const TitleContainer = styled.div`
 `
 
 const Title = styled.h2`
-   font-size: 32px;
+   font-size: clamp(14px, 2vw, 20px);
+   font-weight: 300;
    margin-bottom: 10px;
    text-align: center;
 `
 
 const SmallText = styled.span`
-   font-size: 10px;
-   color: #999; /* 작은 글씨 색상 */
+   font-size: 12px;
+   font-weight: 300;
+   color: #888; /* 작은 글씨 색상 */
 `
 
 const StyledDivider = styled.div`
    width: 100%;
    max-width: 800px;
-   height: 3px;
+   height: 2px;
    background-color: #ff7a00;
    margin-bottom: 20px;
 `
@@ -351,13 +353,14 @@ const Label = styled.label`
    align-items: center;
 
    gap: 20px;
-   font-size: 16px;
-   font-weight: bold;
+   font-size: clamp(14px, 2vw, 16px);
+   font-weight: 300;
    margin-bottom: 10px;
    width: 100%;
    justify-content: flex-start;
 `
 
+/* 다시 보기 */
 const LabelText = styled.span`
    flex: 0 0 150px; /* 고정 너비 설정 */
    text-align: left; /* 왼쪽 정렬 */
@@ -387,7 +390,8 @@ const FlexContainer = styled.div`
 
 const Input = styled.input`
    padding: 12px;
-   font-size: 16px;
+   font-size: clamp(14px, 2vw, 16px);
+   font-weight: 300;
    border-radius: 4px;
    border: 1px solid #ccc;
    flex: 1; /* 남은 공간을 모두 차지 */
@@ -397,7 +401,8 @@ const Input = styled.input`
 
 const SmallInput = styled(Input)`
    padding: 8px;
-   font-size: 14px;
+   font-size: clamp(12px, 1vw, 14px);
+   font-weight: 300;
    border-radius: 4px;
    border: 1px solid #ccc;
    width: 150px; /* 입력 필드 크기 고정 */
@@ -426,7 +431,8 @@ const CustomTimeInput = styled(Input)`
 
 const TextArea = styled.textarea`
    padding: 12px;
-   font-size: 16px;
+   font-size: clamp(14px, 2vw, 16px);
+   font-weight: 300;
    border-radius: 4px;
    border: 1px solid #ccc;
    resize: vertical;
@@ -437,7 +443,8 @@ const TextArea = styled.textarea`
 
 const SmallSelect = styled.select`
    padding: 12px;
-   font-size: 16px;
+   font-size: clamp(14px, 2vw, 16px);
+   font-weight: 300;
    border-radius: 4px;
    border: 1px solid #ccc;
    width: 180px;
@@ -458,8 +465,8 @@ const RadioGroup = styled.div`
 `
 
 const Spacer = styled.span`
-   font-size: 16px;
-   font-weight: bold;
+   font-size: clamp(14px, 2vw, 16px);
+   font-weight: 300;
    text-align: center;
    min-width: 20px;
 `
@@ -468,13 +475,14 @@ const SubmitButton = styled.button`
    padding: 12px 20px;
    background-color: #ff7a00;
    color: white;
-   font-size: 16px;
+   font-size: clamp(14px, 2vw, 16px);
+   font-weight: 300;
    border: none;
    border-radius: 5px;
    cursor: pointer;
    margin-top: 20px;
    align-self: center;
-   width: 70%;
+   width: 100%;
 
    &:hover {
       background-color: #e66e00;
