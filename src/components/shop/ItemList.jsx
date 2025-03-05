@@ -176,7 +176,7 @@ const PriceContainer = styled.div`
 `
 
 const ItemPrice = styled.p`
-   font-size: 20px;
+   font-size: clamp(16px, 1vw, 20px);
    font-weight: bold;
 `
 

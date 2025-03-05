@@ -102,11 +102,11 @@ const CreateMingShop = ({ isAuthenticated }) => {
    }
 
    return (
-      <Container maxWidth="lg" sx={{ mt: 6, height: '1000px' }}>
-         <Typography variant="h5" sx={{ fontWeight: 'bold', textAlign: 'left' }}>
+      <Container maxWidth="sm" sx={{ mt: 6, height: '1000px' }}>
+         <Typography variant="h5" sx={{ fontWeight: '300', textAlign: 'left', fontSize: 'clamp(14px, 2vw, 20px)', marginBottom: '10px' }}>
             {isEditing ? '상품 수정' : '새로운 밍샵 상품 등록'}
          </Typography>
-         <Box sx={{ borderBottom: '2px solid orange', width: '100%', mb: 4 }} />
+         <Box sx={{ borderBottom: '2px solid #FF7A00', width: '100%', mb: 4 }} />
 
          {/* 상품명 */}
          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>

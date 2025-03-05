@@ -101,9 +101,13 @@ const BoardList = ({ category }) => {
                )}
                {/* 검색 필터 */}
                <SearchContainer>
-                  <StyledSelect value={searchType} onChange={(e) => setSearchType(e.target.value)}>
-                     <MenuItem value="title">제목</MenuItem>
-                     <MenuItem value="author">작성자</MenuItem>
+                  <StyledSelect style={{ fontSize: 'clamp(14px, 1vw, 16px)' }} value={searchType} onChange={(e) => setSearchType(e.target.value)}>
+                     <MenuItem value="title" style={{ fontSize: 'clamp(14px, 1vw, 16px)' }}>
+                        제목
+                     </MenuItem>
+                     <MenuItem value="author" style={{ fontSize: 'clamp(14px, 1vw, 16px)' }}>
+                        작성자
+                     </MenuItem>
                   </StyledSelect>
                   <StyledInput value={searchKeyword} onChange={(e) => setSearchKeyword(e.target.value)} placeholder="검색어 입력" />
                   <SearchButton onClick={handleSearch}>검색</SearchButton>
@@ -131,7 +135,7 @@ const Header = styled.div`
 `
 const Title = styled.h2`
    font-weight: 300;
-   font-size: 32px;
+   font-size: clamp(14px, 2vw, 20px);
 `
 const WriteButton = styled.button`
    background-color: #ff5733;
@@ -140,7 +144,7 @@ const WriteButton = styled.button`
    border-radius: 20px;
    border: none;
    cursor: pointer;
-   font-size: 14px;
+   font-size: clamp(12px, 1vw, 14px);
    font-weight: bold;
    transition: background-color 0.3s;
    &:hover {
@@ -149,7 +153,7 @@ const WriteButton = styled.button`
 `
 const LoadingText = styled.p`
    text-align: center;
-   font-size: 18px;
+   font-size: clamp(14px, 2vw, 18px);
    color: #666;
 `
 const StyledTableContainer = styled(TableContainer)`
@@ -211,10 +215,11 @@ const StyledInput = styled.input`
    margin: 0 10px;
    border: 1px solid #ccc;
    border-radius: 5px;
-   outline: none; /* 기본 브라우저 포커스 테두리 제거 */
+   outline: none;
+   font-size: clamp(14px, 2vw, 16px);
 
    &:focus {
-      border: 2px solid #aaa !important; /* 포커스 시 테두리 색 변경 */
+      border: 2px solid #aaa !important;
    }
 `
 
@@ -224,10 +229,10 @@ const SearchButton = styled(Button)`
    height: 45px;
    font-weight: 400 !important;
    color: black !important;
-   font-weight: bold;
    padding: 10px 10px;
    border-radius: 5px;
+
    &:hover {
-      background-color: transparent !important; /* 🔥 파란색 배경 제거 */
+      background-color: transparent !important;
    }
 `
