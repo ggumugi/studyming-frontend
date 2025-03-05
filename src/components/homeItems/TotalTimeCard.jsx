@@ -34,7 +34,7 @@ const TotalTimeCard = ({ user, title }) => {
    const totalStudyTime = secondsToTime(totalSeconds)
 
    return (
-      <div className="study-time-card">
+      <div className="study-time-card study-time-last-card">
          <div className="title-container">
             <h3 className="title">{title}</h3>
             <div className="underline"></div>

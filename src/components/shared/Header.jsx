@@ -44,6 +44,13 @@ const Header = ({ isAuthenticated, user }) => {
 
    const [menuOpen, setMenuOpen] = useState(false)
 
+   const [mobileUserOpen, setMobileUserOpen] = useState(false)
+   const mobileUserRef = useRef(null)
+
+   const handleMobileUserClick = () => {
+      setMobileUserOpen(!mobileUserOpen)
+   }
+
    // 알림 데이터 불러오기
    useEffect(() => {
       if (isAuthenticated && user) {
@@ -205,46 +212,104 @@ const Header = ({ isAuthenticated, user }) => {
 
                {/* 로그인한 사용자만 메뉴 표시 */}
                {isAuthenticated && (
-                  <NavMenu $menuOpen={menuOpen}>
-                     <Link to="/study/list">
-                        <NavItem>스터디</NavItem>
-                     </Link>
-                     <Link to="/mingshop">
-                        <NavItem>밍샵</NavItem>
-                     </Link>
-
-                     {/* 게시판 드롭다운 버튼 */}
-                     <NavItemDropdown ref={boardRef}>
-                        <NavItem onClick={handleBoardClick} $isOpen={boardOpen}>
-                           게시판 {boardOpen ? <KeyboardArrowUpIcon style={{ fontSize: 'clamp(14px, 2vw, 20px)' }} /> : <KeyboardArrowDownIcon style={{ fontSize: 'clamp(14px, 2vw, 20px)' }} />}
+                  <>
+                     <NavMenu>
+                        <NavItem>
+                           <Link to="/study/list">스터디</Link>
+                        </NavItem>
+                        <NavItem>
+                           <Link to="/mingshop">밍샵</Link>
                         </NavItem>
 
-                        {/* 게시판 드롭다운 메뉴 */}
-                        {boardOpen && (
-                           <DropdownMenu>
-                              {Object.keys(categoryMap).map((item) => (
-                                 <DropdownItem key={item} onClick={() => handleBoardCategoryClick(item)}>
-                                    {item}
-                                 </DropdownItem>
-                              ))}
-                           </DropdownMenu>
+                        {/* 게시판 드롭다운 */}
+                        <NavItemDropdown>
+                           <NavItem onClick={() => setBoardOpen(!boardOpen)}>게시판 {boardOpen ? <KeyboardArrowUpIcon style={{ fontSize: 'clamp(14px, 2vw, 20px)' }} /> : <KeyboardArrowDownIcon style={{ fontSize: 'clamp(14px, 2vw, 20px)' }} />}</NavItem>
+                           {boardOpen && (
+                              <DropdownMenu>
+                                 <DropdownItem onClick={() => navigate('/board/free')}>자유</DropdownItem>
+                                 <DropdownItem onClick={() => navigate('/board/QnA')}>질문</DropdownItem>
+                                 <DropdownItem onClick={() => navigate('/board/noti')}>정보</DropdownItem>
+                                 <DropdownItem onClick={() => navigate('/board/inquiry')}>문의</DropdownItem>
+                              </DropdownMenu>
+                           )}
+                        </NavItemDropdown>
+                        {/* 관리자만 "관리" 메뉴 표시 */}
+                        {user?.role === 'ADMIN' && (
+                           <Link to="/admin">
+                              <NavItem>관리</NavItem>
+                           </Link>
                         )}
-                     </NavItemDropdown>
+                     </NavMenu>
 
-                     {/* 관리자만 "관리" 메뉴 표시 */}
-                     {user?.role === 'ADMIN' && (
-                        <Link to="/admin">
-                           <NavItem>관리</NavItem>
-                        </Link>
+                     {/* 모바일 메뉴 */}
+                     {menuOpen && (
+                        <MobileMenu>
+                           {/* 닫기 버튼 */}
+                           <CloseButton onClick={() => setMenuOpen(false)}>✖</CloseButton>
+
+                           {/* 유저 정보 (스터디 위) */}
+                           <MobileUserContainer>
+                              <MobileUserDropdown ref={mobileUserRef}>
+                                 <MobileUserMenu onClick={handleMobileUserClick} $isOpen={mobileUserOpen}>
+                                    {user?.nickname} 님 {mobileUserOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                                 </MobileUserMenu>
+
+                                 {/* 사용자 드롭다운 메뉴 */}
+                                 {mobileUserOpen && (
+                                    <MobileUserDropdownMenu>
+                                       <DropdownItem onClick={() => navigate('/mypage')}>내 프로필</DropdownItem>
+                                       <DropdownItem onClick={() => navigate('/info')}>내 정보</DropdownItem>
+                                       <DropdownItem onClick={() => navigate('/items')}>내 아이템</DropdownItem>
+                                       <DropdownItem onClick={() => navigate('/payment')}>결제 및 밍 내역</DropdownItem>
+                                       <DropdownItem style={{ color: 'red' }}>회원 탈퇴</DropdownItem>
+                                    </MobileUserDropdownMenu>
+                                 )}
+                              </MobileUserDropdown>
+                           </MobileUserContainer>
+
+                           {/* 기존 메뉴 */}
+                           <NavItem>
+                              <Link to="/study/list">스터디</Link>
+                           </NavItem>
+                           <NavItem>
+                              <Link to="/mingshop">밍샵</Link>
+                           </NavItem>
+
+                           {/* 게시판 드롭다운 */}
+                           <NavItemDropdown>
+                              <NavItem onClick={handleBoardClick}>게시판 {boardOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}</NavItem>
+                              {boardOpen && (
+                                 <DropdownMenu>
+                                    {Object.keys(categoryMap).map((item) => (
+                                       <DropdownItem key={item} onClick={() => handleBoardCategoryClick(item)}>
+                                          {item}
+                                       </DropdownItem>
+                                    ))}
+                                 </DropdownMenu>
+                              )}
+                           </NavItemDropdown>
+
+                           {/* 관리자 메뉴 (관리자만 보임) */}
+                           {user?.role === 'ADMIN' && (
+                              <NavItem>
+                                 <Link to="/admin">관리</Link>
+                              </NavItem>
+                           )}
+
+                           {/* 로그아웃 버튼 */}
+                           <NavItem onClick={handleLogout}>로그아웃</NavItem>
+                        </MobileMenu>
                      )}
-                  </NavMenu>
+                  </>
                )}
             </LeftSection>
 
             {/* 햄버거 메뉴 (모바일 전용) */}
-            <HamburgerMenu onClick={() => setMenuOpen(!menuOpen)}>
-               <RxHamburgerMenu size={30} />
-            </HamburgerMenu>
+            {isAuthenticated && (
+               <HamburgerMenu onClick={() => setMenuOpen(!menuOpen)}>
+                  <RxHamburgerMenu size={30} />
+               </HamburgerMenu>
+            )}
 
             {/* 오른쪽 영역: 알림 아이콘 + 유저 메뉴 + 로그아웃 버튼 */}
             <RightSection>
@@ -666,4 +731,67 @@ const MessageContent = styled.div`
    line-height: 1.5;
    min-height: 100px;
    white-space: pre-wrap;
+`
+const MobileMenu = styled.div`
+   position: fixed;
+   top: 0;
+   left: 0;
+   width: 100%;
+   height: 100vh;
+   background: orange;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   z-index: 100;
+`
+
+const CloseButton = styled.div`
+   position: absolute;
+   top: 20px;
+   right: 20px;
+   font-size: 24px;
+   cursor: pointer;
+   color: white;
+`
+// 모바일 전용 유저 정보 스타일
+const MobileUserContainer = styled.div`
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   width: 100%;
+   padding: 15px;
+   background-color: white;
+   border-bottom: 1px solid #ddd;
+   position: relative;
+   z-index: 101;
+`
+
+const MobileUserDropdown = styled.div`
+   position: relative;
+   width: 100%;
+   text-align: center;
+`
+
+const MobileUserMenu = styled.div`
+   font-size: 16px;
+   font-weight: 600;
+   color: ${(props) => (props.$isOpen ? '#ff7f00' : '#000')};
+   cursor: pointer;
+   padding: 10px;
+   &:hover {
+      color: #ff7f00;
+   }
+`
+
+const MobileUserDropdownMenu = styled.div`
+   width: 100%;
+   background-color: white;
+   border-radius: 5px;
+   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+   padding: 5px 0;
+   text-align: center;
+   margin-top: 10px;
+   position: relative;
+   animation: slideDown 0.3s ease-in-out;
 `
