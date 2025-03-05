@@ -83,6 +83,11 @@ const Signup = () => {
          newErrors.confirmPassword = '비밀번호가 일치하지 않습니다.'
       }
 
+      // ✅ 닉네임 길이 검사 (최대 6자)
+      if (formData.nickname && formData.nickname.length > 6) {
+         newErrors.nickname = '닉네임은 최대 6자까지만 가능합니다.'
+      }
+
       setErrors(newErrors)
       return Object.keys(newErrors).length === 0
    }
