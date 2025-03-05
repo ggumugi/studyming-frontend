@@ -147,6 +147,7 @@ const Header = styled.div`
 `
 
 const OutButton = styled.button`
+   margin-left: 10px;
    background-color: #ff5733;
    color: white;
    padding: 10px 20px;

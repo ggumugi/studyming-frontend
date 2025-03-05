@@ -5,12 +5,8 @@ import { TextField, Button, Typography } from '@mui/material'
 import { createPostThunk, updatePostThunk } from '../../features/postSlice'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { useLocation } from 'react-router-dom'
 
 const BoardCreate = ({ user, category, onSubmit, initialValues = {} }) => {
-   console.log('initialValues', initialValues)
-   // const location = useLocation()
-   // const initialValues = location.state || {} // 글쓰기 버튼에서 넘겨준 state 값이 없으면 빈 객체 설정
    const dispatch = useDispatch()
    const navigate = useNavigate()
    const [title, setTitle] = useState('')

@@ -359,9 +359,10 @@ const FormContainer = styled.div`
 `
 
 const Title = styled.h2`
-   font-weight: bold;
+   font-weight: 300;
    text-align: left;
    color: black;
+   font-size: clamp(14px, 2vw, 20px);
 `
 
 const StyledDivider = styled.div`
@@ -387,6 +388,10 @@ const StyledTextField = styled(TextField)`
    width: 100%;
    &.MuiTextField-root {
       margin-bottom: 20px;
+   }
+
+   label {
+      font-size: clamp(12px, 1vw, 14px);
    }
 `
 

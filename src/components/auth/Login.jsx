@@ -239,7 +239,7 @@ const Wrapper = styled.div`
    display: flex;
    justify-content: center;
    align-items: center;
-   height: 100vh;
+   height: 100%;
    background-color: transparent; /* 배경색 제거 */
 `
 
@@ -251,19 +251,19 @@ const FormContainer = styled.div`
 `
 
 const Title = styled.h2`
-   font-size: 32px;
+   font-size: clamp(14px, 2vw, 20px);
+   font-weight: 300;
    margin-bottom: 8px;
    color: black; /* 검정색으로 변경 */
 `
 
 const StyledDivider = styled.div`
    width: 100%;
-   height: 3px;
+   height: 2px;
    background-color: #ff7a00;
    display: flex; /* Flex 적용 */
-   min-height: 3px; /* 최소 높이 강제 적용 */
    margin-top: 10px; /* 로그인 제목과의 간격 */
-   margin-bottom: 40px; /* 주황색 줄과 입력 필드 간 간격 증가 */
+   margin-bottom: 30px; /* 주황색 줄과 입력 필드 간 간격 증가 */
 `
 
 const InputWrapper = styled.div`
@@ -286,6 +286,10 @@ const StyledTextField = styled(TextField)`
       display: block;
       text-align: right;
    }
+
+   label {
+      font-size: clamp(14px, 2vw, 18px);
+   }
 `
 
 const RememberMeWrapper = styled.div`
@@ -298,7 +302,7 @@ const StyledButton = styled(Button)`
    height: 60px;
    background-color: #ff7a00 !important;
    color: white !important;
-   font-size: 18px;
+   font-size: clamp(14px, 2vw, 18px);
    padding: 10px;
    margin-bottom: 30px; /* 🔥 로그인 버튼과 아이디 찾기 간 간격 조정 */
    border-radius: 10px !important;
@@ -311,7 +315,7 @@ const FindLinks = styled.div`
    gap: 20px; /* 🔥 각 항목 간 간격 증가 */
    margin-top: 60px;
    margin-bottom: 30px; /* 🔥 SNS 로그인과의 간격 조정 */
-   font-size: 16px;
+   font-size: clamp(14px, 2vw, 16px);
 `
 
 const LinkText = styled(Link)`
@@ -329,7 +333,7 @@ const StyledDividerText = styled.div`
    max-width: 650px;
    margin: 40px 0 30px; /* SNS 로그인 선 간격 조정 */
    color: gray;
-   font-size: 14px;
+   font-size: clamp(12px, 1vw, 14px);
    font-weight: 500;
    position: relative;
 `

@@ -199,9 +199,9 @@ const SearchContainer = styled.div`
    display: flex;
    justify-content: center;
    align-items: center;
-   margin-top: 20px;
+   margin-top: 50px;
    @media (max-width: 965px) {
-      margin-bottom: 100px;
+      margin-bottom: 120px;
    }
 `
 const StyledSelect = styled(Select)`
