@@ -10,16 +10,13 @@ const Ejection = ({ isOpen, onClose, groupId }) => {
 
    useEffect(() => {
       if (isOpen) {
-         console.log('🔥 강퇴 모달 열림, 그룹 멤버 데이터 로드 중...')
          dispatch(fetchGroupMembersThunk(groupId))
       }
    }, [isOpen, dispatch, groupId])
 
    if (!isOpen) return null // 모달이 열리지 않으면 렌더링 안 함
-   console.log('groupmembers', groupmembers)
    // ✅ 방장 제외한 멤버 필터링
    const membersToKick = groupmembers.filter((member) => member.role !== 'leader')
-   console.log('membersToKick', membersToKick)
    // ✅ 멤버 강퇴 처리
    const handleKickMember = (userId, nickname) => {
       if (!selectedMember) {

@@ -63,21 +63,23 @@ const Timer = () => {
    // 타이머 실행
    useEffect(() => {
       const interval = setInterval(() => {
-         setTime((prevTime) => {
-            const newTime = prevTime + 1
-            // Redux 상태도 업데이트
-            dispatch(
-               updateCurrentTime({
-                  seconds: newTime,
-                  formatted: formatTime(newTime),
-               })
-            )
-            return newTime
-         })
+         setTime((prevTime) => prevTime + 1)
       }, 1000)
 
       return () => clearInterval(interval)
-   }, [dispatch])
+   }, [])
+
+   // 10초마다 Redux 상태 업데이트 (필요한 경우)
+   useEffect(() => {
+      if (time % 30 === 0 && time > 0) {
+         dispatch(
+            updateCurrentTime({
+               seconds: time,
+               formatted: formatTime(time),
+            })
+         )
+      }
+   }, [time, dispatch])
 
    // 10분(600초) 간격으로 타이머 정보 저장
    useEffect(() => {

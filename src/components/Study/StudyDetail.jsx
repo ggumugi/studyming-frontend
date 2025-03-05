@@ -20,6 +20,9 @@ const StudyDetail = ({ isAuthenticated, user }) => {
    const [password, setPassword] = useState('')
    const [passwordError, setPasswordError] = useState('')
 
+   // 입장 주의사항 모달 상태 추가
+   const [showEnterWarningModal, setShowEnterWarningModal] = useState(false)
+
    // 스터디 그룹 데이터 불러오기
    useEffect(() => {
       if (!isAuthenticated) {
@@ -105,13 +108,21 @@ const StudyDetail = ({ isAuthenticated, user }) => {
          })
    }
 
-   // 스터디 입장 버튼 클릭 시
+   // 스터디 입장 버튼 클릭 시 - 주의사항 모달 표시
    const handleStudyEnterClick = () => {
       if (!isAuthenticated) {
          alert('로그인이 필요합니다.')
          navigate('/login')
          return
       }
+
+      // 주의사항 모달 표시
+      setShowEnterWarningModal(true)
+   }
+
+   // 주의사항 확인 후 입장 처리
+   const handleConfirmEnter = () => {
+      setShowEnterWarningModal(false)
 
       dispatch(participateInGroupThunk({ groupId: id, status: 'on' })) // 참여 상태 업데이트 API 요청
          .unwrap()
@@ -149,6 +160,11 @@ const StudyDetail = ({ isAuthenticated, user }) => {
       setShowPasswordModal(false)
       setPassword('')
       setPasswordError('')
+   }
+
+   // 주의사항 모달 닫기
+   const handleCloseWarningModal = () => {
+      setShowEnterWarningModal(false)
    }
 
    return (
@@ -250,6 +266,27 @@ const StudyDetail = ({ isAuthenticated, user }) => {
                            <ModalSubmitButton onClick={handlePasswordSubmit}>확인</ModalSubmitButton>
                         </ModalButtonGroup>
                      </ModalContent>
+                  </ModalOverlay>
+               )}
+
+               {/* 스터디 입장 주의사항 모달 */}
+               {showEnterWarningModal && (
+                  <ModalOverlay>
+                     <WarningModalContent>
+                        <WarningIcon>⚠️</WarningIcon>
+                        <ModalTitle>스터디 입장 시 주의사항</ModalTitle>
+                        <WarningMessage>
+                           나가기 버튼을 이용하지 않고 비정상적인 방법으로 그룹을 퇴장하실 경우
+                           <HighlightText>타이머가 정상 작동하지 않을 수 있습니다.</HighlightText>
+                        </WarningMessage>
+                        <WarningSubMessage>
+                           스터디룸을 떠날 때는 반드시 화면 우측 상단의 <HighlightText>나가기</HighlightText> 버튼을 사용해 주세요.
+                        </WarningSubMessage>
+                        <ModalButtonGroup>
+                           <ModalCancelButton onClick={handleCloseWarningModal}>취소</ModalCancelButton>
+                           <ModalSubmitButton onClick={handleConfirmEnter}>확인했습니다</ModalSubmitButton>
+                        </ModalButtonGroup>
+                     </WarningModalContent>
                   </ModalOverlay>
                )}
             </Wrapper>
@@ -503,4 +540,35 @@ const ModalSubmitButton = styled.button`
    &:hover {
       background-color: #e66e00;
    }
+`
+
+const WarningModalContent = styled(ModalContent)`
+   max-width: 450px;
+   padding: 35px;
+`
+
+const WarningIcon = styled.div`
+   font-size: 40px;
+   margin-bottom: 15px;
+`
+
+const WarningMessage = styled.p`
+   font-size: 16px;
+   line-height: 1.6;
+   color: #333;
+   margin-bottom: 15px;
+   text-align: center;
+`
+
+const WarningSubMessage = styled.p`
+   font-size: 14px;
+   line-height: 1.5;
+   color: #666;
+   margin-bottom: 20px;
+   text-align: center;
+`
+
+const HighlightText = styled.span`
+   color: #ff5733;
+   font-weight: 500;
 `

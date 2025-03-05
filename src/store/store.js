@@ -17,6 +17,7 @@ import groupmemberSliceReducer from '../features/groupmemberSlice'
 import timeReducer from '../features/timeSlice'
 import screenShareReducer from '../features/screenShareSlice'
 import grouptimeReducer from '../features/grouptimeSlice'
+import notiReducer from '../features/notiSlice'
 
 const store = configureStore({
    reducer: {
@@ -37,6 +38,7 @@ const store = configureStore({
       time: timeReducer,
       screenShare: screenShareReducer,
       grouptime: grouptimeReducer,
+      noti: notiReducer,
    },
 })
 

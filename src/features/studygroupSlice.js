@@ -74,7 +74,6 @@ const studygroupSlice = createSlice({
          })
          .addCase(fetchStudygroupsThunk.fulfilled, (state, action) => {
             state.loading = false
-            console.log(action.payload, '11')
             state.studygroups = action.payload.studygroups
          })
          .addCase(fetchStudygroupsThunk.rejected, (state, action) => {

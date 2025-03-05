@@ -5,7 +5,6 @@ import { createGroupMember, deleteGroupMember, updateGroupMember, getGroupMember
 export const fetchGroupMembersThunk = createAsyncThunk('groupmembers/fetchAll', async (groupId, { rejectWithValue }) => {
    try {
       const response = await getGroupMembers(groupId)
-      console.log('response.data:', response.data)
       return response.data // 그룹 멤버 데이터를 반환
    } catch (error) {
       return rejectWithValue(error.response?.data?.message || '그룹 멤버 목록 불러오기 실패')
