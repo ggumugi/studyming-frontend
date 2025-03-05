@@ -48,7 +48,7 @@ const BoardList = ({ category }) => {
    } // 벤실험 코드
    useEffect(() => {
       dispatch(fetchPostsThunk({ page, category, limit: rowsPerPage, searchType, searchKeyword }))
-   }, [dispatch, page, category, rowsPerPage, searchType, searchKeyword])
+   }, [dispatch, page, category, rowsPerPage, searchType])
    const handleChangePage = (event, newPage) => {
       setPage(newPage)
    }

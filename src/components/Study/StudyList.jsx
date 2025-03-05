@@ -322,10 +322,10 @@ const StudyList = () => {
          </TitleWrapper>
          <StyledDivider />
          <StudyContainer2>
-            {currentAllStudies.length === 0 && searchTerm ? ( // ✅ 검색 결과가 없을 경우
+            {filteredStudies.length === 0 && searchTerm ? ( // ✅ 검색 결과가 없을 경우
                <Message>일치하는 스터디 그룹이 없습니다.</Message>
             ) : (
-               currentAllStudies.map(
+               filteredStudies.map(
                   (
                      study // ✅ 현재 페이지의 스터디만 표시
                   ) => (
@@ -578,15 +578,12 @@ const SearchButton = styled.button`
    border: none;
    border-radius: 4px;
    cursor: pointer;
-<<<<<<< HEAD
    font-size: 14px;
    white-space: nowrap; /* ✅ 텍스트 줄바꿈 방지 */
    min-width: 60px; /* ✅ 너무 작아지지 않도록 설정 */
    flex-shrink: 0; /* ✅ 버튼 크기 유지 */
    width: auto; /* ✅ 텍스트 크기에 맞게 버튼 크기 자동 조정 */
-=======
    font-size: clamp(12px, 1vw, 14px);
->>>>>>> 2ead971e06cefb3f9fb8552c5719c8875e242f3b
    &:hover {
       background-color: #ff7a00;
    }
