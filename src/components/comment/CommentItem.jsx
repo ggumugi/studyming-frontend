@@ -132,6 +132,8 @@ const CommentItem = () => {
          })
    }
 
+   const isAnyCommentSelected = comments.some((comment) => comment.selected) // ✅ 이미 채택된 댓글이 있는지 확인
+
    //페이징 버튼 함수
    useEffect(() => {
       if (postId) {
@@ -217,7 +219,13 @@ const CommentItem = () => {
                      <CancelButton onClick={() => setIsEditing(null)}>취소</CancelButton>
                   ) : (
                      <>
-                        {post?.userId && user?.id === post.userId && user?.id !== comment.userId && !comment.selected && <SelectButton onClick={() => handleSelectComment(comment.id)}>채택</SelectButton>}
+                        {post?.userId &&
+                           user?.id === post.userId &&
+                           user?.id !== comment.userId &&
+                           !comment.selected &&
+                           !isAnyCommentSelected && ( // ✅ 이미 채택된 댓글이 있으면 다른 댓글에 채택 버튼 안 보이게 함
+                              <SelectButton onClick={() => handleSelectComment(comment.id)}>채택</SelectButton>
+                           )}
                         {/* ✅ 로그인한 유저 본인의 댓글만 수정/삭제 가능 */}
                         {user?.id === comment.userId && (
                            <>
