@@ -381,7 +381,8 @@ const Label = styled.label`
 
 /* 다시 보기 */
 const LabelText = styled.span`
-   flex: 0 0 150px; /* 고정 너비 설정 */
+   flex: 0 0 clamp(50px, 5vw, 150px);
+
    text-align: left; /* 왼쪽 정렬 */
 `
 
