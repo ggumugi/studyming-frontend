@@ -1,5 +1,27 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { signupUser, loginUser, checkIdDuplicate, checkNicknameDuplicate, logoutUser, checkAuthStatus, sendVerificationCode, verifyCodeAndFindId, checkIdExists, checkEmailMatches, updatePassword, googleLoginApi, verifyCodepw, kakaoLoginApi, getKakaoUserInfo, fetchUsers } from '../api/authApi' // ✅ 수정된 API
+import {
+   signupUser,
+   loginUser,
+   checkIdDuplicate,
+   checkNicknameDuplicate,
+   logoutUser,
+   checkAuthStatus,
+   sendVerificationCode,
+   verifyCodeAndFindId,
+   checkIdExists,
+   checkEmailMatches,
+   updatePassword,
+   googleLoginApi,
+   verifyCodepw,
+   kakaoLoginApi,
+   getKakaoUserInfo,
+   fetchUsers,
+   verifyPassword,
+   getUserInfo,
+   updateUserInfo,
+   connectSnsAccount,
+   deleteAccount,
+} from '../api/authApi' // ✅ 수정된 API
 
 // 회원가입
 export const signupUserThunk = createAsyncThunk('auth/signupUser', async (userData, { rejectWithValue }) => {
@@ -170,6 +192,62 @@ export const fetchUsersThunk = createAsyncThunk('auth/fetchUsers', async (_, { r
       return users
    } catch (error) {
       return rejectWithValue(error.message || '회원 목록 불러오기 실패')
+   }
+})
+
+// 비밀번호 검증 Thunk
+export const verifyPasswordThunk = createAsyncThunk('auth/checkPassword', async (password, { rejectWithValue }) => {
+   try {
+      const response = await verifyPassword(password) // API 호출
+      return response // 성공 시 응답 반환
+   } catch (error) {
+      return rejectWithValue(error.response?.data?.message || '비밀번호 검증 실패')
+   }
+})
+
+// 사용자 정보 가져오기
+export const getUserInfoThunk = createAsyncThunk('auth/getUserInfo', async (_, { rejectWithValue }) => {
+   try {
+      const response = await getUserInfo()
+      return response
+   } catch (error) {
+      return rejectWithValue(error.message || '사용자 정보 조회 실패')
+   }
+})
+
+// 사용자 정보 업데이트
+export const updateUserInfoThunk = createAsyncThunk('auth/updateUserInfo', async (userData, { rejectWithValue }) => {
+   try {
+      const response = await updateUserInfo(userData)
+      return response
+   } catch (error) {
+      return rejectWithValue(error.message || '사용자 정보 업데이트 실패')
+   }
+})
+
+// SNS 계정 연동 Thunk
+export const connectSnsAccountThunk = createAsyncThunk('auth/connectSnsAccount', async (data, { rejectWithValue }) => {
+   try {
+      const response = await connectSnsAccount(data)
+      return response
+   } catch (error) {
+      console.error('❌ SNS 계정 연동 실패:', error)
+      return rejectWithValue(error || 'SNS 계정 연동 중 오류가 발생했습니다.')
+   }
+})
+
+// 회원 탈퇴 Thunk
+export const deleteAccountThunk = createAsyncThunk('auth/deleteAccount', async (_, { rejectWithValue, dispatch }) => {
+   try {
+      const response = await deleteAccount()
+
+      // 로그아웃 상태로 설정
+      dispatch(logout())
+
+      return response
+   } catch (error) {
+      console.error('회원 탈퇴 실패:', error)
+      return rejectWithValue(error?.message || '회원 탈퇴 중 오류가 발생했습니다.')
    }
 })
 
@@ -417,6 +495,109 @@ const authSlice = createSlice({
          .addCase(fetchUsersThunk.rejected, (state, action) => {
             state.loading = false // 로딩 완료
             state.error = action.payload // 오류 메시지 저장
+         })
+      // 비밀번호 확인
+      builder
+         .addCase(verifyPasswordThunk.pending, (state) => {
+            state.loading = true
+            state.error = null
+         })
+         .addCase(verifyPasswordThunk.fulfilled, (state, action) => {
+            state.loading = false
+            state.successMessage = action.payload.message // 비밀번호 검증 성공 메시지
+         })
+         .addCase(verifyPasswordThunk.rejected, (state, action) => {
+            state.loading = false
+            state.error = action.payload // 에러 메시지
+         })
+      // 사용자 정보 조회
+      builder
+         .addCase(getUserInfoThunk.pending, (state) => {
+            state.loading = true
+            state.error = null
+         })
+         .addCase(getUserInfoThunk.fulfilled, (state, action) => {
+            state.loading = false
+            state.userDetails = action.payload
+         })
+         .addCase(getUserInfoThunk.rejected, (state, action) => {
+            state.loading = false
+            state.error = action.payload
+         })
+
+      // 사용자 정보 업데이트
+      builder
+         .addCase(updateUserInfoThunk.pending, (state) => {
+            state.loading = true
+            state.error = null
+         })
+         .addCase(updateUserInfoThunk.fulfilled, (state, action) => {
+            state.loading = false
+            state.user = {
+               ...state.user,
+               ...action.payload.user,
+            }
+            state.userDetails = {
+               ...state.userDetails,
+               ...action.payload.user,
+            }
+            state.successMessage = action.payload.message
+         })
+         .addCase(updateUserInfoThunk.rejected, (state, action) => {
+            state.loading = false
+            state.error = action.payload
+         })
+      // SNS 계정 연결
+      builder
+         .addCase(connectSnsAccountThunk.pending, (state) => {
+            state.loading = true
+            state.error = null
+            state.successMessage = null
+         })
+         .addCase(connectSnsAccountThunk.fulfilled, (state, action) => {
+            state.loading = false
+            state.successMessage = action.payload.message
+
+            // 중요: user 객체 업데이트
+            if (action.payload.user) {
+               state.user = {
+                  ...state.user,
+                  ...action.payload.user,
+               }
+            } else {
+               // 서버에서 user 객체를 반환하지 않는 경우를 대비
+               if (action.meta.arg.type === 'google') {
+                  state.user = {
+                     ...state.user,
+                     google: true,
+                  }
+               } else if (action.meta.arg.type === 'kakao') {
+                  state.user = {
+                     ...state.user,
+                     kakao: true,
+                  }
+               }
+            }
+         })
+         .addCase(connectSnsAccountThunk.rejected, (state, action) => {
+            state.loading = false
+            state.error = action.payload
+         })
+      // 회원 탈퇴
+      builder
+         .addCase(deleteAccountThunk.pending, (state) => {
+            state.loading = true
+            state.error = null
+         })
+         .addCase(deleteAccountThunk.fulfilled, (state) => {
+            state.loading = false
+            state.user = null
+            state.isAuthenticated = false
+            // 로그아웃 상태로 설정
+         })
+         .addCase(deleteAccountThunk.rejected, (state, action) => {
+            state.loading = false
+            state.error = action.payload
          })
    },
 })
