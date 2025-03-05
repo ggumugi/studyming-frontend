@@ -5,8 +5,12 @@ import { TextField, Button, Typography } from '@mui/material'
 import { createPostThunk, updatePostThunk } from '../../features/postSlice'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 
 const BoardCreate = ({ user, category, onSubmit, initialValues = {} }) => {
+   console.log('initialValues', initialValues)
+   // const location = useLocation()
+   // const initialValues = location.state || {} // 글쓰기 버튼에서 넘겨준 state 값이 없으면 빈 객체 설정
    const dispatch = useDispatch()
    const navigate = useNavigate()
    const [title, setTitle] = useState('')
@@ -32,10 +36,18 @@ const BoardCreate = ({ user, category, onSubmit, initialValues = {} }) => {
 
    // 기존 게시글이 있다면 (수정 모드), 초기값 설정
    useEffect(() => {
-      if (initialValues) {
-         setTitle(initialValues.title)
-         setContent(initialValues.content)
+      if (initialValues && Object.keys(initialValues).length > 0) {
+         // 기존 게시글 수정 모드
+         setTitle(initialValues.title || '')
+         setContent(initialValues.content || '')
          setImages(initialValues.Images || [])
+      } else {
+         // 새로운 글쓰기 모드 -> 기존 값 초기화
+         setTitle('')
+         setContent('')
+         setImages([])
+         setImageFiles([])
+         setRemovedImages([])
       }
    }, [initialValues])
 
