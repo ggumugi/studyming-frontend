@@ -3,9 +3,10 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Select, MenuItem, Button, Pagination } from '@mui/material'
-import { fetchPostsThunk } from '../../features/postSlice'
+import { fetchPostsThunk, resetPost } from '../../features/postSlice'
 import Report from '../shared/Report' // 벤실험 코드
 import { submitReport } from '../../features/bannedSlice'
+
 const BoardList = ({ category }) => {
    const dispatch = useDispatch()
    const selectedCategory = useSelector((state) => state.posts.category)
@@ -59,7 +60,16 @@ const BoardList = ({ category }) => {
          {/* :흰색_확인_표시: 게시판 제목 + 글쓰기 버튼 */}
          <Header>
             <Title>{reverseCategoryMap[category]} 게시판</Title>
-            {(selectedCategory !== 'noti' || user?.role === 'ADMIN') && <WriteButton onClick={() => navigate('/board/create')}>글쓰기</WriteButton>}
+            {(selectedCategory !== 'noti' || user?.role === 'ADMIN') && (
+               <WriteButton
+                  onClick={() => {
+                     dispatch(resetPost()) // ✅ Redux에서 기존 post 초기화
+                     navigate('/board/create', { state: {} })
+                  }}
+               >
+                  글쓰기
+               </WriteButton>
+            )}
          </Header>
          {loading ? (
             <LoadingText>로딩 중...</LoadingText>
@@ -76,18 +86,21 @@ const BoardList = ({ category }) => {
                         </StyledTableRow>
                      </TableHead>
                      <TableBody>
-                        {posts.map((post) => (
-                           <StyledTableRow key={post.id}>
-                              <StyledTableCell>{post.id}</StyledTableCell>
-                              <StyledTableCell onClick={() => navigate(`/board/detail/${post.id}`)} style={{ cursor: 'pointer' }}>
-                                 {post.title}
-                              </StyledTableCell>
-                              <StyledTableCell onClick={() => handleOpenReport(post.User)} style={{ cursor: 'pointer', color: 'blue', textDecoration: 'underline' }} /*벤실험 코드 */>
-                                 {post?.User?.nickname}
-                              </StyledTableCell>
-                              <StyledTableCell>{new Date(post.createdAt).toLocaleDateString()}</StyledTableCell>
-                           </StyledTableRow>
-                        ))}
+                        {posts.map((post, index) => {
+                           const totalPosts = pagination.totalPosts // 현재 페이지의 마지막 번호
+                           return (
+                              <StyledTableRow key={post.id}>
+                                 <StyledTableCell>{totalPosts - ((page - 1) * rowsPerPage + index)}</StyledTableCell>
+                                 <StyledTableCell onClick={() => navigate(`/board/detail/${post.id}`)} style={{ cursor: 'pointer' }}>
+                                    {post.title}
+                                 </StyledTableCell>
+                                 <StyledTableCell onClick={() => handleOpenReport(post.User)} style={{ cursor: 'pointer', color: 'blue', textDecoration: 'underline' }} /*벤실험 코드 */>
+                                    {post?.User?.nickname}
+                                 </StyledTableCell>
+                                 <StyledTableCell>{new Date(post.createdAt).toLocaleDateString()}</StyledTableCell>
+                              </StyledTableRow>
+                           )
+                        })}
                      </TableBody>
                   </StyledTable>
                </StyledTableContainer>

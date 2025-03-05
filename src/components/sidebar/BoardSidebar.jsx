@@ -37,7 +37,7 @@ const BoardSidebar = () => {
                {Object.keys(categoryMap).map((item) => (
                   <MenuItem key={item} $isActive={categoryMap[item] === selectedCategory} onClick={() => handleCategoryClick(item)}>
                      <StyledButton>{item}</StyledButton>
-                     {console.log('item1', item)}
+
                      {categoryMap[item] === selectedCategory && <ActiveIndicator />}
                   </MenuItem>
                ))}
