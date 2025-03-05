@@ -14,7 +14,6 @@ export const getGrouptime = async (groupId) => {
 // 타이머 정보 업데이트
 export const updateGrouptime = async (groupId, time) => {
    try {
-      console.log(`타이머 정보 업데이트 API 호출: 그룹 ID ${groupId}, 시간 ${time}`)
       const response = await studymingApi.put(`/grouptime/${groupId}`, { time })
       return response
    } catch (error) {

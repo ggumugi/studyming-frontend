@@ -1,7 +1,8 @@
+// components/studyGroup/ScreenShare.jsx
 import React, { useEffect, useState, useRef } from 'react'
 import { JitsiMeeting } from '@jitsi/react-sdk'
 import { useDispatch, useSelector } from 'react-redux'
-import { updateGroupMemberThunk, participateInGroupThunk } from '../../features/groupmemberSlice'
+import { updateGroupMemberThunk } from '../../features/groupmemberSlice'
 import styled from 'styled-components'
 
 const ScreenShare = ({ studygroup, groupmembers }) => {
@@ -11,27 +12,18 @@ const ScreenShare = ({ studygroup, groupmembers }) => {
    const [isScreenSharing, setIsScreenSharing] = useState(false)
    const [statusMessage, setStatusMessage] = useState('')
    const jitsiIframeRef = useRef(null)
-   const localStreamRef = useRef(null) // 로컬 캠 스트림을 저장할 참조
+
+   // 데이터가 없을 때 안전하게 처리
+   const safeGroupmembers = groupmembers || []
 
    // 현재 사용자의 그룹 멤버 정보 찾기
-   const currentMember = groupmembers?.find((member) => member.userId === user?.id)
-
-   const leaderMember = groupmembers?.find((member) => member.role === 'leader')
+   const currentMember = safeGroupmembers.find((member) => member.userId === user?.id)
+   const leaderMember = safeGroupmembers.find((member) => member.role === 'leader')
 
    // 그룹 ID를 회의실 ID로 사용
    const roomName = `studyming_${studygroup?.id}_room`
 
    useEffect(() => {
-      // 참가자 상태를 'on'으로 설정
-      if (currentMember && currentMember.status !== 'on') {
-         dispatch(
-            participateInGroupThunk({
-               groupId: studygroup.id,
-               status: 'on',
-            })
-         )
-      }
-
       // 컴포넌트 언마운트 시 화면 공유 상태 초기화
       return () => {
          if (currentMember && currentMember.shareState) {
@@ -43,18 +35,8 @@ const ScreenShare = ({ studygroup, groupmembers }) => {
                })
             )
          }
-
-         // 참가자 상태를 'off'로 설정
-         if (currentMember && currentMember.status === 'on') {
-            dispatch(
-               participateInGroupThunk({
-                  groupId: studygroup.id,
-                  status: 'off',
-               })
-            )
-         }
       }
-   }, [currentMember, dispatch, studygroup.id, user.id])
+   }, [currentMember, dispatch, studygroup?.id, user?.id])
 
    const handleApiReady = (apiObj) => {
       setApi(apiObj)
@@ -192,114 +174,107 @@ const ScreenShare = ({ studygroup, groupmembers }) => {
       }
    }
 
+   // 데이터가 로드되지 않았을 때 로딩 표시
+   if (!studygroup || !groupmembers) {
+      return <LoadingContainer>데이터를 불러오는 중입니다...</LoadingContainer>
+   }
+
    return (
-      <Container>
-         <MeetingContainer>
-            {statusMessage && <StatusMessage>{statusMessage}</StatusMessage>}
+      <MeetingContainer>
+         {statusMessage && <StatusMessage>{statusMessage}</StatusMessage>}
 
-            <JitsiMeeting
-               domain="meet.jit.si"
-               roomName={roomName}
-               configOverwrite={{
-                  startWithAudioMuted: true,
-                  startWithVideoMuted: true,
-                  prejoinPageEnabled: false,
-                  disableDeepLinking: true,
-                  disableInitialGUM: true,
-                  toolbarButtons: [
-                     'microphone',
-                     'camera',
-                     'desktop', // 화면 공유 버튼 추가
-                     'hangup',
-                     'participants-pane',
-                     'settings',
-                  ],
-                  desktopSharingEnabled: true,
-                  desktopSharingChromeEnabled: true,
-                  desktopSharingFirefoxEnabled: true,
-                  enableInsecureRoomNameWarning: false,
-                  desktopSharingFrameRate: {
-                     min: 5,
-                     max: 30,
-                  },
-                  hideConferenceSubject: true,
-                  hideConferenceTimer: false,
-                  defaultLocalDisplayName: user?.nickname || '사용자',
-                  watermark: {
-                     enabled: false,
-                     logo: '',
-                  },
-                  backgroundColor: '#000000',
-               }}
-               interfaceConfigOverwrite={{
-                  DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
-                  SHOW_JITSI_WATERMARK: false,
-                  SHOW_WATERMARK_FOR_GUESTS: false,
-                  DEFAULT_BACKGROUND: '#000000',
-                  DEFAULT_LOCAL_DISPLAY_NAME: user?.nickname || '사용자',
-                  TOOLBAR_BUTTONS: [
-                     'microphone',
-                     'camera',
-                     'desktop', // 화면 공유 버튼 추가
-                     'hangup',
-                     'participants-pane',
-                  ],
-                  SHARING_FEATURES: ['desktop'],
-                  SETTINGS_SECTIONS: ['devices', 'language', 'moderator'],
-                  DESKTOP_SHARING_ENABLE_LOCALHOST: true,
-               }}
-               userInfo={{
-                  displayName: user?.nickname || '사용자',
-               }}
-               onApiReady={handleApiReady}
-               getIFrameRef={(iframeRef) => {
-                  if (iframeRef) {
-                     jitsiIframeRef.current = iframeRef
-                     iframeRef.style.height = '600px'
-                     iframeRef.style.backgroundColor = '#000000'
+         <JitsiMeeting
+            domain="meet.jit.si"
+            roomName={roomName}
+            configOverwrite={{
+               startWithAudioMuted: true,
+               startWithVideoMuted: true,
+               prejoinPageEnabled: false,
+               disableDeepLinking: true,
+               disableInitialGUM: true,
+               toolbarButtons: [
+                  'microphone',
+                  'camera',
+                  'desktop', // 화면 공유 버튼 추가
+                  'hangup',
+                  'participants-pane',
+                  'settings',
+               ],
+               desktopSharingEnabled: true,
+               desktopSharingChromeEnabled: true,
+               desktopSharingFirefoxEnabled: true,
+               enableInsecureRoomNameWarning: false,
+               desktopSharingFrameRate: {
+                  min: 5,
+                  max: 30,
+               },
+               hideConferenceSubject: true,
+               hideConferenceTimer: false,
+               defaultLocalDisplayName: user?.nickname || '사용자',
+               watermark: {
+                  enabled: false,
+                  logo: '',
+               },
+               backgroundColor: '#000000',
+            }}
+            interfaceConfigOverwrite={{
+               DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
+               SHOW_JITSI_WATERMARK: false,
+               SHOW_WATERMARK_FOR_GUESTS: false,
+               DEFAULT_BACKGROUND: '#000000',
+               DEFAULT_LOCAL_DISPLAY_NAME: user?.nickname || '사용자',
+               TOOLBAR_BUTTONS: [
+                  'microphone',
+                  'camera',
+                  'desktop', // 화면 공유 버튼 추가
+                  'hangup',
+                  'participants-pane',
+               ],
+               SHARING_FEATURES: ['desktop'],
+               SETTINGS_SECTIONS: ['devices', 'language', 'moderator'],
+               DESKTOP_SHARING_ENABLE_LOCALHOST: true,
+            }}
+            userInfo={{
+               displayName: user?.nickname || '사용자',
+            }}
+            onApiReady={handleApiReady}
+            getIFrameRef={(iframeRef) => {
+               if (iframeRef) {
+                  jitsiIframeRef.current = iframeRef
+                  iframeRef.style.height = '100%'
+                  iframeRef.style.width = '100%'
+                  iframeRef.style.backgroundColor = '#000000'
 
-                     // iframe 로드 후 스타일 적용 시도
-                     iframeRef.onload = () => {
-                        try {
-                           const iframeDocument = iframeRef.contentWindow.document
-                           const style = document.createElement('style')
-                           style.textContent = `
-                    body { background-color: #000 !important; }
-                  `
-                           iframeDocument.head.appendChild(style)
-                        } catch (e) {
-                           console.warn('iframe 스타일 적용 실패:', e)
-                        }
+                  // iframe 로드 후 스타일 적용 시도
+                  iframeRef.onload = () => {
+                     try {
+                        const iframeDocument = iframeRef.contentWindow.document
+                        const style = document.createElement('style')
+                        style.textContent = `
+                  body { background-color: #000 !important; }
+                `
+                        iframeDocument.head.appendChild(style)
+                     } catch (e) {
+                        console.warn('iframe 스타일 적용 실패:', e)
                      }
                   }
-               }}
-            />
-         </MeetingContainer>
-
-         <SidePanel>
-            <PanelTitle>참가자 ({groupmembers?.length || 0}/6)</PanelTitle>
-            {groupmembers.map((member) => (
-               <ParticipantItem key={member.userId}>
-                  <ParticipantName>
-                     {member.User?.nickname || '사용자'}
-                     {member.role === 'leader' && <LeaderBadge>방장</LeaderBadge>}
-                  </ParticipantName>
-                  <ParticipantStatus>{member.status === 'on' ? '접속 중' : '오프라인'}</ParticipantStatus>
-               </ParticipantItem>
-            ))}
-            {!leaderMember && <NoLeaderWarning>현재 방장이 없습니다. 모든 참가자가 회의에 참여할 수 있습니다.</NoLeaderWarning>}
-         </SidePanel>
-      </Container>
+               }
+            }}
+         />
+      </MeetingContainer>
    )
 }
 
 export default ScreenShare
 
 // 스타일 컴포넌트
-const Container = styled.div`
+const LoadingContainer = styled.div`
    display: flex;
-   height: calc(100vh - 200px);
-   gap: 20px;
+   justify-content: center;
+   align-items: center;
+   height: 50vh;
+   font-size: 18px;
+   color: #666;
 `
 
 const MeetingContainer = styled.div`
@@ -308,11 +283,13 @@ const MeetingContainer = styled.div`
    background-color: #000;
    border-radius: 10px;
    overflow: hidden;
+   height: calc(100vh - 200px);
 
    & iframe {
       background-color: #000;
       border-radius: 10px;
       width: 100%;
+      height: 100%;
    }
 `
 
@@ -327,70 +304,4 @@ const StatusMessage = styled.div`
    border-radius: 20px;
    font-size: 14px;
    z-index: 100;
-`
-
-const SidePanel = styled.div`
-   width: 250px;
-   background-color: #f5f5f5;
-   border-radius: 10px;
-   padding: 15px;
-   overflow-y: auto;
-`
-
-const PanelTitle = styled.h3`
-   margin-top: 0;
-   padding-bottom: 10px;
-   border-bottom: 1px solid #ddd;
-   color: #333;
-`
-
-const ParticipantsList = styled.ul`
-   list-style: none;
-   padding: 0;
-   margin: 0;
-`
-
-const ParticipantItem = styled.li`
-   padding: 10px;
-   margin-bottom: 8px;
-   border-radius: 8px;
-   background-color: #fff;
-   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-`
-
-const ParticipantName = styled.div`
-   font-weight: bold;
-   display: flex;
-   align-items: center;
-   gap: 5px;
-`
-
-const LeaderBadge = styled.span`
-   background-color: #ff7a00;
-   color: white;
-   font-size: 11px;
-   padding: 2px 6px;
-   border-radius: 10px;
-`
-
-const ParticipantStatus = styled.div`
-   font-size: 12px;
-   color: #666;
-   margin-top: 3px;
-`
-
-const ParticipantInfo = styled.div`
-   padding: 15px;
-   text-align: center;
-   color: #666;
-`
-
-const NoLeaderWarning = styled.div`
-   margin-top: 15px;
-   padding: 10px;
-   background-color: #fff3cd;
-   border-radius: 5px;
-   font-size: 12px;
-   color: #856404;
-   text-align: center;
 `
