@@ -180,6 +180,23 @@ const UserPointsContainer = styled.div`
    padding: 20px;
    background-color: rgba(255, 122, 0, 0.7);
    border-radius: 40px 0px 40px 0px;
+   flex-wrap: wrap; /* 💡 요소가 너무 넓어지지 않도록 wrap 적용 */
+
+   @media (max-width: 1024px) {
+      max-width: 90%;
+      flex-direction: column; /* 📌 태블릿에서는 세로 정렬 */
+      text-align: center;
+   }
+
+   @media (max-width: 768px) {
+      font-size: 14px;
+      padding: 15px;
+   }
+
+   @media (max-width: 480px) {
+      font-size: 12px;
+      padding: 10px;
+   }
 `
 
 const Container = styled.div`
@@ -188,6 +205,13 @@ const Container = styled.div`
    align-items: center;
    padding: 50px;
    width: 100%;
+   @media (max-width: 1024px) {
+      padding: 30px;
+   }
+
+   @media (max-width: 768px) {
+      padding: 20px;
+   }
 `
 
 const Title = styled.h2`
@@ -205,6 +229,21 @@ const Title = styled.h2`
    &:first-of-type {
       border-bottom: none;
    }
+   @media (max-width: 1024px) {
+      font-size: 18px;
+      max-width: 90%;
+   }
+
+   @media (max-width: 768px) {
+      font-size: 16px;
+      max-width: 80%;
+   }
+
+   @media (max-width: 480px) {
+      font-size: 14px;
+      max-width: 100%;
+      text-align: center;
+   }
 `
 const ModalContent = styled.div`
    position: absolute;
@@ -218,6 +257,9 @@ const ModalContent = styled.div`
    width: 300px;
    display: flex;
    flex-direction: column;
+   @media (max-width: 480px) {
+      width: 250px; /* 작은 화면에서 모달 크기 조정 */
+   }
 `
 /* ???????????????????????????????????? */
 // const ItemGrid = styled.div`
