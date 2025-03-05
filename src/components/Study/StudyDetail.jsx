@@ -15,6 +15,11 @@ const StudyDetail = ({ isAuthenticated, user }) => {
    const { groupmembers } = useSelector((state) => state.groupmembers.groupmember) // 그룹 멤버 데이터
    const [isMember, setIsMember] = useState(false) // 멤버 여부 상태
 
+   // 비밀번호 모달 관련 상태 추가
+   const [showPasswordModal, setShowPasswordModal] = useState(false)
+   const [password, setPassword] = useState('')
+   const [passwordError, setPasswordError] = useState('')
+
    // 스터디 그룹 데이터 불러오기
    useEffect(() => {
       if (!isAuthenticated) {
@@ -39,6 +44,41 @@ const StudyDetail = ({ isAuthenticated, user }) => {
       navigate(`/study/edit/${id}`)
    }
 
+   // 비밀번호 입력 핸들러
+   const handlePasswordChange = (e) => {
+      // 숫자만 입력 가능하도록 처리
+      const value = e.target.value.replace(/[^0-9]/g, '')
+      if (value.length <= 6) {
+         setPassword(value)
+      }
+   }
+
+   // 비밀번호 제출 핸들러
+   const handlePasswordSubmit = () => {
+      if (password.length !== 6) {
+         setPasswordError('비밀번호는 6자리 숫자여야 합니다.')
+         return
+      }
+
+      // 비밀번호 검증 후 가입 처리
+      if (password === studygroup.password) {
+         setShowPasswordModal(false)
+
+         dispatch(createGroupMemberThunk({ groupId: id })) // API 요청
+            .unwrap()
+            .then(() => {
+               alert('스터디에 성공적으로 가입했습니다.')
+               window.location.reload()
+            })
+            .catch((err) => {
+               console.error('스터디 그룹 가입 실패 : ', err)
+               alert('스터디 그룹에 가입할 수 없습니다.')
+            })
+      } else {
+         setPasswordError('비밀번호가 일치하지 않습니다.')
+      }
+   }
+
    const handleStudyJoinClick = () => {
       if (!isAuthenticated) {
          alert('로그인이 필요합니다.')
@@ -46,6 +86,13 @@ const StudyDetail = ({ isAuthenticated, user }) => {
          return
       }
 
+      // 비공개 스터디인 경우 비밀번호 모달 표시
+      if (!studygroup.open) {
+         setShowPasswordModal(true)
+         return
+      }
+
+      // 공개 스터디인 경우 바로 가입 처리
       dispatch(createGroupMemberThunk({ groupId: id })) // API 요청
          .unwrap()
          .then(() => {
@@ -97,6 +144,13 @@ const StudyDetail = ({ isAuthenticated, user }) => {
       }
    }
 
+   // 모달 닫기 핸들러
+   const handleCloseModal = () => {
+      setShowPasswordModal(false)
+      setPassword('')
+      setPasswordError('')
+   }
+
    return (
       <>
          {studygroup && groupmembers && (
@@ -117,6 +171,11 @@ const StudyDetail = ({ isAuthenticated, user }) => {
                      <DetailText>
                         {studygroup.countMembers} / {studygroup.maxMembers}
                      </DetailText>
+                  </DetailRow>
+
+                  <DetailRow>
+                     <LabelText>방장</LabelText>
+                     <DetailText>{studygroup.Groupmembers && studygroup.Groupmembers.length > 0 && studygroup.Groupmembers[0].User ? studygroup.Groupmembers[0].User.nickname : '정보 없음'}</DetailText>
                   </DetailRow>
 
                   <DetailRow>
@@ -160,8 +219,6 @@ const StudyDetail = ({ isAuthenticated, user }) => {
                </Content>
 
                {/* 조건부 렌더링: 가입 상태에 따라 다른 버튼 표시 */}
-               {/* 예시로 가입 전 상태만 표시 */}
-               {/* 조건부 렌더링: 가입 상태에 따라 다른 버튼 표시 */}
                {isMember ? (
                   <SubmitButton onClick={handleStudyEnterClick}>스터디 입장하기</SubmitButton>
                ) : (
@@ -175,6 +232,25 @@ const StudyDetail = ({ isAuthenticated, user }) => {
                   <ButtonWrapper>
                      <BackButton onClick={handleStudyLeaveClick}>스터디 탈퇴하기</BackButton>
                   </ButtonWrapper>
+               )}
+
+               {/* 비밀번호 입력 모달 */}
+               {showPasswordModal && (
+                  <ModalOverlay>
+                     <ModalContent>
+                        <ModalTitle>비밀번호 입력</ModalTitle>
+                        <ModalDescription>이 스터디는 비공개 스터디입니다. 가입하려면 비밀번호를 입력하세요.</ModalDescription>
+
+                        <PasswordInput type="text" placeholder="6자리 숫자 입력" value={password} onChange={handlePasswordChange} maxLength={6} />
+
+                        {passwordError && <ErrorMessage>{passwordError}</ErrorMessage>}
+
+                        <ModalButtonGroup>
+                           <ModalCancelButton onClick={handleCloseModal}>취소</ModalCancelButton>
+                           <ModalSubmitButton onClick={handlePasswordSubmit}>확인</ModalSubmitButton>
+                        </ModalButtonGroup>
+                     </ModalContent>
+                  </ModalOverlay>
                )}
             </Wrapper>
          )}
@@ -333,4 +409,98 @@ const BackButton = styled.button`
    font-weight: 400;
    font-size: clamp(14px, 2vw, 16px);
    cursor: pointer;
+`
+const ModalOverlay = styled.div`
+   position: fixed;
+   top: 0;
+   left: 0;
+   width: 100%;
+   height: 100%;
+   background-color: rgba(0, 0, 0, 0.5);
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   z-index: 1000;
+`
+
+const ModalContent = styled.div`
+   background-color: white;
+   padding: 30px;
+   border-radius: 10px;
+   width: 90%;
+   max-width: 400px;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+`
+
+const ModalTitle = styled.h3`
+   font-size: 18px;
+   margin-bottom: 15px;
+   font-weight: 500;
+`
+
+const ModalDescription = styled.p`
+   font-size: 14px;
+   color: #666;
+   margin-bottom: 20px;
+   text-align: center;
+`
+
+const PasswordInput = styled.input`
+   width: 100%;
+   padding: 12px 15px;
+   border: 1px solid #ddd;
+   border-radius: 5px;
+   font-size: 16px;
+   margin-bottom: 15px;
+   text-align: center;
+   letter-spacing: 5px;
+
+   &:focus {
+      border-color: #ff7a00;
+      outline: none;
+   }
+`
+
+const ErrorMessage = styled.p`
+   color: #e74c3c;
+   font-size: 14px;
+   margin-bottom: 15px;
+`
+
+const ModalButtonGroup = styled.div`
+   display: flex;
+   justify-content: center;
+   gap: 15px;
+   width: 100%;
+   margin-top: 10px;
+`
+
+const ModalCancelButton = styled.button`
+   padding: 10px 20px;
+   background-color: #f1f1f1;
+   color: #333;
+   border: none;
+   border-radius: 5px;
+   cursor: pointer;
+   font-size: 14px;
+
+   &:hover {
+      background-color: #e1e1e1;
+   }
+`
+
+const ModalSubmitButton = styled.button`
+   padding: 10px 20px;
+   background-color: #ff7a00;
+   color: white;
+   border: none;
+   border-radius: 5px;
+   cursor: pointer;
+   font-size: 14px;
+
+   &:hover {
+      background-color: #e66e00;
+   }
 `

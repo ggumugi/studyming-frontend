@@ -90,10 +90,10 @@ export const kickGroupMember = async (groupId, userId) => {
    }
 }
 
-// 로그인한 유저의 참여 중인 스터디 목록 가져오기
+// 로그인한 유저가 가입한 스터디 그룹 목록 가져오기
 export const getUserStudyGroups = async () => {
    try {
-      const response = await studymingApi.get('/groupmember/user') // 백엔드 API 요청
+      const response = await studymingApi.get('/groupmember/user/studygroups')
       return response
    } catch (error) {
       console.error(`API 오류: ${error.message}`)
