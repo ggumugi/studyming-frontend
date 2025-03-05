@@ -57,7 +57,8 @@ const Container = styled.div`
 `
 
 const SidebarContainer = styled.nav`
-   width: 200px;
+   width: clamp(100px, 10vw, 200px);
+   margin-left: 20px;
    height: 100vh;
    padding: 20px;
    display: flex;
@@ -66,7 +67,7 @@ const SidebarContainer = styled.nav`
 `
 
 const MenuList = styled.ul`
-   margin-top: 170px;
+   margin-top: 120px;
    list-style: none;
    padding: 0;
    display: flex;
@@ -81,7 +82,7 @@ const MenuItem = styled.li`
    display: flex;
    margin-right: 20px;
    justify-content: center;
-   font-size: 20px;
+   font-size: clamp(14px, 2vw, 20px);
    font-weight: ${(props) => (props.$isActive ? '500' : '300')};
    color: ${(props) => (props.$isActive ? '#FF7A00' : '#000')};
    cursor: pointer;
