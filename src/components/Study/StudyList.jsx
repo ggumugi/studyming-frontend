@@ -213,30 +213,37 @@ const StudyList = () => {
    // 🔹 검색 버튼 클릭 시 실행되는 함수
    const handleSearch = () => {
       if (!searchTerm.trim()) {
-         setFilteredStudies(studygroupList)
+         setFilteredStudies(studygroupList) // 검색어가 없으면 전체 리스트 표시
          return
       }
 
-      const lowerCaseSearch = searchTerm.toLowerCase()
+      const lowerCaseSearch = searchTerm.toLowerCase() // 검색어를 소문자로 변환
 
       const results = studygroupList.filter((study) => {
          if (searchType === 'title') {
-            return study.name.toLowerCase().includes(lowerCaseSearch)
+            return study.name.toLowerCase().includes(lowerCaseSearch) // 제목 검색
          } else if (searchType === 'hashtag') {
-            return hashtagsMap[study.id] && hashtagsMap[study.id].some((tag) => tag.name.toLowerCase().includes(lowerCaseSearch))
+            return (
+               hashtagsMap[study.id] &&
+               hashtagsMap[study.id].some(
+                  (tag) => tag.name.toLowerCase().includes(lowerCaseSearch) // 해시태그 검색
+               )
+            )
          }
          return false
       })
 
-      setFilteredStudies(results)
+      setFilteredStudies(results) // 필터링된 결과를 상태에 저장
    }
 
    // 🔹 검색어 입력 시, 전체 리스트 유지
    useEffect(() => {
       if (!searchTerm.trim()) {
-         setFilteredStudies(studygroupList) // ✅ 검색어가 없으면 전체 리스트 표시
+         setFilteredStudies(studygroupList) // 검색어가 없으면 전체 리스트 표시
+      } else {
+         handleSearch() // 검색어가 있을 경우 `handleSearch`를 호출하여 결과 처리
       }
-   }, [searchTerm, studygroupList])
+   }, [searchTerm, studygroupList]) // `searchTerm`이나 `studygroupList`가 변경될 때마다 실행
 
    // 스터디 등록 버튼 클릭 시 호출되는 함수
    const handleStudyCreateClick = () => {
@@ -257,6 +264,7 @@ const StudyList = () => {
 
    // 그룹 카드 클릭 시 상세 페이지로 이동
    const handleCardClick = (studyId) => {
+      if (!user) return // 로그인하지 않은 상태에서는 아무 동작도 하지 않음
       navigate(`/study/detail/${studyId}`)
    }
 
@@ -267,7 +275,6 @@ const StudyList = () => {
             <StyledAddStudyButton onClick={handleStudyCreateClick}>스터디 등록</StyledAddStudyButton>
          </Header>
          <StyledDivider />
-
          <StudyContainer>
             {!user ? ( // ✅ 유저가 로그인 안 한 상태
                <Message>로그인을 해주세요</Message>
@@ -315,7 +322,7 @@ const StudyList = () => {
             )}
          </StudyContainer>
          {/* ✅ "내 스터디" 페이징 적용 (StudyContainer 아래) */}
-         {renderPaginationButtons(Math.ceil(userCreatedStudies.length / myStudiesPerPage), myCurrentPage, handleMyPageClick)}
+         {user ? renderPaginationButtons(Math.ceil(userCreatedStudies.length / myStudiesPerPage), myCurrentPage, handleMyPageClick) : null} {/* 로그인 상태일 때만 페이징 버튼 표시 */}
          {/* ✅ 카드 섹션 - 검색 결과 반영 */}
          <TitleWrapper>
             <Title>스터디 목록</Title>
@@ -367,7 +374,6 @@ const StudyList = () => {
          </StudyContainer2>
          {/* ✅ "스터디 목록" 페이징 적용 (StudyContainer2 아래) */}
          {renderPaginationButtons(Math.ceil(allStudies.length / allStudiesPerPage), allCurrentPage, handleAllPageClick)}
-
          <SearchContainer>
             <Dropdown value={searchType} onChange={(e) => setSearchType(e.target.value)}>
                <option value="title">제목</option>
@@ -583,7 +589,6 @@ const SearchButton = styled.button`
    min-width: 60px; /* ✅ 너무 작아지지 않도록 설정 */
    flex-shrink: 0; /* ✅ 버튼 크기 유지 */
    width: auto; /* ✅ 텍스트 크기에 맞게 버튼 크기 자동 조정 */
-   font-size: clamp(12px, 1vw, 14px);
    &:hover {
       background-color: #ff7a00;
    }
