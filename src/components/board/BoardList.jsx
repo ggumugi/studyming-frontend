@@ -124,6 +124,9 @@ export default BoardList
 const Container = styled.div`
    width: 100%;
    padding: 70px 70px 0 70px;
+   @media (max-width: 965px) {
+      padding: 0 70px 0 70px;
+   }
 `
 const Header = styled.div`
    display: flex;
@@ -184,6 +187,9 @@ const SearchContainer = styled.div`
    justify-content: center;
    align-items: center;
    margin-top: 20px;
+   @media (max-width: 965px) {
+      margin-bottom: 100px;
+   }
 `
 const StyledSelect = styled(Select)`
    width: 120px;
