@@ -237,3 +237,73 @@ export const verifyPassword = async (password) => {
       throw error.response?.data?.message || '비밀번호 확인 중 오류 발생'
    }
 }
+
+export const getUserInfo = async () => {
+   try {
+      // 기존에 구현된 /auth/user API 활용
+      const response = await studymingApi.get('/auth/user')
+
+      // 응답 데이터 구조 확인 및 변환
+      if (response.data && response.data.isAuthenticated && response.data.user) {
+         // 사용자 정보에 소셜 로그인 상태 추가 (실제 데이터가 없으므로 임시로 설정)
+         const userData = {
+            ...response.data.user,
+            google: !!response.data.user.google, // 값이 있으면 true, 없으면 false
+            kakao: !!response.data.user.kakao, // 값이 있으면 true, 없으면 false
+         }
+
+         return {
+            success: true,
+            user: userData,
+         }
+      }
+
+      // 인증되지 않은 경우
+      return {
+         success: false,
+         message: '인증된 사용자 정보가 없습니다.',
+      }
+   } catch (error) {
+      console.error('❌ 사용자 정보 조회 실패:', error)
+      throw error.response?.data?.message || '사용자 정보 조회 중 오류가 발생했습니다.'
+   }
+}
+
+// 사용자 정보 업데이트 API
+export const updateUserInfo = async (userData) => {
+   try {
+      const response = await studymingApi.patch('/auth/update', userData)
+      return response.data
+   } catch (error) {
+      console.error('❌ 사용자 정보 업데이트 실패:', error)
+      throw error.response?.data?.message || '사용자 정보 업데이트 중 오류가 발생했습니다.'
+   }
+}
+
+// SNS 계정 연동 API
+export const connectSnsAccount = async (data) => {
+   try {
+      const response = await studymingApi.patch('/auth/connect-sns', data, {
+         withCredentials: true,
+      })
+      console.log('✅ SNS 계정 연동 성공:', response.data)
+      return response.data
+   } catch (error) {
+      console.error('❌ SNS 계정 연동 실패:', error)
+      throw error.response?.data?.message || '연동 중 오류가 발생했습니다.'
+   }
+}
+
+// 회원 탈퇴 API
+export const deleteAccount = async () => {
+   try {
+      const response = await studymingApi.delete('/auth/delete-account', {
+         withCredentials: true,
+      })
+      console.log('✅ 회원 탈퇴 성공:', response.data)
+      return response.data
+   } catch (error) {
+      console.error('❌ 회원 탈퇴 실패:', error)
+      throw error.response?.data?.message || '회원 탈퇴 중 오류가 발생했습니다.'
+   }
+}

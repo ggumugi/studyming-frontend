@@ -1,94 +1,135 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-
+import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { AiOutlineDown } from 'react-icons/ai' // 드롭다운 아이콘
 
-import { fetchUserStudyCountThunk } from '../../features/groupmemberSlice'
+import { fetchUserStudyGroupsThunk, fetchGroupMembersThunk } from '../../features/groupmemberSlice'
 
 const RealTimeAccess = () => {
    const dispatch = useDispatch()
+   const navigate = useNavigate()
 
-   // 로그인한 유저의 참여 중인 스터디 개수 불러오기
-   const userStudyCount = useSelector((state) => state.groupmembers.userStudyCount)
+   // 리덕스 스토어에서 데이터 가져오기
+   const userStudyGroups = useSelector((state) => state.groupmembers.userStudyGroups || [])
+   const userStudyCount = useSelector((state) => state.groupmembers.userStudyCount || 0)
+   const { groupmembers } = useSelector((state) => state.groupmembers.groupmember || { groupmembers: [] })
+   const loading = useSelector((state) => state.groupmembers.loading)
 
-   // 로그인한 유저의 참여 중인 스터디 개수 불러오기
+   // 선택된 스터디와 드롭다운 상태
+   const [selectedStudy, setSelectedStudy] = useState(null)
+   const [dropdownOpen, setDropdownOpen] = useState(false)
+
+   // 유저가 가입한 스터디 그룹 목록 가져오기
    useEffect(() => {
-      dispatch(fetchUserStudyCountThunk())
+      dispatch(fetchUserStudyGroupsThunk())
    }, [dispatch])
 
-   // ✅ 참여 중인 스터디 목록 (임시 데이터)
-   const studyList = [
-      { id: 1, name: '고시생방', members: 6 },
-      { id: 2, name: '토익 스터디', members: 4 },
-   ]
+   // 선택된 스터디가 변경되면 해당 스터디의 멤버 목록 가져오기
+   useEffect(() => {
+      if (selectedStudy) {
+         dispatch(fetchGroupMembersThunk(selectedStudy.id))
+      }
+   }, [dispatch, selectedStudy])
 
-   // ✅ 현재 접속 중인 멤버 (임시 데이터)
-   const users = [
-      { id: 1, nickname: 'User1', isOnline: true },
-      { id: 2, nickname: 'User2', isOnline: false },
-      { id: 3, nickname: 'User3', isOnline: false },
-      { id: 4, nickname: 'User4', isOnline: true },
-      { id: 5, nickname: 'User5', isOnline: true },
-   ]
+   // 스터디 그룹 데이터가 로드되면 첫 번째 스터디를 기본 선택
+   useEffect(() => {
+      if (userStudyGroups && userStudyGroups.length > 0 && !selectedStudy) {
+         setSelectedStudy(userStudyGroups[0])
+      }
+   }, [userStudyGroups, selectedStudy])
 
-   const [selectedStudy, setSelectedStudy] = useState(studyList[0]) // 기본 선택된 스터디
-   const [dropdownOpen, setDropdownOpen] = useState(false) // 드롭다운 열기 상태
+   // 스터디 바로가기 핸들러
+   const handleStudyVisit = () => {
+      if (selectedStudy) {
+         navigate(`/study/detail/${selectedStudy.id}`)
+      }
+   }
+
+   // 접속 중인 멤버 수 계산
+   const onlineMembersCount = groupmembers ? groupmembers.filter((member) => member.status === 'on').length : 0
+
+   // RealTimeAccess 컴포넌트 내에서 데이터 확인 로그 추가
+   useEffect(() => {
+      console.log('유저 스터디 그룹 상태:', userStudyGroups)
+      console.log('유저 스터디 개수:', userStudyCount)
+      console.log('그룹 멤버 목록:', groupmembers)
+   }, [userStudyGroups, userStudyCount, groupmembers])
 
    return (
       <Container>
-         {/* 🔹 현재 참여 중인 스터디 개수 */}
+         {/* 현재 참여 중인 스터디 개수 */}
          <Header>
             <StudyInfo>
                참여 중인 스터디 <span>{userStudyCount}</span>개
             </StudyInfo>
-            <VisitButton>{selectedStudy.name} 바로가기 →</VisitButton>
+            {selectedStudy && <VisitButton onClick={handleStudyVisit}>{selectedStudy.name} 바로가기 →</VisitButton>}
          </Header>
 
-         {/* 🔹 스터디 드롭다운 */}
-         <DropdownSection>
-            <DropdownContainer>
-               <SelectBox onClick={() => setDropdownOpen(!dropdownOpen)}>
-                  {selectedStudy.name} <AiOutlineDown />
-               </SelectBox>
-               {dropdownOpen && (
-                  <DropdownList>
-                     {studyList.map((study) => (
-                        <DropdownItem
-                           key={study.id}
-                           onClick={() => {
-                              setSelectedStudy(study)
-                              setDropdownOpen(false)
-                           }}
-                        >
-                           {study.name}
-                           <span>{study.members}명 접속 중</span>
-                        </DropdownItem>
+         {/* 스터디 드롭다운 */}
+         {loading ? (
+            <LoadingText>스터디 정보를 불러오는 중...</LoadingText>
+         ) : userStudyGroups && userStudyGroups.length > 0 ? (
+            <>
+               <DropdownSection>
+                  <DropdownContainer>
+                     <SelectBox onClick={() => setDropdownOpen(!dropdownOpen)}>
+                        {selectedStudy ? selectedStudy.name : '스터디 선택'} <AiOutlineDown />
+                     </SelectBox>
+                     {dropdownOpen && (
+                        <DropdownList>
+                           {userStudyGroups.map((study) => (
+                              <DropdownItem
+                                 key={study.id}
+                                 onClick={() => {
+                                    setSelectedStudy(study)
+                                    setDropdownOpen(false)
+                                 }}
+                              >
+                                 {study.name}
+                                 <span>{study.members}명 가입 중</span>
+                              </DropdownItem>
+                           ))}
+                        </DropdownList>
+                     )}
+                  </DropdownContainer>
+                  {selectedStudy && (
+                     <MemberCount>
+                        {selectedStudy.name} 현재 <span>{onlineMembersCount}</span>명 접속 중입니다
+                     </MemberCount>
+                  )}
+               </DropdownSection>
+
+               {/* 실시간 접속 현황 */}
+               <SectionTitle>실시간 접속 현황</SectionTitle>
+               <Divider />
+
+               {/* 접속 중인 멤버 리스트 */}
+               {groupmembers && groupmembers.length > 0 ? (
+                  <UserList>
+                     {groupmembers.map((member) => (
+                        <UserIcon key={member.userId} $isOnline={member.status === 'on'}>
+                           <UserImage src={`${process.env.PUBLIC_URL}/img/${member.status === 'on' ? 'happyMing.png' : 'cryingMing.png'}`} alt="user" />
+                           <p>{member.User ? member.User.nickname : '알 수 없음'}</p>
+                           {member.role === 'leader' && <LeaderBadge>방장</LeaderBadge>}
+                        </UserIcon>
                      ))}
-                  </DropdownList>
+                  </UserList>
+               ) : (
+                  <NoMembersMessage>멤버 정보를 불러올 수 없습니다.</NoMembersMessage>
                )}
-            </DropdownContainer>
-            <MemberCount>
-               {selectedStudy.name} 현재 <span>{selectedStudy.members}</span>명 접속 중입니다
-            </MemberCount>
-         </DropdownSection>
-
-         {/* 🔹 실시간 접속 현황 */}
-         <SectionTitle>실시간 접속 현황</SectionTitle>
-         <Divider />
-
-         {/* 🔹 접속 중인 멤버 리스트 */}
-         <UserList>
-            {users.map((user) => (
-               <UserIcon key={user.id} $isOnline={user.isOnline}>
-                  <UserImage src={`${process.env.PUBLIC_URL}/img/${user.isOnline ? 'happyMing.png' : 'cryingMing.png'}`} alt="user" />
-                  <p>{user.nickname}</p>
-               </UserIcon>
-            ))}
-         </UserList>
+            </>
+         ) : (
+            <NoStudyMessage>
+               참여 중인 스터디가 없습니다.
+               <JoinStudyButton onClick={() => navigate('/study/list')}>스터디 찾아보기</JoinStudyButton>
+            </NoStudyMessage>
+         )}
       </Container>
    )
 }
+
+export default RealTimeAccess
 
 // 🎨 Styled Components
 const Container = styled.div`
@@ -193,7 +234,7 @@ const DropdownItem = styled.li`
    display: flex;
    justify-content: space-between;
    align-items: center;
-   font-size: clamp(12px, 1vw, 16px);
+   font-size: 16px;
    cursor: pointer;
    color: #333;
 
@@ -250,4 +291,52 @@ const UserImage = styled.img`
    height: 50px;
 `
 
-export default RealTimeAccess
+const LoadingText = styled.p`
+   text-align: center;
+   color: #666;
+   margin: 20px 0;
+   font-size: 14px;
+`
+
+const NoStudyMessage = styled.div`
+   text-align: center;
+   margin: 30px 0;
+   color: #666;
+   font-size: 16px;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   gap: 15px;
+`
+
+const JoinStudyButton = styled.button`
+   background-color: #ff7a00;
+   color: white;
+   border: none;
+   padding: 10px 20px;
+   border-radius: 5px;
+   cursor: pointer;
+   font-size: 14px;
+
+   &:hover {
+      background-color: #e66e00;
+   }
+`
+
+const LeaderBadge = styled.span`
+   background-color: #ff7a00;
+   color: white;
+   font-size: 10px;
+   padding: 2px 6px;
+   border-radius: 10px;
+   position: absolute;
+   top: -5px;
+   right: -5px;
+`
+
+const NoMembersMessage = styled.p`
+   text-align: center;
+   color: #888;
+   margin: 20px 0;
+   font-size: 14px;
+`

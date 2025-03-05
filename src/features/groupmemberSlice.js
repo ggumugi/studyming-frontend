@@ -85,16 +85,13 @@ export const kickGroupMemberThunk = createAsyncThunk('groupmembers/kick', async 
    }
 })
 
-// 로그인한 유저의 참여 중인 스터디 개수 가져오기
-// features/groupmemberSlice.js
-export const fetchUserStudyCountThunk = createAsyncThunk('groupmembers/fetchUserStudyCount', async (_, { rejectWithValue }) => {
+// 로그인한 유저가 가입한 스터디 그룹 목록 가져오기
+export const fetchUserStudyGroupsThunk = createAsyncThunk('groupmembers/fetchUserStudyGroups', async (_, { rejectWithValue }) => {
    try {
       const response = await getUserStudyGroups()
-      console.log('🟢 API 응답:', response.data) // 응답 데이터 로그
-      return response.data.studyGroups?.length || 0 // 옵셔널 체이닝 추가
+      return response.data.studyGroups
    } catch (error) {
-      console.error('🔴 API 에러:', error.response)
-      return rejectWithValue(error.response?.data?.message || '데이터 불러오기 실패')
+      return rejectWithValue(error.response?.data?.message || '유저 스터디 그룹 목록 조회 실패')
    }
 })
 
@@ -102,7 +99,10 @@ export const fetchUserStudyCountThunk = createAsyncThunk('groupmembers/fetchUser
 const groupmemberSlice = createSlice({
    name: 'groupmembers',
    initialState: {
-      userStudyCount: 0, // 참여 중인 스터디 개수
+      userStudyCount: 0,
+      userStudyGroups: [], // 유저가 가입한 스터디 그룹 목록
+      onlineMembers: [], // 현재 접속 중인 멤버 목록
+      onlineMembersCount: 0, // 접속 중인 멤버 수
       groupmembers: [],
       groupmember: [],
       loading: false,
@@ -227,17 +227,17 @@ const groupmemberSlice = createSlice({
             state.error = action.payload
             alert(action.payload)
          })
-
-         //스터디 개수 가져오기
-         .addCase(fetchUserStudyCountThunk.pending, (state) => {
+         // 스터디 그룹 정보 가져오기기
+         .addCase(fetchUserStudyGroupsThunk.pending, (state) => {
             state.loading = true
             state.error = null
          })
-         .addCase(fetchUserStudyCountThunk.fulfilled, (state, action) => {
+         .addCase(fetchUserStudyGroupsThunk.fulfilled, (state, action) => {
             state.loading = false
-            state.userStudyCount = action.payload // 개수 저장
+            state.userStudyGroups = action.payload
+            state.userStudyCount = action.payload.length // 스터디 그룹 개수 업데이트
          })
-         .addCase(fetchUserStudyCountThunk.rejected, (state, action) => {
+         .addCase(fetchUserStudyGroupsThunk.rejected, (state, action) => {
             state.loading = false
             state.error = action.payload
          })

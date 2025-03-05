@@ -58,29 +58,33 @@ const MingShopPage = ({ isAuthenticated, user }) => {
    return (
       <Container>
          <Title>
-            현재 보유 포인트: {userPoints} 밍
-            <div>
-               <Button variant="contained" sx={{ borderRadius: '20px', backgroundColor: '#FF5733', color: '#fff', marginRight: '10px' }} onClick={() => setOpen(true)}>
-                  선물하기
-               </Button>
-               {userRole === 'ADMIN' && (
-                  <Button
-                     variant="contained"
-                     sx={{
-                        borderRadius: '20px',
-                        backgroundColor: '#FF5733',
-                        color: '#fff',
-                        marginRight: '10px',
-                        '&:hover': { backgroundColor: '#E74C3C' },
-                     }}
-                     onClick={() => navigate('/mingshop/create')}
-                     isAuthenticated={isAuthenticated}
-                     user={user}
-                  >
-                     등록하기
+            <UserPointsContainer>
+               현재 보유 포인트: {userPoints} 밍
+               <div>
+                  <Button variant="contained" sx={{ borderRadius: '20px', border: '1px solid white', backgroundColor: 'transparent', color: 'white', marginRight: '10px', fontWeight: '300' }} onClick={() => setOpen(true)}>
+                     선물하기
                   </Button>
-               )}
-            </div>
+                  {userRole === 'ADMIN' && (
+                     <Button
+                        variant="contained"
+                        sx={{
+                           border: '1px solid white',
+                           borderRadius: '20px',
+                           backgroundColor: 'transparent',
+                           color: 'white',
+                           marginRight: '10px',
+                           fontWeight: '300',
+                        }}
+                        onClick={() => navigate('/mingshop/create')}
+                        isAuthenticated={isAuthenticated}
+                        user={user}
+                     >
+                        등록하기
+                     </Button>
+                  )}
+               </div>
+            </UserPointsContainer>
+
             {/* 선물하기 모달 */}
             <Modal open={open} onClose={() => setOpen(false)}>
                <ModalContent>
@@ -114,6 +118,20 @@ const MingShopPage = ({ isAuthenticated, user }) => {
 export default MingShopPage
 
 // Styled Components
+const UserPointsContainer = styled.div`
+   color: white;
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   width: 100%;
+   max-width: 1200px;
+   font-weight: 300;
+   font-size: clamp(14px, 2vw, 20px);
+   padding: 20px;
+   background-color: rgba(255, 122, 0, 0.7);
+   border-radius: 40px 0px 40px 0px;
+`
+
 const Container = styled.div`
    display: flex;
    flex-direction: column;
@@ -130,10 +148,13 @@ const Title = styled.h2`
    max-width: 1200px; /* 최대 너비 설정 */
    text-align: left; /* 왼쪽 정렬 */
    font-weight: 300;
-   font-size: 32px;
+   font-size: clamp(14px, 2vw, 20px);
    border-bottom: 2px solid #ff7a00;
    padding-bottom: 10px;
    margin-bottom: 40px; /* 아이템과 간격 추가 */
+   &:first-of-type {
+      border-bottom: none;
+   }
 `
 const ModalContent = styled.div`
    position: absolute;
@@ -148,58 +169,58 @@ const ModalContent = styled.div`
    display: flex;
    flex-direction: column;
 `
+/* ???????????????????????????????????? */
+// const ItemGrid = styled.div`
+//    display: grid;
+//    grid-template-columns: repeat(4, 1fr); /* 한 줄에 네 개씩 */
+//    gap: 20px;
+//    max-width: 1200px; /* 최대 너비 설정 */
+//    width: 100%;
+//    margin: 0 auto; /* 가운데 정렬 */
+//    margin-bottom: 50px; /* 다음 title과 간격 추가 */
+// `
 
-const ItemGrid = styled.div`
-   display: grid;
-   grid-template-columns: repeat(4, 1fr); /* 한 줄에 네 개씩 */
-   gap: 20px;
-   max-width: 1200px; /* 최대 너비 설정 */
-   width: 100%;
-   margin: 0 auto; /* 가운데 정렬 */
-   margin-bottom: 50px; /* 다음 title과 간격 추가 */
-`
+// const ItemCard = styled.div`
+//    background-color: #fff; /* 흰색 배경 */
+//    border-radius: 8px;
+//    padding: 20px;
+//    text-align: center;
+//    display: flex;
+//    flex-direction: column;
+//    justify-content: space-between;
+//    height: 300px; /* 아이템 카드 고정 높이 설정 */
+//    max-width: 325px;
+// `
 
-const ItemCard = styled.div`
-   background-color: #fff; /* 흰색 배경 */
-   border-radius: 8px;
-   padding: 20px;
-   text-align: center;
-   display: flex;
-   flex-direction: column;
-   justify-content: space-between;
-   height: 300px; /* 아이템 카드 고정 높이 설정 */
-   max-width: 325px;
-`
+// const ImageWrapper = styled.div`
+//    width: 100%;
+//    max-width: 280px;
+//    height: 200px; /* 고정된 이미지 높이 */
+//    margin-bottom: 10px;
+//    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+//    border-radius: 16px; /* 부드러운 곡선 */
+//    overflow: hidden;
+// `
 
-const ImageWrapper = styled.div`
-   width: 100%;
-   max-width: 280px;
-   height: 200px; /* 고정된 이미지 높이 */
-   margin-bottom: 10px;
-   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
-   border-radius: 16px; /* 부드러운 곡선 */
-   overflow: hidden;
-`
+// const ItemImage = styled.img`
+//    width: 100%;
+//    height: 100%;
+//    object-fit: contain; /* 이미지를 잘라서 박스에 맞게 크기 조정 */
+//    transform: scale(0.6);
+// `
 
-const ItemImage = styled.img`
-   width: 100%;
-   height: 100%;
-   object-fit: contain; /* 이미지를 잘라서 박스에 맞게 크기 조정 */
-   transform: scale(0.6);
-`
+// const ItemTitle = styled.h3`
+//    font-size: clamp(16px, 2vw, 18px);
+//    margin-bottom: 5px;
+// `
 
-const ItemTitle = styled.h3`
-   font-size: 18px;
-   margin-bottom: 5px;
-`
+// const ItemDescription = styled.p`
+//    font-size: 14px;
+//    color: #999;
+//    margin-bottom: 5px;
+// `
 
-const ItemDescription = styled.p`
-   font-size: 14px;
-   color: #999;
-   margin-bottom: 5px;
-`
-
-const ItemDate = styled.p`
-   font-size: 12px;
-   color: #999;
-`
+// const ItemDate = styled.p`
+//    font-size: 12px;
+//    color: #999;
+// `

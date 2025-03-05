@@ -29,7 +29,7 @@ const StudyList = () => {
    const [likeCounts, setLikeCounts] = useState({}) //  각 스터디의 좋아요 개수 저장
 
    /**
-    * ✅ 1. 좋아요 상태 및 개수 불러오기 (로그인 유저 변경되거나, 그룹 리스트 변경 시) 이거도 then으로 수정
+    * ✅ 1. 좋아요 상태 및 개수 불러오기 (로그인 유저 변경되거나, 그룹 리스트 변경 시)
     */
    useEffect(() => {
       if (studygroups.length > 0) {
@@ -134,7 +134,7 @@ const StudyList = () => {
       dispatch(fetchStudygroupsThunk()) // ✅ Redux 상태 업데이트
    }, [dispatch])
 
-   // ✅ 2️⃣ 전체 스터디 그룹이 업데이트된 후 개별 해시태그 불러오는 useEffect 실행 이거 then 형태로 수정
+   // ✅ 2️⃣ 전체 스터디 그룹이 업데이트된 후 개별 해시태그 불러오는 useEffect 실행
    useEffect(() => {
       if (Array.isArray(studygroups) && studygroups.length > 0) {
          const fetchHashtags = async () => {
@@ -549,6 +549,7 @@ const SearchContainer = styled.div`
    gap: 10px;
    width: 100%;
    margin: 0 auto 40px auto;
+   flex-wrap: nowarp;
 `
 
 const Dropdown = styled.select`
@@ -577,7 +578,15 @@ const SearchButton = styled.button`
    border: none;
    border-radius: 4px;
    cursor: pointer;
+<<<<<<< HEAD
+   font-size: 14px;
+   white-space: nowrap; /* ✅ 텍스트 줄바꿈 방지 */
+   min-width: 60px; /* ✅ 너무 작아지지 않도록 설정 */
+   flex-shrink: 0; /* ✅ 버튼 크기 유지 */
+   width: auto; /* ✅ 텍스트 크기에 맞게 버튼 크기 자동 조정 */
+=======
    font-size: clamp(12px, 1vw, 14px);
+>>>>>>> 2ead971e06cefb3f9fb8552c5719c8875e242f3b
    &:hover {
       background-color: #ff7a00;
    }
