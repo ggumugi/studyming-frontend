@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { fetchStudygroupsThunk, fetchStudygroupByIdThunk, deleteStudygroupThunk } from '../../features/studygroupSlice'
+import { fetchAllStudyGroupsThunk, fetchStudyGroupHashtagsThunk, searchStudyGroupsThunk, fetchMyStudyGroupsThunk, deleteStudyGroupThunk, clearSearchResults } from '../../features/studyListSlice'
 import { toggleStudyLikeThunk, checkUserLikeStatusThunk, fetchStudyLikesThunk } from '../../features/likedSlice'
 
 import styled from 'styled-components'
@@ -8,78 +8,177 @@ import { Card, CardContent, Typography, Button, TextField, MenuItem, Select, Inp
 import { FaLock, FaCamera, FaDesktop, FaHeart } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 
-/*
-좋아요 기능 ui 수정
-활성여부 로고변함? cam sharing lock
-*/
 const StudyList = () => {
    const dispatch = useDispatch()
    const navigate = useNavigate()
 
    // Redux에서 로그인한 사용자 정보 & 스터디 그룹 데이터 가져오기
-   const { studygroups, studygroup, loading } = useSelector((state) => state.studygroups)
+   const { studyGroups, myStudyGroups, searchResults, hashtags, loading, error } = useSelector((state) => state.studyList)
+   const { user } = useSelector((state) => state.auth) // 로그인한 유저의 정보
 
-   const [hashtagsMap, setHashtagsMap] = useState({}) // 🔥 해시태그를 개별적으로 저장할 상태
+   // 로컬 상태 관리
+   const [likedStatus, setLikedStatus] = useState({}) // 각 스터디의 좋아요 상태 저장
+   const [likeCounts, setLikeCounts] = useState({}) // 각 스터디의 좋아요 개수 저장
+   const [searchTerm, setSearchTerm] = useState('') // 검색어 저장
+   const [searchType, setSearchType] = useState('title') // 검색 기준 (제목 or 해시태그)
+   const [isSearching, setIsSearching] = useState(false) // 검색 중인지 여부
+   const [localSearchResults, setLocalSearchResults] = useState([]) // 로컬 검색 결과 (해시태그 검색용)
 
-   const studygroupList = studygroups || [] //진짜배열
+   // 페이징 처리 관련 상태
+   const [myCurrentPage, setMyCurrentPage] = useState(1) // 내 스터디 페이지 번호
+   const myStudiesPerPage = 4 // 한 페이지당 4개 표시
 
-   const { user } = useSelector((state) => state.auth) //로그인한 유저의 정보
+   const [allCurrentPage, setAllCurrentPage] = useState(1) // 전체 스터디 페이지 번호
+   const allStudiesPerPage = 8 // 한 페이지당 8개 표시
 
-   const [likedStatus, setLikedStatus] = useState({}) //  각 스터디의 좋아요 상태 저장
-   const [likeCounts, setLikeCounts] = useState({}) //  각 스터디의 좋아요 개수 저장
+   // 화면에 표시할 스터디 목록 결정
+   const displayedStudies = isSearching ? (searchType === 'hashtag' ? localSearchResults : searchResults) : studyGroups
 
    /**
-    * ✅ 1. 좋아요 상태 및 개수 불러오기 (로그인 유저 변경되거나, 그룹 리스트 변경 시)
+    * 1. 컴포넌트 마운트 시 데이터 로드
     */
    useEffect(() => {
-      if (studygroups.length > 0) {
-         const fetchLikesData = async () => {
-            const newLikedStatus = {}
-            const newLikeCounts = {}
+      // 모든 스터디 그룹 목록 가져오기
+      dispatch(fetchAllStudyGroupsThunk())
 
-            await Promise.all(
-               studygroups.map(async (study) => {
-                  try {
-                     const likeCount = await dispatch(fetchStudyLikesThunk(study.id)).unwrap()
-                     newLikeCounts[study.id] = likeCount // ✅ 좋아요 개수 저장
-
-                     if (user) {
-                        const likeStatus = await dispatch(checkUserLikeStatusThunk(study.id)).unwrap()
-                        newLikedStatus[study.id] = likeStatus
-                     }
-                  } catch (error) {
-                     console.error('❌ 좋아요 데이터 불러오기 오류:', error)
-                  }
-               })
-            )
-
-            setLikeCounts(newLikeCounts) // ✅ 로그인 여부 관계없이 좋아요 숫자는 유지
-            if (user) {
-               setLikedStatus(newLikedStatus) // ✅ 로그인 시 Redux에서 불러온 값 유지
-            }
-         }
-
-         fetchLikesData()
+      // 로그인한 경우 내 스터디 그룹 목록 가져오기
+      if (user) {
+         dispatch(fetchMyStudyGroupsThunk())
       }
-   }, [dispatch, studygroups, user]) // ✅ 유저 변경 시 실행됨
+   }, [dispatch, user])
+
    /**
-    * ✅ 2. 로그아웃 시 좋아요 초기화 (회색 하트 유지)
+    * 2. 스터디 그룹 목록이 로드된 후 해시태그 및 좋아요 정보 가져오기
+    */
+   useEffect(() => {
+      if (studyGroups.length > 0) {
+         // 각 스터디 그룹의 해시태그 가져오기
+         studyGroups.forEach((study) => {
+            dispatch(fetchStudyGroupHashtagsThunk(study.id))
+         })
+
+         // 각 스터디 그룹의 좋아요 개수 가져오기
+         studyGroups.forEach((study) => {
+            dispatch(fetchStudyLikesThunk(study.id))
+               .unwrap()
+               .then((likeCount) => {
+                  setLikeCounts((prev) => ({ ...prev, [study.id]: likeCount }))
+               })
+         })
+
+         // 로그인한 경우 유저의 좋아요 상태 가져오기
+         if (user) {
+            studyGroups.forEach((study) => {
+               dispatch(checkUserLikeStatusThunk(study.id))
+                  .unwrap()
+                  .then((likeStatus) => {
+                     setLikedStatus((prev) => ({ ...prev, [study.id]: likeStatus }))
+                  })
+            })
+         }
+      }
+   }, [dispatch, studyGroups, user])
+
+   /**
+    * 3. 검색 결과가 로드된 후 해시태그 및 좋아요 정보 가져오기
+    */
+   useEffect(() => {
+      if (searchResults.length > 0 && isSearching && searchType === 'title') {
+         // 각 검색 결과의 해시태그 가져오기
+         searchResults.forEach((study) => {
+            if (!hashtags[study.id]) {
+               // 이미 불러온 해시태그가 없는 경우에만
+               dispatch(fetchStudyGroupHashtagsThunk(study.id))
+            }
+         })
+
+         // 각 검색 결과의 좋아요 개수 가져오기
+         searchResults.forEach((study) => {
+            if (likeCounts[study.id] === undefined) {
+               // 이미 불러온 좋아요 개수가 없는 경우에만
+               dispatch(fetchStudyLikesThunk(study.id))
+                  .unwrap()
+                  .then((likeCount) => {
+                     setLikeCounts((prev) => ({ ...prev, [study.id]: likeCount }))
+                  })
+            }
+         })
+
+         // 로그인한 경우 유저의 좋아요 상태 가져오기
+         if (user) {
+            searchResults.forEach((study) => {
+               if (likedStatus[study.id] === undefined) {
+                  // 이미 불러온 좋아요 상태가 없는 경우에만
+                  dispatch(checkUserLikeStatusThunk(study.id))
+                     .unwrap()
+                     .then((likeStatus) => {
+                        setLikedStatus((prev) => ({ ...prev, [study.id]: likeStatus }))
+                     })
+               }
+            })
+         }
+      }
+   }, [dispatch, searchResults, isSearching, searchType, hashtags, likeCounts, likedStatus, user])
+
+   /**
+    * 4. 로컬 검색 결과에 대한 좋아요 및 해시태그 정보 가져오기
+    */
+   useEffect(() => {
+      if (localSearchResults.length > 0 && isSearching && searchType === 'hashtag') {
+         // 각 검색 결과의 해시태그 가져오기
+         localSearchResults.forEach((study) => {
+            if (!hashtags[study.id]) {
+               // 이미 불러온 해시태그가 없는 경우에만
+               dispatch(fetchStudyGroupHashtagsThunk(study.id))
+            }
+         })
+
+         // 각 검색 결과의 좋아요 개수 가져오기
+         localSearchResults.forEach((study) => {
+            if (likeCounts[study.id] === undefined) {
+               // 이미 불러온 좋아요 개수가 없는 경우에만
+               dispatch(fetchStudyLikesThunk(study.id))
+                  .unwrap()
+                  .then((likeCount) => {
+                     setLikeCounts((prev) => ({ ...prev, [study.id]: likeCount }))
+                  })
+            }
+         })
+
+         // 로그인한 경우 유저의 좋아요 상태 가져오기
+         if (user) {
+            localSearchResults.forEach((study) => {
+               if (likedStatus[study.id] === undefined) {
+                  // 이미 불러온 좋아요 상태가 없는 경우에만
+                  dispatch(checkUserLikeStatusThunk(study.id))
+                     .unwrap()
+                     .then((likeStatus) => {
+                        setLikedStatus((prev) => ({ ...prev, [study.id]: likeStatus }))
+                     })
+               }
+            })
+         }
+      }
+   }, [dispatch, localSearchResults, isSearching, searchType, hashtags, likeCounts, likedStatus, user])
+
+   /**
+    * 5. 로그아웃 시 좋아요 상태 초기화
     */
    useEffect(() => {
       if (!user) {
-         setLikedStatus({}) //  로그아웃하면 모든 하트를 회색으로 변경
+         setLikedStatus({}) // 로그아웃하면 모든 하트를 회색으로 변경
       }
    }, [user])
 
    /**
-    * ✅ 3. 좋아요 클릭 핸들러 (UI 즉시 반영 후, Redux 요청)
+    * 좋아요 클릭 핸들러
     */
    const handleLikeClick = (groupId) => {
       if (!user) return // 로그인하지 않으면 클릭 불가능
 
       const isLiked = likedStatus[groupId] // 현재 좋아요 상태
 
-      // ✅ UI에서 즉시 반영
+      // UI에서 즉시 반영
       setLikedStatus((prev) => ({
          ...prev,
          [groupId]: !isLiked,
@@ -87,105 +186,154 @@ const StudyList = () => {
 
       setLikeCounts((prev) => ({
          ...prev,
-         [groupId]: isLiked ? prev[groupId] - 1 : prev[groupId] + 1, // ✅ 좋아요 개수 변경
+         [groupId]: isLiked ? prev[groupId] - 1 : prev[groupId] + 1,
       }))
 
-      // ✅ Redux Thunk 실행 후 서버 응답 반영
+      // Redux 액션 디스패치
       dispatch(toggleStudyLikeThunk(groupId))
          .unwrap()
          .then((response) => {
+            // 서버 응답으로 상태 업데이트
             setLikedStatus((prev) => ({
                ...prev,
                [groupId]: response.liked,
             }))
-
             setLikeCounts((prev) => ({
                ...prev,
                [groupId]: response.likeCount,
             }))
          })
-         .catch((error) => {
-            console.error('❌ 좋아요 요청 오류:', error)
-         })
    }
 
-   //스터디그룹 삭제함수
+   /**
+    * 스터디 그룹 삭제 함수
+    */
    const handleDeleteStudy = (e, studyId) => {
-      e.stopPropagation() // 🛑 카드 클릭 이벤트 방지
+      e.stopPropagation() // 카드 클릭 이벤트 방지
 
       if (window.confirm('정말 삭제하시겠습니까?')) {
-         dispatch(deleteStudygroupThunk(studyId))
+         dispatch(deleteStudyGroupThunk(studyId))
             .unwrap()
             .then(() => {
-               alert('그룹을 삭제했습니다.')
-
-               // ✅ Redux 상태에서 해당 그룹을 제거하여 UI에서도 즉시 반영
-               dispatch(fetchStudygroupsThunk())
-            })
-            .catch((err) => {
-               console.error('❌ 그룹 삭제 실패:', err)
-               alert('그룹을 삭제할 수 없습니다.')
+               // 삭제 성공 후 목록 새로고침
+               dispatch(fetchAllStudyGroupsThunk())
+               if (user) {
+                  dispatch(fetchMyStudyGroupsThunk())
+               }
             })
       }
    }
-   //해시태그 추출 로직(일단 됨....)
-   // ✅ 1️⃣ 전체 스터디 그룹을 불러오는 useEffect (가장 먼저 실행)
-   useEffect(() => {
-      dispatch(fetchStudygroupsThunk()) // ✅ Redux 상태 업데이트
-   }, [dispatch])
 
-   // ✅ 2️⃣ 전체 스터디 그룹이 업데이트된 후 개별 해시태그 불러오는 useEffect 실행
-   useEffect(() => {
-      if (Array.isArray(studygroups) && studygroups.length > 0) {
-         const fetchHashtags = async () => {
-            try {
-               const newHashtagsMap = {}
+   /**
+    * 해시태그 기반 로컬 검색 함수
+    */
+   const performHashtagSearch = (term) => {
+      if (!term.trim()) return []
 
-               await Promise.all(
-                  studygroups.map(async (study) => {
-                     const response = await dispatch(fetchStudygroupByIdThunk(study.id)).unwrap()
-                     newHashtagsMap[study.id] = response.studygroup?.Hashtaged || []
-                  })
-               )
+      const lowerCaseTerm = term.toLowerCase()
 
-               setHashtagsMap(newHashtagsMap) // ✅ Redux는 변경하지 않고 클라이언트 상태만 업데이트
-            } catch (error) {
-               console.error('❌ 해시태그 불러오기 실패:', error)
-            }
-         }
+      // 해시태그 데이터를 기반으로 검색
+      const results = studyGroups.filter((study) => {
+         const studyHashtags = hashtags[study.id] || []
+         return studyHashtags.some((tag) => tag.name.toLowerCase().includes(lowerCaseTerm))
+      })
 
-         fetchHashtags()
+      return results
+   }
+
+   /**
+    * 검색 버튼 클릭 시 실행되는 함수
+    */
+   const handleSearch = () => {
+      if (!searchTerm.trim()) {
+         // 검색어가 없으면 전체 목록으로 돌아감
+         setIsSearching(false)
+         setLocalSearchResults([])
+         dispatch(clearSearchResults())
+         return
       }
-   }, [dispatch, studygroups]) // ✅ `studygroups`가 업데이트된 후 실행
 
-   //  페이징 처리 관련 상태
-   const [myCurrentPage, setMyCurrentPage] = useState(1) // ✅ 내 스터디 페이지 번호
-   const myStudiesPerPage = 4 // ✅ 한 페이지당 4개 표시
+      // 검색 실행
+      setIsSearching(true)
+      setAllCurrentPage(1) // 검색 시 페이지 초기화
 
-   const [allCurrentPage, setAllCurrentPage] = useState(1) // ✅ 전체 스터디 페이지 번호
-   const allStudiesPerPage = 8 // ✅ 한 페이지당 8개 표시
+      if (searchType === 'hashtag') {
+         // 해시태그 검색은 클라이언트 측에서 수행
+         const results = performHashtagSearch(searchTerm)
+         setLocalSearchResults(results)
+      } else {
+         // 제목 검색은 서버 측에서 수행
+         dispatch(searchStudyGroupsThunk({ searchType, searchTerm }))
+      }
+   }
 
-   // 수정: 올바른 데이터 구조로 변경
-   const sortedStudies = [...studygroupList].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+   /**
+    * 검색어 변경 핸들러
+    */
+   const handleSearchTermChange = (e) => {
+      setSearchTerm(e.target.value)
+      // 검색어가 비어있으면 전체 목록으로 돌아감
+      if (!e.target.value.trim()) {
+         setIsSearching(false)
+         setLocalSearchResults([])
+         dispatch(clearSearchResults())
+      }
+   }
 
-   // ✅ 현재 로그인한 사용자가 만든 스터디 필터링
-   const userCreatedStudies = sortedStudies.filter((study) => study.createdBy === user?.id)
+   /**
+    * 검색 타입 변경 핸들러
+    */
+   const handleSearchTypeChange = (e) => {
+      setSearchType(e.target.value)
+      // 검색 타입이 변경되면 검색 결과 초기화
+      setIsSearching(false)
+      setLocalSearchResults([])
+      dispatch(clearSearchResults())
+   }
 
-   // ✅ 모든 사용자가 만든 스터디
-   const allStudies = sortedStudies
+   /**
+    * 스터디 등록 버튼 클릭 시 호출되는 함수
+    */
+   const handleStudyCreateClick = () => {
+      navigate('/study/create')
+   }
 
-   // ✅ "내 스터디" 페이징 처리 (4개씩)
+   /**
+    * "내 스터디" 페이지 변경
+    */
+   const handleMyPageClick = (pageNumber) => {
+      setMyCurrentPage(pageNumber)
+   }
+
+   /**
+    * "스터디 목록" 페이지 변경
+    */
+   const handleAllPageClick = (pageNumber) => {
+      setAllCurrentPage(pageNumber)
+   }
+
+   /**
+    * 그룹 카드 클릭 시 상세 페이지로 이동
+    */
+   const handleCardClick = (studyId) => {
+      if (!user) return // 로그인하지 않은 상태에서는 아무 동작도 하지 않음
+      navigate(`/study/detail/${studyId}`)
+   }
+
+   // 페이징 처리된 내 스터디 목록
    const indexOfLastMyStudy = myCurrentPage * myStudiesPerPage
    const indexOfFirstMyStudy = indexOfLastMyStudy - myStudiesPerPage
-   const currentUserStudies = userCreatedStudies.slice(indexOfFirstMyStudy, indexOfLastMyStudy)
+   const currentUserStudies = myStudyGroups.slice(indexOfFirstMyStudy, indexOfLastMyStudy)
 
-   // ✅ "전체 스터디" 페이징 처리 (8개씩)
+   // 페이징 처리된 전체 스터디 목록
    const indexOfLastAllStudy = allCurrentPage * allStudiesPerPage
    const indexOfFirstAllStudy = indexOfLastAllStudy - allStudiesPerPage
-   const currentAllStudies = allStudies.slice(indexOfFirstAllStudy, indexOfLastAllStudy)
+   const currentAllStudies = displayedStudies.slice(indexOfFirstAllStudy, indexOfLastAllStudy)
 
-   //StyledPagination 유지하면서 동적으로 버튼 생성
+   // 페이징 버튼 렌더링 함수
    const renderPaginationButtons = (totalPages, currentPage, onPageChange) => {
+      if (totalPages === 0) return null // 페이지가 없으면 렌더링하지 않음
+
       return (
          <StyledPagination>
             <Button onClick={() => onPageChange(Math.max(currentPage - 1, 1))} disabled={currentPage === 1}>
@@ -205,69 +353,6 @@ const StudyList = () => {
       )
    }
 
-   //검색어 저장
-   const [searchTerm, setSearchTerm] = useState('') // 검색어 저장
-   const [searchType, setSearchType] = useState('title') // 🔥 검색 기준 (제목 or 해시태그)
-   const [filteredStudies, setFilteredStudies] = useState([]) // 검색 결과 저장
-
-   // 🔹 검색 버튼 클릭 시 실행되는 함수
-   const handleSearch = () => {
-      if (!searchTerm.trim()) {
-         setFilteredStudies(studygroupList) // 검색어가 없으면 전체 리스트 표시
-         return
-      }
-
-      const lowerCaseSearch = searchTerm.toLowerCase() // 검색어를 소문자로 변환
-
-      const results = studygroupList.filter((study) => {
-         if (searchType === 'title') {
-            return study.name.toLowerCase().includes(lowerCaseSearch) // 제목 검색
-         } else if (searchType === 'hashtag') {
-            return (
-               hashtagsMap[study.id] &&
-               hashtagsMap[study.id].some(
-                  (tag) => tag.name.toLowerCase().includes(lowerCaseSearch) // 해시태그 검색
-               )
-            )
-         }
-         return false
-      })
-
-      setFilteredStudies(results) // 필터링된 결과를 상태에 저장
-   }
-
-   // 🔹 검색어 입력 시, 전체 리스트 유지
-   useEffect(() => {
-      if (!searchTerm.trim()) {
-         setFilteredStudies(studygroupList) // 검색어가 없으면 전체 리스트 표시
-      } else {
-         handleSearch() // 검색어가 있을 경우 `handleSearch`를 호출하여 결과 처리
-      }
-   }, [searchTerm, studygroupList]) // `searchTerm`이나 `studygroupList`가 변경될 때마다 실행
-
-   // 스터디 등록 버튼 클릭 시 호출되는 함수
-   const handleStudyCreateClick = () => {
-      navigate('/study/create') // '/study-create' 페이지로 이동
-   }
-
-   //  "내 스터디" 페이지 변경
-   const handleMyPageClick = (pageNumber) => {
-      setMyCurrentPage(pageNumber)
-      console.log(`📌 내 스터디 현재 페이지: ${pageNumber}`)
-   }
-
-   //  "스터디 목록" 페이지 변경
-   const handleAllPageClick = (pageNumber) => {
-      setAllCurrentPage(pageNumber)
-      console.log(`📌 전체 스터디 현재 페이지: ${pageNumber}`)
-   }
-
-   // 그룹 카드 클릭 시 상세 페이지로 이동
-   const handleCardClick = (studyId) => {
-      if (!user) return // 로그인하지 않은 상태에서는 아무 동작도 하지 않음
-      navigate(`/study/detail/${studyId}`)
-   }
-
    return (
       <Wrapper>
          <Header>
@@ -276,110 +361,105 @@ const StudyList = () => {
          </Header>
          <StyledDivider />
          <StudyContainer>
-            {!user ? ( // ✅ 유저가 로그인 안 한 상태
+            {!user ? (
                <Message>로그인을 해주세요</Message>
-            ) : currentUserStudies.length === 0 ? ( // ✅ 내가 만든 스터디가 없는 경우
+            ) : currentUserStudies.length === 0 ? (
                <Message>내가 만든 스터디 그룹이 존재하지 않습니다</Message>
             ) : (
-               currentUserStudies.map(
-                  (
-                     study // ✅ 현재 페이지에 해당하는 스터디만 렌더링
-                  ) => (
-                     <StyledCard key={study.id} onClick={() => handleCardClick(study.id)}>
-                        <CardTop>
-                           {study.lock && <FaLock />}
-                           {study.cam && <FaCamera />}
-                           {study.sharing && <FaDesktop />}
-                        </CardTop>
-                        <HeartIcon
-                           onClick={(e) => {
-                              e.stopPropagation() // 카드 클릭 이벤트 방지
-                              handleLikeClick(study.id)
+               currentUserStudies.map((study) => (
+                  <StyledCard key={study.id} onClick={() => handleCardClick(study.id)}>
+                     <CardTop>
+                        {study.locked && <FaLock />}
+                        {study.cam && <FaCamera />}
+                        {study.sharing && <FaDesktop />}
+                     </CardTop>
+                     <HeartIcon
+                        onClick={(e) => {
+                           e.stopPropagation()
+                           handleLikeClick(study.id)
+                        }}
+                        style={{ pointerEvents: user ? 'auto' : 'none' }}
+                     >
+                        <FaHeart
+                           style={{
+                              color: user ? (likedStatus[study.id] ? 'red' : 'gray') : 'gray',
+                              cursor: user ? 'pointer' : 'default',
+                              transition: 'color 0.2s ease-in-out',
                            }}
-                           style={{ pointerEvents: user ? 'auto' : 'none' }} // 🔥 로그아웃 시 클릭 비활성화
-                        >
-                           <FaHeart
-                              style={{
-                                 color: user ? (likedStatus[study.id] ? 'red' : 'gray') : 'gray', // 🔥 로그아웃 시 회색 유지
-                                 cursor: user ? 'pointer' : 'default',
-                                 transition: 'color 0.2s ease-in-out',
-                              }}
-                           />
-                           <LikeCount disabled={!user}>{likeCounts[study.id] !== undefined ? likeCounts[study.id] : '0'}</LikeCount>
-                        </HeartIcon>
-                        {/* ✅ 관리자인 경우 삭제 버튼 표시 */}
-                        {user?.role === 'ADMIN' && <DeleteButton onClick={(e) => handleDeleteStudy(e, study.id)}>삭제</DeleteButton>}
-                        <CardContent>
-                           <TitleText>{study.name}</TitleText>
-                           <TagContainer>{hashtagsMap[study.id] && hashtagsMap[study.id].length > 0 ? hashtagsMap[study.id].slice(0, 2).map((tag, i) => <Tag key={i}>#{tag.name}</Tag>) : <Tag>해시태그 없음</Tag>}</TagContainer>
-                           <Participants>
-                              인원 {study.countMembers}/{study.maxMembers}
-                           </Participants>
-                        </CardContent>
-                     </StyledCard>
-                  )
-               )
+                        />
+                        <LikeCount disabled={!user}>{likeCounts[study.id] !== undefined ? likeCounts[study.id] : '0'}</LikeCount>
+                     </HeartIcon>
+                     {user?.role === 'ADMIN' && <DeleteButton onClick={(e) => handleDeleteStudy(e, study.id)}>삭제</DeleteButton>}
+                     <CardContent>
+                        <TitleText>{study.name}</TitleText>
+                        <TagContainer>{hashtags[study.id] && hashtags[study.id].length > 0 ? hashtags[study.id].slice(0, 2).map((tag, i) => <Tag key={i}>#{tag.name}</Tag>) : <Tag>해시태그 없음</Tag>}</TagContainer>
+                        <Participants>
+                           인원 {study.countMembers}/{study.maxMembers}
+                        </Participants>
+                     </CardContent>
+                  </StyledCard>
+               ))
             )}
          </StudyContainer>
-         {/* ✅ "내 스터디" 페이징 적용 (StudyContainer 아래) */}
-         {user ? renderPaginationButtons(Math.ceil(userCreatedStudies.length / myStudiesPerPage), myCurrentPage, handleMyPageClick) : null} {/* 로그인 상태일 때만 페이징 버튼 표시 */}
-         {/* ✅ 카드 섹션 - 검색 결과 반영 */}
+         {user && renderPaginationButtons(Math.ceil(myStudyGroups.length / myStudiesPerPage), myCurrentPage, handleMyPageClick)}
+
          <TitleWrapper>
             <Title>스터디 목록</Title>
          </TitleWrapper>
          <StyledDivider />
+
          <StudyContainer2>
-            {filteredStudies.length === 0 && searchTerm ? ( // ✅ 검색 결과가 없을 경우
+            {loading ? (
+               <Message>검색 중...</Message>
+            ) : isSearching && displayedStudies.length === 0 ? (
                <Message>일치하는 스터디 그룹이 없습니다.</Message>
+            ) : currentAllStudies.length === 0 ? (
+               <Message>스터디 그룹이 없습니다.</Message>
             ) : (
-               filteredStudies.map(
-                  (
-                     study // ✅ 현재 페이지의 스터디만 표시
-                  ) => (
-                     <StyledCard key={study.id} onClick={() => handleCardClick(study.id)}>
-                        <CardTop>
-                           {study.locked && <FaLock />}
-                           {study.camera && <FaCamera />}
-                           {study.screenShare && <FaDesktop />}
-                        </CardTop>
-                        <HeartIcon
-                           onClick={(e) => {
-                              e.stopPropagation() // 카드 클릭 이벤트 방지
-                              handleLikeClick(study.id)
+               currentAllStudies.map((study) => (
+                  <StyledCard key={study.id} onClick={() => handleCardClick(study.id)}>
+                     <CardTop>
+                        {study.locked && <FaLock />}
+                        {study.cam && <FaCamera />}
+                        {study.sharing && <FaDesktop />}
+                     </CardTop>
+                     <HeartIcon
+                        onClick={(e) => {
+                           e.stopPropagation()
+                           handleLikeClick(study.id)
+                        }}
+                        style={{ pointerEvents: user ? 'auto' : 'none' }}
+                     >
+                        <FaHeart
+                           style={{
+                              color: user ? (likedStatus[study.id] ? 'red' : 'gray') : 'gray',
+                              cursor: user ? 'pointer' : 'default',
+                              transition: 'color 0.2s ease-in-out',
                            }}
-                           style={{ pointerEvents: user ? 'auto' : 'none' }} // 🔥 로그아웃 시 클릭 비활성화
-                        >
-                           <FaHeart
-                              style={{
-                                 color: user ? (likedStatus[study.id] ? 'red' : 'gray') : 'gray', // 🔥 로그아웃 시 회색 유지
-                                 cursor: user ? 'pointer' : 'default',
-                                 transition: 'color 0.2s ease-in-out',
-                              }}
-                           />
-                           {likeCounts[study.id] !== undefined ? likeCounts[study.id] : '0'}
-                        </HeartIcon>
-                        {/* ✅ 관리자인 경우 삭제 버튼 표시 */}
-                        {user?.role === 'ADMIN' && <DeleteButton onClick={(e) => handleDeleteStudy(e, study.id)}>삭제</DeleteButton>}
-                        <CardContent>
-                           <TitleText>{study.name}</TitleText>
-                           <TagContainer>{hashtagsMap[study.id] && hashtagsMap[study.id].length > 0 ? hashtagsMap[study.id].slice(0, 2).map((tag, i) => <Tag key={i}>#{tag.name}</Tag>) : <Tag>해시태그 없음</Tag>}</TagContainer>
-                           <Participants>
-                              인원 {study.countMembers}/{study.maxMembers}
-                           </Participants>
-                        </CardContent>
-                     </StyledCard>
-                  )
-               )
+                        />
+                        {likeCounts[study.id] !== undefined ? likeCounts[study.id] : '0'}
+                     </HeartIcon>
+                     {user?.role === 'ADMIN' && <DeleteButton onClick={(e) => handleDeleteStudy(e, study.id)}>삭제</DeleteButton>}
+                     <CardContent>
+                        <TitleText>{study.name}</TitleText>
+                        <TagContainer>{hashtags[study.id] && hashtags[study.id].length > 0 ? hashtags[study.id].slice(0, 2).map((tag, i) => <Tag key={i}>#{tag.name}</Tag>) : <Tag>해시태그 없음</Tag>}</TagContainer>
+                        <Participants>
+                           인원 {study.countMembers}/{study.maxMembers}
+                        </Participants>
+                     </CardContent>
+                  </StyledCard>
+               ))
             )}
          </StudyContainer2>
-         {/* ✅ "스터디 목록" 페이징 적용 (StudyContainer2 아래) */}
-         {renderPaginationButtons(Math.ceil(allStudies.length / allStudiesPerPage), allCurrentPage, handleAllPageClick)}
+         {renderPaginationButtons(Math.ceil(displayedStudies.length / allStudiesPerPage), allCurrentPage, handleAllPageClick)}
+
+         {/* 검색 컨트롤 - 원래 위치로 이동 */}
          <SearchContainer>
-            <Dropdown value={searchType} onChange={(e) => setSearchType(e.target.value)}>
+            <Dropdown value={searchType} onChange={handleSearchTypeChange}>
                <option value="title">제목</option>
                <option value="hashtag">해시태그</option>
             </Dropdown>
-            <SearchInput type="text" placeholder={searchType === 'title' ? '제목을 입력하세요' : '해시태그를 입력하세요'} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+            <SearchInput type="text" placeholder={searchType === 'title' ? '제목을 입력하세요' : '해시태그를 입력하세요'} value={searchTerm} onChange={handleSearchTermChange} />
             <SearchButton onClick={handleSearch}>검색</SearchButton>
          </SearchContainer>
       </Wrapper>
@@ -388,20 +468,19 @@ const StudyList = () => {
 
 export default StudyList
 
-// Styled Components
-
+// Styled Components는 원본 코드와 동일하게 유지
 const Title = styled.h2`
    font-size: clamp(14px, 2vw, 20px);
    font-weight: 300;
-   margin: 0; /* 여백 제거 */
+   margin: 0;
 `
 
 const TitleWrapper = styled.div`
    width: 100%;
    display: flex;
-   justify-content: space-between; /* 양쪽 끝에 배치 */
-   align-items: center; /* 텍스트와 버튼을 세로 중앙 정렬 */
-   margin-bottom: 10px; /* 필요에 따라 간격 조정 */
+   justify-content: space-between;
+   align-items: center;
+   margin-bottom: 10px;
 `
 
 const Wrapper = styled.div`
@@ -428,12 +507,12 @@ const StyledAddStudyButton = styled.button`
    border-radius: 4px;
    cursor: pointer;
    font-size: clamp(10px, 1vw, 14px);
-   height: 40px; /* 버튼 높이 조정 */
+   height: 40px;
 `
 const StyledDivider = styled.div`
    width: 100%;
    border-top: 2px solid #ff7a00;
-   margin-top: 10px; /* 제목과의 간격 */
+   margin-top: 10px;
 `
 
 const StudyContainer = styled.div`
@@ -507,7 +586,7 @@ const HeartIcon = styled.div`
    right: 10px;
    font-size: clamp(14px, 2vw, 20px);
    display: flex;
-   gap: 5px; /* 하트와 숫자 간격 */
+   gap: 5px;
    align-items: center;
 `
 
@@ -585,30 +664,14 @@ const SearchButton = styled.button`
    border-radius: 4px;
    cursor: pointer;
    font-size: 14px;
-   white-space: nowrap; /* ✅ 텍스트 줄바꿈 방지 */
-   min-width: 60px; /* ✅ 너무 작아지지 않도록 설정 */
-   flex-shrink: 0; /* ✅ 버튼 크기 유지 */
-   width: auto; /* ✅ 텍스트 크기에 맞게 버튼 크기 자동 조정 */
+   white-space: nowrap;
+   min-width: 60px;
+   flex-shrink: 0;
+   width: auto;
    &:hover {
       background-color: #ff7a00;
    }
 `
-/* ???? */
-const ResultsContainer = styled.div`
-   display: flex;
-   flex-direction: column;
-   gap: 15px;
-   width: 100%;
-   max-width: 600px;
-`
-
-const NoResults = styled.p`
-   font-size: 16px;
-   color: gray;
-   text-align: center;
-   margin-top: 50px;
-`
-/* ???? */
 
 const StyledPagination = styled.div`
    display: flex;
@@ -639,7 +702,7 @@ const DeleteButton = styled.button`
    border-radius: 4px;
    cursor: pointer;
    font-size: 12px;
-   z-index: 10; /* 다른 요소 위에 배치 */
+   z-index: 10;
 
    &:hover {
       background-color: darkred;

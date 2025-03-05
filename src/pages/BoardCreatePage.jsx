@@ -50,6 +50,7 @@ import BoardSidebar from '../components/sidebar/BoardSidebar'
 import BoardCreate from '../components/board/BoardCreate'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom' // ✅ useParams 추가
+import styled from 'styled-components'
 
 import { createPostThunk, updatePostThunk, fetchPostByIdThunk } from '../features/postSlice'
 
@@ -105,12 +106,20 @@ function BoardCreatePage({ isAuthenticated, user }) {
    )
 
    return (
-      <div style={{ display: 'flex' }}>
+      <BoardContainer>
          <BoardSidebar />
          {/* ✅ post가 있으면 수정, 없으면 등록 */}
          <BoardCreate user={user} onSubmit={handleSubmit} isAuthenticated={isAuthenticated} category={category} initialValues={post} />
-      </div>
+      </BoardContainer>
    )
 }
+const BoardContainer = styled.div`
+   display: flex;
+   flex-direction: row;
+   width: 100%;
 
+   @media (max-width: 965px) {
+      flex-direction: column !important;
+   }
+`
 export default BoardCreatePage

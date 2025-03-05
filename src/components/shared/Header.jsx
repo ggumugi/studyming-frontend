@@ -12,6 +12,8 @@ import { logoutUserThunk, checkAuthStatusThunk } from '../../features/authSlice'
 import { setCategory } from '../../features/postSlice'
 import { fetchNotificationsThunk, markNotificationAsReadThunk, deleteReadNotificationsThunk, sendNotificationThunk } from '../../features/notiSlice'
 
+import { RxHamburgerMenu } from 'react-icons/rx' // 햄버거 아이콘 import 추가
+
 const Header = ({ isAuthenticated, user }) => {
    const dispatch = useDispatch()
    const navigate = useNavigate()
@@ -39,6 +41,8 @@ const Header = ({ isAuthenticated, user }) => {
    // 유저 드롭다운 상태
    const [userOpen, setUserOpen] = useState(false)
    const userRef = useRef(null)
+
+   const [menuOpen, setMenuOpen] = useState(false)
 
    // 알림 데이터 불러오기
    useEffect(() => {
@@ -201,7 +205,7 @@ const Header = ({ isAuthenticated, user }) => {
 
                {/* 로그인한 사용자만 메뉴 표시 */}
                {isAuthenticated && (
-                  <NavMenu>
+                  <NavMenu $menuOpen={menuOpen}>
                      <Link to="/study/list">
                         <NavItem>스터디</NavItem>
                      </Link>
@@ -236,6 +240,11 @@ const Header = ({ isAuthenticated, user }) => {
                   </NavMenu>
                )}
             </LeftSection>
+
+            {/* 햄버거 메뉴 (모바일 전용) */}
+            <HamburgerMenu onClick={() => setMenuOpen(!menuOpen)}>
+               <RxHamburgerMenu size={30} />
+            </HamburgerMenu>
 
             {/* 오른쪽 영역: 알림 아이콘 + 유저 메뉴 + 로그아웃 버튼 */}
             <RightSection>
@@ -345,6 +354,7 @@ const Header = ({ isAuthenticated, user }) => {
 export default Header
 
 // 스타일 컴포넌트
+
 const HeaderContainer = styled.header`
    width: 100%;
    height: 60px;
@@ -353,6 +363,11 @@ const HeaderContainer = styled.header`
    align-items: center;
    justify-content: center;
    border-bottom: 1px solid #ddd;
+
+   @media (max-width: 580px) {
+      justify-content: space-between;
+      padding: 0 15px;
+   }
 `
 
 const HeaderContent = styled.div`
@@ -360,22 +375,86 @@ const HeaderContent = styled.div`
    display: flex;
    justify-content: space-between;
    align-items: center;
+
+   @media (max-width: 580px) {
+      width: 100%;
+   }
 `
 
 const LeftSection = styled.div`
    display: flex;
    align-items: center;
+
+   @media (max-width: 580px) {
+      flex: 1;
+   }
 `
 
 const Logo = styled.img`
    height: 25px;
    margin-right: clamp(20px, 4vw, 100px);
+
+   @media (max-width: 580px) {
+      margin-right: 0;
+   }
 `
 
+const RightSection = styled.div`
+   display: flex;
+   align-items: center;
+   gap: clamp(10px, 2vw, 50px);
+
+   @media (max-width: 580px) {
+      gap: 10px;
+   }
+`
+
+const NotificationIconWrapper = styled.div`
+   cursor: pointer;
+
+   @media (max-width: 580px) {
+      order: 2;
+   }
+`
+
+const MenuIcon = styled.div`
+   cursor: pointer;
+   font-size: 24px;
+
+   @media (max-width: 580px) {
+      display: block;
+   }
+`
+
+// 네비게이션 메뉴
 const NavMenu = styled.ul`
    display: flex;
    gap: clamp(20px, 4vw, 80px);
    align-items: center;
+
+   @media (max-width: 580px) {
+      display: ${(props) => (props.$menuOpen ? 'flex' : 'none')};
+      flex-direction: column;
+      position: absolute;
+      top: 60px;
+      left: 0;
+      width: 100%;
+      background: white;
+      padding: 20px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+   }
+`
+
+/*  */
+// 햄버거 메뉴 버튼 (모바일 전용)
+const HamburgerMenu = styled.div`
+   display: none;
+   cursor: pointer;
+
+   @media (max-width: 580px) {
+      display: block;
+   }
 `
 
 const NavItem = styled.li`
@@ -435,12 +514,6 @@ const DropdownItem = styled.li`
    }
 `
 
-const RightSection = styled.div`
-   display: flex;
-   align-items: center;
-   gap: clamp(10px, 2vw, 50px);
-`
-
 const NotificationIcon = styled(FaRegEnvelope)`
    font-size: 22px;
    color: #ff7f00;
@@ -448,10 +521,6 @@ const NotificationIcon = styled(FaRegEnvelope)`
    &:hover {
       color: #e66a00;
    }
-`
-
-const NotificationIconWrapper = styled.div`
-   cursor: pointer;
 `
 
 const NotificationWrapper = styled.div`
@@ -569,6 +638,9 @@ const UserMenu = styled.div`
    &:hover {
       color: #ff7f00;
    }
+   @media (max-width: 580px) {
+      display: none;
+   }
 `
 
 const LogoutButton = styled.button`
@@ -579,6 +651,9 @@ const LogoutButton = styled.button`
    cursor: pointer;
    &:hover {
       text-decoration: underline;
+   }
+   @media (max-width: 580px) {
+      display: none;
    }
 `
 
