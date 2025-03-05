@@ -48,12 +48,16 @@ const HeroSection = () => {
             <SubTitle>
                <strong>스터디밍</strong>과 함께 성장을 시작해보세요
             </SubTitle>
-            <Button>시작하기 →</Button>
+            <Button>
+               <Link to="/login">시작하기 →</Link>
+            </Button>
             <FooterText>
                스터디밍이 처음이신가요?
                <br />
                <Link>
-                  <span>소개페이지로 이동 →</span>
+                  <span>
+                     <Link to="/info">소개페이지로 이동 →</Link>
+                  </span>
                </Link>
             </FooterText>
          </Card>
@@ -129,7 +133,7 @@ const Card = styled.div`
    margin-top: 150px;
    position: absolute;
    background: white;
-   padding: 50px 150px;
+   padding: clamp(10px, 1vw, 50px) clamp(30px, 10vw, 150px);
    border-radius: 15px;
    text-align: center;
    box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.2);
@@ -137,12 +141,13 @@ const Card = styled.div`
 `
 
 const Title = styled.h1`
-   font-size: 36px;
+   font-size: clamp(20px, 2vw, 36px);
    font-weight: 500;
    span {
       color: #ff7a00;
-      font-size: 64px;
-      font-weight: 900;
+      font-size: clamp(38px, 2vw, 64px);
+      font-weight: clamp(300, 900, 900);
+
       display: inline-block;
       transform: rotate(5deg);
       color: transparent; /* 글자 내부 색 제거 */
@@ -151,11 +156,11 @@ const Title = styled.h1`
 `
 
 const SubTitle = styled.p`
-   font-size: 36px;
+   font-size: clamp(20px, 2vw, 36px);
    font-weight: 500;
    strong {
       font-weight: 700;
-      font-size: 48px;
+      font-size: clamp(28px, 2vw, 48px);
       color: #ffa654;
    }
    margin-bottom: 50px;
@@ -167,7 +172,7 @@ const Button = styled.button`
    padding: 10px 100px;
    border-radius: 10px;
    border: none;
-   font-size: 32px;
+   font-size: clamp(18px, 2vw, 32px);
    font-weight: 800;
    cursor: pointer;
    transition: 0.2s ease-in-out;
@@ -179,11 +184,12 @@ const Button = styled.button`
 
 const FooterText = styled.p`
    text-align: right;
-   font-size: 20px;
+   font-size: clamp(14px, 2vw, 20px);
    font-weight: 300;
    color: gray;
    margin-top: 10px;
-   margin-right: -50px;
+   margin-right: clamp(-20px, -5vw, -50px);
+
    line-height: 1.5;
    span {
       text-decoration: underline;

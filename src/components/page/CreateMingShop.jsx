@@ -102,34 +102,50 @@ const CreateMingShop = ({ isAuthenticated }) => {
    }
 
    return (
-      <Container maxWidth="lg" sx={{ mt: 6, height: '1000px' }}>
-         <Typography variant="h5" sx={{ fontWeight: 'bold', textAlign: 'left' }}>
+      <Container
+         maxWidth="sm"
+         sx={{
+            mt: 6,
+            height: 'auto',
+            maxWidth: { xs: '100%', sm: '600px', md: '700px' },
+            padding: { xs: 2, sm: 4 },
+         }}
+      >
+         <Typography
+            variant="h5"
+            sx={{
+               fontWeight: '300',
+               textAlign: 'left',
+               fontSize: 'clamp(14px, 2vw, 20px)',
+               marginBottom: '10px',
+            }}
+         >
             {isEditing ? '상품 수정' : '새로운 밍샵 상품 등록'}
          </Typography>
-         <Box sx={{ borderBottom: '2px solid orange', width: '100%', mb: 4 }} />
+         <Box sx={{ borderBottom: '2px solid #FF7A00', width: '100%', mb: 4 }} />
 
          {/* 상품명 */}
          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', width: '550px', gap: '20px', mb: 3, marginBottom: '50px' }}>
-               <Typography sx={{ width: '230px' }}>상품명</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', width: { xs: '100%', sm: '90%', md: '550px' }, gap: '20px', mb: 3 }}>
+               <Typography sx={{ width: '30%' }}>상품명</Typography>
                <Input fullWidth value={formData.name} onChange={handleChange} name="name" />
             </Box>
 
             {/* 판매 가격 */}
-            <Box sx={{ display: 'flex', alignItems: 'center', width: '550px', gap: '20px', mb: 3, marginBottom: '50px' }}>
-               <Typography sx={{ width: '230px' }}>판매가(밍)</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', width: { xs: '100%', sm: '90%', md: '550px' }, gap: '20px', mb: 3 }}>
+               <Typography sx={{ width: '30%' }}>판매가(밍)</Typography>
                <Input fullWidth type="number" value={formData.price} onChange={handleChange} name="price" />
             </Box>
 
             {/* ✅ 상품 이미지 업로드 */}
-            <Box sx={{ display: 'flex', flexDirection: 'column', width: '550px', gap: '12px', mb: 4, marginBottom: '50px' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', width: { xs: '100%', sm: '90%', md: '550px' }, gap: '12px', mb: 4 }}>
                <Box sx={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                  <Typography sx={{ width: '155px' }}>상품 이미지</Typography>
+                  <Typography sx={{ width: '30%' }}>상품 이미지</Typography>
                   {/* 이미지 미리보기 박스 */}
                   <Box
                      sx={{
-                        width: '373px',
-                        height: '250px',
+                        width: { xs: '100%', sm: '373px' },
+                        height: { xs: '200px', sm: '250px' },
                         border: '1px solid #ccc',
                         borderRadius: '8px',
                         display: 'flex',
@@ -141,7 +157,7 @@ const CreateMingShop = ({ isAuthenticated }) => {
                      {formData.preview ? <img src={formData.preview} alt="미리보기" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} /> : <Typography color="gray">이미지 미리보기</Typography>}
                   </Box>
                </Box>
-               <Box sx={{ display: 'flex', justifyContent: 'flex-start', marginLeft: '176px', mt: 1 }}>
+               <Box sx={{ display: 'flex', justifyContent: 'flex-start', mt: 1 }}>
                   <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} id="image-upload" />
                   <label htmlFor="image-upload">
                      <Button variant="contained" component="span" color="warning">
@@ -151,21 +167,21 @@ const CreateMingShop = ({ isAuthenticated }) => {
                </Box>
             </Box>
 
-            {/* ✅ 상품 제한 설정 */}
-            <Box sx={{ display: 'flex', alignItems: 'center', width: '550px', gap: '20px', mb: 3, marginBottom: '50px' }}>
-               <Typography sx={{ width: '156px' }}>상품 기한</Typography>
+            {/* ✅ 상품 기한 */}
+            <Box sx={{ display: 'flex', alignItems: 'center', width: { xs: '100%', sm: '90%', md: '550px' }, gap: '20px', mb: 3 }}>
+               <Typography sx={{ width: '30%' }}>상품 기한</Typography>
                <Typography>7일</Typography>
             </Box>
 
             {/* ✅ 상품 상세설명 */}
-            <Box sx={{ display: 'flex', alignItems: 'center', width: '550px', gap: '20px', mb: 3, marginBottom: '50px' }}>
-               <Typography sx={{ width: '230px' }}>상품 상세설명</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', width: { xs: '100%', sm: '90%', md: '550px' }, gap: '20px', mb: 3 }}>
+               <Typography sx={{ width: '30%' }}>상품 상세설명</Typography>
                <Input fullWidth multiline rows={1} value={formData.detail} onChange={handleChange} name="detail" sx={{ height: '40px', borderBottom: '1px solid #ccc' }} />
             </Box>
 
             {/* ✅ 상품 유형 선택 */}
-            <Box sx={{ display: 'flex', width: '550px', gap: '20px', mb: 3, height: '40px' }}>
-               <Typography sx={{ width: '230px' }}>상품 유형</Typography>
+            <Box sx={{ display: 'flex', width: { xs: '100%', sm: '90%', md: '550px' }, gap: '20px', mb: 3, height: '40px' }}>
+               <Typography sx={{ width: '30%' }}>상품 유형</Typography>
                <Select fullWidth value={formData.type} onChange={handleChange} name="type">
                   <MenuItem value="emoticon">이모티콘</MenuItem>
                   <MenuItem value="decoration">채팅방 테마</MenuItem>
@@ -174,8 +190,18 @@ const CreateMingShop = ({ isAuthenticated }) => {
             </Box>
 
             {/* ✅ 등록 / 수정 버튼 */}
-            <Box sx={{ display: 'flex', justifyContent: 'center', width: '550px', mt: 4 }}>
-               <Button variant="contained" color="warning" onClick={handleSubmit} sx={{ width: '400px', height: '50px', fontSize: '16px', fontWeight: 'bold' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%', mt: 4 }}>
+               <Button
+                  variant="contained"
+                  color="warning"
+                  onClick={handleSubmit}
+                  sx={{
+                     width: { xs: '100%', sm: '400px' },
+                     height: '50px',
+                     fontSize: '16px',
+                     fontWeight: 'bold',
+                  }}
+               >
                   {isEditing ? '상품 수정' : '상품 등록'}
                </Button>
             </Box>

@@ -1,11 +1,10 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { createGroupMember, deleteGroupMember, updateGroupMember, getGroupMembers, getGroupMemberById, participateInGroup, transferGroupLeader, kickGroupMember } from '../api/groupmemberApi'
+import { createGroupMember, deleteGroupMember, updateGroupMember, getGroupMembers, getGroupMemberById, participateInGroup, transferGroupLeader, kickGroupMember, getUserStudyGroups } from '../api/groupmemberApi'
 
 // 그룹 멤버 전체 불러오기
 export const fetchGroupMembersThunk = createAsyncThunk('groupmembers/fetchAll', async (groupId, { rejectWithValue }) => {
    try {
       const response = await getGroupMembers(groupId)
-      console.log('response.data:', response.data)
       return response.data // 그룹 멤버 데이터를 반환
    } catch (error) {
       return rejectWithValue(error.response?.data?.message || '그룹 멤버 목록 불러오기 실패')
@@ -23,12 +22,14 @@ export const createGroupMemberThunk = createAsyncThunk('groupmembers/create', as
 })
 
 // 그룹 멤버 참여
-export const participateInGroupThunk = createAsyncThunk('groupmembers/participate', async ({ groupId, status }, { rejectWithValue }) => {
+export const participateInGroupThunk = createAsyncThunk('groupmember/participate', async ({ groupId, status }, { rejectWithValue }) => {
    try {
-      const response = await participateInGroup(groupId, status) // API 호출 함수
-      return response.data // 응답 데이터 반환
+      console.log(`그룹 참여 상태 변경 요청: 그룹 ID ${groupId}, 상태 ${status}`)
+      const response = await participateInGroup(groupId, status)
+      return response.data
    } catch (error) {
-      return rejectWithValue(error.response?.data?.message || '그룹 멤버 상태 변경 실패')
+      console.error(`그룹 참여 상태 변경 실패:`, error)
+      return rejectWithValue(error.response?.data?.message || '스터디 그룹 참여 상태를 변경할 수 없습니다.')
    }
 })
 
@@ -83,10 +84,24 @@ export const kickGroupMemberThunk = createAsyncThunk('groupmembers/kick', async 
    }
 })
 
+// 로그인한 유저가 가입한 스터디 그룹 목록 가져오기
+export const fetchUserStudyGroupsThunk = createAsyncThunk('groupmembers/fetchUserStudyGroups', async (_, { rejectWithValue }) => {
+   try {
+      const response = await getUserStudyGroups()
+      return response.data.studyGroups
+   } catch (error) {
+      return rejectWithValue(error.response?.data?.message || '유저 스터디 그룹 목록 조회 실패')
+   }
+})
+
 // 슬라이스 생성
 const groupmemberSlice = createSlice({
    name: 'groupmembers',
    initialState: {
+      userStudyCount: 0,
+      userStudyGroups: [], // 유저가 가입한 스터디 그룹 목록
+      onlineMembers: [], // 현재 접속 중인 멤버 목록
+      onlineMembersCount: 0, // 접속 중인 멤버 수
       groupmembers: [],
       groupmember: [],
       loading: false,
@@ -210,6 +225,20 @@ const groupmemberSlice = createSlice({
             state.loading = false
             state.error = action.payload
             alert(action.payload)
+         })
+         // 스터디 그룹 정보 가져오기기
+         .addCase(fetchUserStudyGroupsThunk.pending, (state) => {
+            state.loading = true
+            state.error = null
+         })
+         .addCase(fetchUserStudyGroupsThunk.fulfilled, (state, action) => {
+            state.loading = false
+            state.userStudyGroups = action.payload
+            state.userStudyCount = action.payload.length // 스터디 그룹 개수 업데이트
+         })
+         .addCase(fetchUserStudyGroupsThunk.rejected, (state, action) => {
+            state.loading = false
+            state.error = action.payload
          })
    },
 })

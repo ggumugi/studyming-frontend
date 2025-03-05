@@ -16,9 +16,19 @@ export const loginUser = async (credentials) => {
    try {
       const response = await studymingApi.post('/auth/login', credentials)
 
+      // ✅ 서버에서 "BANNED" 상태인지 확인
+      if (response.data.status === 'BANNED') {
+         throw new Error(response.data.endDate ? `정지된 계정입니다. ${response.data.endDate}까지 로그인이 불가능합니다.` : '영구 정지된 계정입니다.')
+      }
+
+      // ✅ 휴면 계정 (SLEEP) 처리 🚨
+      if (response.data.status === 'SLEEP') {
+         throw new Error('6개월 미접속으로 인해 휴면 계정이 되었습니다. 비밀번호를 변경한 후 이용해 주세요.')
+      }
+
       return response.data
    } catch (error) {
-      console.error('Login failed', error)
+      console.error('❌ 로그인 실패:', error.message)
       throw error
    }
 }
@@ -215,5 +225,85 @@ export const fetchUsers = async () => {
    } catch (error) {
       console.error('❌ 유저 리스트 가져오기 실패:', error)
       throw error
+   }
+}
+
+// 비밀번호 검증 API 요청을 추가합니다.
+export const verifyPassword = async (password) => {
+   try {
+      const response = await studymingApi.post('/auth/verify-password', { password })
+      return response.data
+   } catch (error) {
+      throw error.response?.data?.message || '비밀번호 확인 중 오류 발생'
+   }
+}
+
+export const getUserInfo = async () => {
+   try {
+      // 기존에 구현된 /auth/user API 활용
+      const response = await studymingApi.get('/auth/user')
+
+      // 응답 데이터 구조 확인 및 변환
+      if (response.data && response.data.isAuthenticated && response.data.user) {
+         // 사용자 정보에 소셜 로그인 상태 추가 (실제 데이터가 없으므로 임시로 설정)
+         const userData = {
+            ...response.data.user,
+            google: !!response.data.user.google, // 값이 있으면 true, 없으면 false
+            kakao: !!response.data.user.kakao, // 값이 있으면 true, 없으면 false
+         }
+
+         return {
+            success: true,
+            user: userData,
+         }
+      }
+
+      // 인증되지 않은 경우
+      return {
+         success: false,
+         message: '인증된 사용자 정보가 없습니다.',
+      }
+   } catch (error) {
+      console.error('❌ 사용자 정보 조회 실패:', error)
+      throw error.response?.data?.message || '사용자 정보 조회 중 오류가 발생했습니다.'
+   }
+}
+
+// 사용자 정보 업데이트 API
+export const updateUserInfo = async (userData) => {
+   try {
+      const response = await studymingApi.patch('/auth/update', userData)
+      return response.data
+   } catch (error) {
+      console.error('❌ 사용자 정보 업데이트 실패:', error)
+      throw error.response?.data?.message || '사용자 정보 업데이트 중 오류가 발생했습니다.'
+   }
+}
+
+// SNS 계정 연동 API
+export const connectSnsAccount = async (data) => {
+   try {
+      const response = await studymingApi.patch('/auth/connect-sns', data, {
+         withCredentials: true,
+      })
+      console.log('✅ SNS 계정 연동 성공:', response.data)
+      return response.data
+   } catch (error) {
+      console.error('❌ SNS 계정 연동 실패:', error)
+      throw error.response?.data?.message || '연동 중 오류가 발생했습니다.'
+   }
+}
+
+// 회원 탈퇴 API
+export const deleteAccount = async () => {
+   try {
+      const response = await studymingApi.delete('/auth/delete-account', {
+         withCredentials: true,
+      })
+      console.log('✅ 회원 탈퇴 성공:', response.data)
+      return response.data
+   } catch (error) {
+      console.error('❌ 회원 탈퇴 실패:', error)
+      throw error.response?.data?.message || '회원 탈퇴 중 오류가 발생했습니다.'
    }
 }

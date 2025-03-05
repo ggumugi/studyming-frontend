@@ -27,19 +27,6 @@ const NextArrow = ({ onClick }) => (
    </ArrowButton>
 )
 
-// ✅ Slick 캐러셀 설정
-const settings = {
-   dots: true,
-   infinite: true,
-   speed: 500,
-   slidesToShow: 1,
-   slidesToScroll: 1,
-   autoplay: true,
-   autoplaySpeed: 3000,
-   prevArrow: <PrevArrow />,
-   nextArrow: <NextArrow />,
-}
-
 const MainVisual = () => {
    const dispatch = useDispatch()
    const { posts, loading } = useSelector((state) => state.posts)
@@ -48,14 +35,29 @@ const MainVisual = () => {
       dispatch(fetchPostsThunk({ page: 1, category: 'noti', limit: 5 }))
    }, [dispatch])
 
+   const uniquePosts = posts.filter((post, index, self) => index === self.findIndex((p) => p.id === post.id))
+
+   // ✅ Slick 캐러셀 설정
+   const settings = {
+      dots: true,
+      infinite: true,
+      infinite: uniquePosts.length > 1, // ✅ 게시글이 1개뿐이면 무한 스크롤 X
+      speed: 500,
+      slidesToShow: 1,
+      slidesToScroll: 1,
+      autoplay: true,
+      autoplaySpeed: 3000,
+      prevArrow: <PrevArrow />,
+      nextArrow: <NextArrow />,
+   }
    return (
       <MainBanner>
          {loading ? (
             <p>로딩 중...</p>
          ) : (
             <StyledSlider {...settings}>
-               {posts.length > 0 ? (
-                  posts.map((item, index) => (
+               {uniquePosts.length > 0 ? (
+                  uniquePosts.map((item, index) => (
                      <CarouselItem key={index}>
                         <h3>{item.title}</h3>
                         <p>{item.content}</p>
@@ -143,6 +145,12 @@ const ArrowButton = styled.button`
    cursor: pointer;
    transition: 0.3s;
 
+   /* 왼쪽 화살표 */
+   ${({ $left }) => $left && `left: clamp(5px, 4vw, -50px);`}
+
+   /* 오른쪽 화살표 */
+   ${({ $right }) => $right && `right: clamp(5px, 4vw, -50px);`}
+   
    &:hover {
       background: rgba(255, 255, 255, 0.2);
    }

@@ -11,6 +11,7 @@ const StudyCreate = ({ onSubmit, isAuthenticated, user, initialValues = {} }) =>
    const [startTime, setStartTime] = useState(initialValues.startTime || '')
    const [endTime, setEndTime] = useState(initialValues.endTime || '')
    const [password, setPassword] = useState(initialValues.password || '')
+   const [passwordError, setPasswordError] = useState('') // 비밀번호 에러 메시지 상태 추가
    const [timegoal, setTimegoal] = useState(initialValues.timeGoal || '')
    const [capInterval, setCapInterval] = useState(initialValues.capInterval || '')
    const [dayZone, setDayZone] = useState(!!initialValues.startDate) // 기간 적용 여부
@@ -53,12 +54,30 @@ const StudyCreate = ({ onSubmit, isAuthenticated, user, initialValues = {} }) =>
       }
    }, [user, initialValues.Hashtaged])
 
+   // 비밀번호 입력 핸들러 추가
+   const handlePasswordChange = (e) => {
+      // 숫자만 입력 가능하도록 처리
+      const value = e.target.value.replace(/[^0-9]/g, '')
+      // 최대 6자리까지만 입력 가능
+      if (value.length <= 6) {
+         setPassword(value)
+      }
+   }
+
    const handleSubmit = (e) => {
       e.preventDefault()
 
       if (!user) {
          alert('로그인이 필요합니다.')
          return
+      }
+
+      // 비공개 스터디인데 비밀번호가 6자리가 아닌 경우
+      if (!open && password.length !== 6) {
+         setPasswordError('비밀번호는 6자리 숫자여야 합니다.')
+         return
+      } else {
+         setPasswordError('')
       }
 
       const groupData = {
@@ -201,8 +220,8 @@ const StudyCreate = ({ onSubmit, isAuthenticated, user, initialValues = {} }) =>
             <Label>
                <LabelText>참여코드</LabelText>
                <NameLabel>
-                  <SmallInput type="text" placeholder="참여코드 6자리" disabled={open} value={password} onChange={(e) => setPassword(e.target.value)} />
-                  <SmallText>참여 가능한 코드입니다</SmallText>
+                  <SmallInput type="text" placeholder="참여코드 6자리" disabled={open} value={password} onChange={handlePasswordChange} maxLength={6} pattern="[0-9]*" inputMode="numeric" />
+                  {!open && <SmallText style={{ color: passwordError ? '#e74c3c' : '#888' }}>{passwordError || (password.length === 6 ? '참여 가능한 코드입니다' : '숫자 6자리를 입력하세요')}</SmallText>}
                </NameLabel>
             </Label>
 
@@ -306,20 +325,22 @@ const TitleContainer = styled.div`
 `
 
 const Title = styled.h2`
-   font-size: 32px;
+   font-size: clamp(14px, 2vw, 20px);
+   font-weight: 300;
    margin-bottom: 10px;
    text-align: center;
 `
 
 const SmallText = styled.span`
-   font-size: 10px;
-   color: #999; /* 작은 글씨 색상 */
+   font-size: 12px;
+   font-weight: 300;
+   color: #888; /* 작은 글씨 색상 */
 `
 
 const StyledDivider = styled.div`
    width: 100%;
    max-width: 800px;
-   height: 3px;
+   height: 2px;
    background-color: #ff7a00;
    margin-bottom: 20px;
 `
@@ -351,15 +372,17 @@ const Label = styled.label`
    align-items: center;
 
    gap: 20px;
-   font-size: 16px;
-   font-weight: bold;
+   font-size: clamp(14px, 2vw, 16px);
+   font-weight: 300;
    margin-bottom: 10px;
    width: 100%;
    justify-content: flex-start;
 `
 
+/* 다시 보기 */
 const LabelText = styled.span`
-   flex: 0 0 150px; /* 고정 너비 설정 */
+   flex: 0 0 clamp(50px, 5vw, 150px);
+
    text-align: left; /* 왼쪽 정렬 */
 `
 
@@ -387,7 +410,8 @@ const FlexContainer = styled.div`
 
 const Input = styled.input`
    padding: 12px;
-   font-size: 16px;
+   font-size: clamp(14px, 2vw, 16px);
+   font-weight: 300;
    border-radius: 4px;
    border: 1px solid #ccc;
    flex: 1; /* 남은 공간을 모두 차지 */
@@ -397,7 +421,8 @@ const Input = styled.input`
 
 const SmallInput = styled(Input)`
    padding: 8px;
-   font-size: 14px;
+   font-size: clamp(12px, 1vw, 14px);
+   font-weight: 300;
    border-radius: 4px;
    border: 1px solid #ccc;
    width: 150px; /* 입력 필드 크기 고정 */
@@ -426,7 +451,8 @@ const CustomTimeInput = styled(Input)`
 
 const TextArea = styled.textarea`
    padding: 12px;
-   font-size: 16px;
+   font-size: clamp(14px, 2vw, 16px);
+   font-weight: 300;
    border-radius: 4px;
    border: 1px solid #ccc;
    resize: vertical;
@@ -437,7 +463,8 @@ const TextArea = styled.textarea`
 
 const SmallSelect = styled.select`
    padding: 12px;
-   font-size: 16px;
+   font-size: clamp(14px, 2vw, 16px);
+   font-weight: 300;
    border-radius: 4px;
    border: 1px solid #ccc;
    width: 180px;
@@ -458,8 +485,8 @@ const RadioGroup = styled.div`
 `
 
 const Spacer = styled.span`
-   font-size: 16px;
-   font-weight: bold;
+   font-size: clamp(14px, 2vw, 16px);
+   font-weight: 300;
    text-align: center;
    min-width: 20px;
 `
@@ -468,13 +495,14 @@ const SubmitButton = styled.button`
    padding: 12px 20px;
    background-color: #ff7a00;
    color: white;
-   font-size: 16px;
+   font-size: clamp(14px, 2vw, 16px);
+   font-weight: 300;
    border: none;
    border-radius: 5px;
    cursor: pointer;
    margin-top: 20px;
    align-self: center;
-   width: 70%;
+   width: 100%;
 
    &:hover {
       background-color: #e66e00;

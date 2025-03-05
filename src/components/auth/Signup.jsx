@@ -60,10 +60,17 @@ const Signup = () => {
 
    // 입력 변경 핸들러
    const handleChange = (e) => {
+      const { name, value } = e.target
+
+      // 닉네임 길이 체크 (6자 이하만 입력)
+      if (name === 'nickname' && value.length > 6) {
+         return // 6자 이상 입력되면 값 변경하지 않음
+      }
       setFormData({ ...formData, [e.target.name]: e.target.value })
    }
 
-   const validate = () => {
+   const validate = (e) => {
+      const { name, value } = e.target
       let newErrors = {}
 
       // 이메일 형식 검사 및 비밀번호 일치 확인
@@ -72,9 +79,20 @@ const Signup = () => {
          newErrors.email = '올바른 이메일 형식에 맞춰서 작성해주세요(예시:studyming@google.com).'
       }
 
+      // ✅ 비밀번호 형식 검사 (최소 8자, 영문/숫자/특수문자 포함)
+      const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+      if (!passwordRegex.test(formData.password)) {
+         newErrors.password = '비밀번호는 최소 8자 이상, 영문/숫자/특수문자를 포함해야 합니다.'
+      }
+
       // 비밀번호 확인
       if (formData.password !== formData.confirmPassword) {
          newErrors.confirmPassword = '비밀번호가 일치하지 않습니다.'
+      }
+
+      // ✅ 닉네임 길이 검사 (최대 6자)
+      if (name === 'nickname' && value.length > 6) {
+         newErrors.nickname = '닉네임은 최대 6자까지만 가능합니다.'
       }
 
       setErrors(newErrors)
@@ -212,7 +230,11 @@ const Signup = () => {
 
    const handleSubmit = (e) => {
       e.preventDefault()
-      if (!validate()) return
+      //  회원가입 전 최종 검증(이메일,비밀번호 형식)
+      if (!validate()) {
+         alert('🚨 입력한 정보를 다시 확인해주세요.')
+         return
+      }
 
       // ✅ 아이디 & 닉네임 중복 확인을 했는지 검사
       if (!successMessages.loginId || !successMessages.nickname) {
@@ -230,6 +252,25 @@ const Signup = () => {
             navigate('/login')
          })
          .catch((error) => {
+            console.error('❌ 회원가입 실패 (서버 응답 전체):', error) //  전체 오류 로그 확인
+            console.log('📢 서버 응답:', error) // `error` 자체를 확인
+
+            const errorMsg = error || '알 수 없는 오류 발생' // 기본 메시지 설정
+
+            console.log('📢 서버에서 받은 오류 메시지:', errorMsg) //  백엔드에서 어떤 메시지를 보내는지 확인
+
+            // ✅ 이메일 중복 체크 (에러 메시지가 직접 "중복된 이메일입니다."인지 비교)
+            if (errorMsg === '중복된 이메일입니다' || errorMsg === '중복된 이메일입니다.') {
+               alert('🚨 이미 가입된 이메일입니다! 다른 이메일을 사용해주세요.')
+               setErrors((prevErrors) => ({
+                  ...prevErrors,
+                  email: '이미 가입된 이메일입니다.',
+               }))
+               return
+            }
+
+            // ✅ 기타 회원가입 실패 처리 (예상치 못한 오류)
+            alert('🚨 회원가입 중 오류가 발생했습니다. 다시 시도해주세요.')
             console.error('회원가입 실패:', error)
             setErrors((prevErrors) => ({
                ...prevErrors,
@@ -255,6 +296,7 @@ const Signup = () => {
                         onBlur={checkDuplicateNickname} // ✅ 입력 후 포커스 아웃 시 자동 실행
                         error={!!errors.nickname}
                         helperText={errors.nickname || successMessages.nickname || ''}
+                        placeholder="닉네임은 6자 이하로 작성해주세요"
                      />
                   </InputRow>
 
@@ -270,7 +312,17 @@ const Signup = () => {
                      />
                   </InputRow>
                   <StyledTextField label="이메일" name="email" type="email" value={formData.email} onChange={handleChange} error={!!errors.email} helperText={errors.email || ''} autoComplete="email" disabled={isEmailDisabled} />
-                  <StyledTextField label="비밀번호" name="password" type="password" value={formData.password} onChange={handleChange} helperText="비밀번호는 최소 8자 이상, 영문/숫자/특수문자를 포함해야 합니다." autoComplete="new-password" />
+                  <StyledTextField
+                     label="비밀번호"
+                     name="password"
+                     type="password"
+                     value={formData.password}
+                     onChange={handleChange}
+                     helperText={errors.password ? errors.password : '비밀번호는 최소 8자 이상, 영문/숫자/특수문자를 포함해야 합니다.'}
+                     error={Boolean(errors.password)}
+                     autoComplete="new-password"
+                  />
+
                   <StyledTextField label="비밀번호 확인" name="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleChange} error={!!errors.confirmPassword} helperText={errors.confirmPassword || ''} autoComplete="new-password" />
                </InputWrapper>
                <StyledButton type="submit">회원가입</StyledButton>
@@ -315,9 +367,10 @@ const FormContainer = styled.div`
 `
 
 const Title = styled.h2`
-   font-weight: bold;
+   font-weight: 300;
    text-align: left;
    color: black;
+   font-size: clamp(14px, 2vw, 20px);
 `
 
 const StyledDivider = styled.div`
@@ -343,6 +396,10 @@ const StyledTextField = styled(TextField)`
    width: 100%;
    &.MuiTextField-root {
       margin-bottom: 20px;
+   }
+
+   label {
+      font-size: clamp(12px, 1vw, 14px);
    }
 `
 

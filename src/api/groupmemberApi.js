@@ -82,7 +82,18 @@ export const transferGroupLeader = async (groupId, newLeaderId) => {
 export const kickGroupMember = async (groupId, userId) => {
    try {
       console.log('🔥 API 요청 - groupId:', groupId, 'userId:', userId) // ✅ 확인용
-      const response = await studymingApi.delete(`/groupmember/${groupId}/${userId}`)
+      const response = await studymingApi.delete(`/groupmember/kick/${groupId}/${userId}`)
+      return response
+   } catch (error) {
+      console.error(`API 오류: ${error.message}`)
+      throw error
+   }
+}
+
+// 로그인한 유저가 가입한 스터디 그룹 목록 가져오기
+export const getUserStudyGroups = async () => {
+   try {
+      const response = await studymingApi.get('/groupmember/user/studygroups')
       return response
    } catch (error) {
       console.error(`API 오류: ${error.message}`)

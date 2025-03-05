@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import BoardSidebar from '../components/sidebar/BoardSidebar'
 import BoardList from '../components/board/BoardList'
 import { fetchPostsThunk } from '../features/postSlice'
+import styled from 'styled-components'
 
 function BoardListPage() {
    const dispatch = useDispatch()
@@ -13,11 +14,21 @@ function BoardListPage() {
    }, [dispatch, category]) // ✅ category 변경 감지
 
    return (
-      <div style={{ display: 'flex' }}>
+      <BoardContainer>
          <BoardSidebar />
          <BoardList category={category} />
-      </div>
+      </BoardContainer>
    )
 }
-
+/* 965 */
 export default BoardListPage
+
+const BoardContainer = styled.div`
+   display: flex;
+   flex-direction: row;
+   width: 100%;
+
+   @media (max-width: 965px) {
+      flex-direction: column; /* 화면이 965px 이하일 때 상하 정렬 */
+   }
+`

@@ -48,7 +48,7 @@ const AdminBoardSidebar = ({ isAuthenticated, user }) => {
          {/* 🔥 오른쪽 콘텐츠 영역 */}
          <ContentArea>
             {/* ✅ 기존 게시판 유지 */}
-            <h2 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>{selectedMenu} 게시판</h2>
+            <h2 style={{ fontSize: 'clamp(14px, 2vw, 20px)' }}>{selectedMenu} 게시판</h2>
 
             {boardContent[selectedMenu]}
          </ContentArea>
@@ -61,26 +61,50 @@ export default AdminBoardSidebar
 // ⭐ Styled Components
 const Container = styled.div`
    display: flex;
-   height: 100vh;
+   height: 100%;
+   margin-bottom: 50px;
+
+   @media (max-width: 1095px) {
+      flex-direction: column;
+   }
 `
 
 const SidebarContainer = styled.nav`
-   width: 200px;
+   width: clamp(100px, 10vw, 200px);
+   margin-left: 20px;
    height: 100vh;
    padding: 20px;
    display: flex;
    flex-direction: column;
    border-right: 1px solid #ddd;
+
+   @media (max-width: 1095px) {
+      width: 100%;
+      height: auto;
+      flex-direction: row;
+      border-right: none;
+      border-bottom: 2px solid #ddd;
+      justify-content: center;
+      align-items: center;
+      padding: 10px 0;
+      margin-left: 0px;
+   }
 `
 
 const MenuList = styled.ul`
-   margin-top: 170px;
+   margin-top: 120px;
    list-style: none;
    padding: 0;
    display: flex;
    flex-direction: column;
    align-items: flex-end;
-   gap: 70px; /* ✅ 메뉴 간 간격 */
+   gap: 70px;
+
+   @media (max-width: 1095px) {
+      flex-direction: row;
+      margin-top: 10px;
+      gap: clamp(50px, 15vw, 200px);
+   }
 `
 
 const MenuItem = styled.li`
@@ -89,10 +113,30 @@ const MenuItem = styled.li`
    display: flex;
    margin-right: 20px;
    justify-content: center;
-   font-size: 20px;
+   font-size: clamp(14px, 1vw, 20px);
    font-weight: ${(props) => (props.$isActive ? '500' : '300')};
    color: ${(props) => (props.$isActive ? '#FF7A00' : '#000')};
    cursor: pointer;
+
+   @media (max-width: 1095px) {
+      margin-right: 0;
+   }
+`
+
+const ActiveIndicator = styled.div`
+   position: absolute;
+   right: -44px;
+   width: 8px;
+   height: 8px;
+   background-color: #ff7f00;
+   border-radius: 50%;
+
+   @media (max-width: 1095px) {
+      right: auto;
+      top: 135%;
+      left: 50%;
+      transform: translateX(-50%);
+   }
 `
 
 const StyledButton = styled.button`
@@ -111,16 +155,6 @@ const SubText = styled.span`
    color: #888;
    margin-top: 4px;
    width: 100%;
-`
-
-// 🔥 활성화된 메뉴 오른쪽에 동그라미 표시
-const ActiveIndicator = styled.div`
-   position: absolute;
-   right: -44px; /* ✅ 오른쪽에 동그라미 위치 */
-   width: 8px;
-   height: 8px;
-   background-color: #ff7f00;
-   border-radius: 50%;
 `
 
 // 🔥 오른쪽 콘텐츠 영역 스타일
