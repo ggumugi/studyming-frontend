@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { getUserPoints, usePointsForItem, sendPoints, getPointHistory } from '../api/pointApi'
+import { getUserPoints, usePointsForItem, sendPoints, getPointHistory, chargePoints } from '../api/pointApi'
 
 // 포인트 조회
 export const fetchUserPoints = createAsyncThunk('points/fetchUserPoints', async (_, { rejectWithValue }) => {
@@ -41,6 +41,16 @@ export const fetchPointHistory = createAsyncThunk('points/fetchPointHistory', as
       return response.data
    } catch (error) {
       return rejectWithValue(error.response?.data?.message || '포인트 변동 내역 조회 실패')
+   }
+})
+
+// ✅ 포인트 충전 Thunk
+export const chargePointsThunk = createAsyncThunk('points/chargePoints', async ({ imp_uid, amount }, { rejectWithValue }) => {
+   try {
+      const response = await chargePoints(imp_uid, amount)
+      return response
+   } catch (error) {
+      return rejectWithValue(error.response?.data?.message || '포인트 충전 실패')
    }
 })
 
@@ -109,6 +119,20 @@ const pointSlice = createSlice({
             state.history = action.payload.history
          })
          .addCase(fetchPointHistory.rejected, (state, action) => {
+            state.loading = false
+            state.error = action.payload
+         })
+
+         // 포인트 충전
+         .addCase(chargePointsThunk.pending, (state) => {
+            state.loading = true
+            state.error = null
+         })
+         .addCase(chargePointsThunk.fulfilled, (state, action) => {
+            state.loading = false
+            state.points = action.payload.newPoints
+         })
+         .addCase(chargePointsThunk.rejected, (state, action) => {
             state.loading = false
             state.error = action.payload
          })

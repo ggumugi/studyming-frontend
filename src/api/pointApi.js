@@ -46,3 +46,14 @@ export const getPointHistory = async () => {
       throw error
    }
 }
+
+// ✅ 카드 결제 후 포인트 충전 API
+export const chargePoints = async (imp_uid, amount) => {
+   try {
+      const response = await studymingApi.post('/point/charge', { imp_uid, amount })
+      return response.data
+   } catch (error) {
+      console.error(`❌ 포인트 충전 오류: ${error.message}`)
+      throw error
+   }
+}
