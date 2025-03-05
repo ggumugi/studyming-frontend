@@ -298,7 +298,7 @@ const StudyList = () => {
                                  transition: 'color 0.2s ease-in-out',
                               }}
                            />
-                           {likeCounts[study.id] !== undefined ? likeCounts[study.id] : '0'}
+                           <LikeCount disabled={!user}>{likeCounts[study.id] !== undefined ? likeCounts[study.id] : '0'}</LikeCount>
                         </HeartIcon>
                         {/* ✅ 관리자인 경우 삭제 버튼 표시 */}
                         {user?.role === 'ADMIN' && <DeleteButton onClick={(e) => handleDeleteStudy(e, study.id)}>삭제</DeleteButton>}
@@ -385,7 +385,8 @@ export default StudyList
 // Styled Components
 
 const Title = styled.h2`
-   font-size: 24px; /* 글자 크기 줄임 */
+   font-size: clamp(14px, 2vw, 20px);
+   font-weight: 300;
    margin: 0; /* 여백 제거 */
 `
 
@@ -414,13 +415,13 @@ const Header = styled.div`
 `
 
 const StyledAddStudyButton = styled.button`
-   padding: 10px 20px;
+   padding: 0 15px;
    background-color: #ff7a00;
    color: white;
    border: none;
    border-radius: 4px;
    cursor: pointer;
-   font-size: 14px;
+   font-size: clamp(10px, 1vw, 14px);
    height: 40px; /* 버튼 높이 조정 */
 `
 const StyledDivider = styled.div`
@@ -490,7 +491,7 @@ const CardTop = styled.div`
    left: 10px;
    display: flex;
    gap: 10px;
-   font-size: 20px;
+   font-size: clamp(14px, 2vw, 20px);
    color: #ff7a00;
 `
 
@@ -498,18 +499,20 @@ const HeartIcon = styled.div`
    position: absolute;
    top: 10px;
    right: 10px;
-   font-size: 20px;
+   font-size: clamp(14px, 2vw, 20px);
    display: flex;
    gap: 5px; /* 하트와 숫자 간격 */
+   align-items: center;
 `
+
 const LikeCount = styled.span`
-   font-size: 14px;
+   font-size: clamp(12px, 1vw, 14px);
    font-weight: bold;
    color: black;
 `
 
 const TitleText = styled.h3`
-   font-size: 18px;
+   font-size: clamp(15px, 2vw, 18px);
    font-weight: bold;
    margin-top: 40px;
    margin-bottom: 10px;
@@ -535,7 +538,7 @@ const Participants = styled.div`
    position: absolute;
    bottom: 10px;
    left: 10px;
-   font-size: 14px;
+   font-size: clamp(12px, 1vw, 14px);
    color: gray;
 `
 
@@ -550,7 +553,7 @@ const SearchContainer = styled.div`
 
 const Dropdown = styled.select`
    padding: 10px;
-   font-size: 14px;
+   font-size: clamp(12px, 1vw, 14px);
    border: 1px solid #ff7a00;
    border-radius: 4px;
    outline: none;
@@ -559,7 +562,7 @@ const Dropdown = styled.select`
 
 const SearchInput = styled.input`
    padding: 10px;
-   font-size: 14px;
+   font-size: clamp(12px, 1vw, 14px);
    width: 500px;
    max-width: 100%;
    border: 1px solid #ff7a00;
@@ -574,11 +577,12 @@ const SearchButton = styled.button`
    border: none;
    border-radius: 4px;
    cursor: pointer;
-   font-size: 14px;
+   font-size: clamp(12px, 1vw, 14px);
    &:hover {
       background-color: #ff7a00;
    }
 `
+/* ???? */
 const ResultsContainer = styled.div`
    display: flex;
    flex-direction: column;
@@ -593,6 +597,7 @@ const NoResults = styled.p`
    text-align: center;
    margin-top: 50px;
 `
+/* ???? */
 
 const StyledPagination = styled.div`
    display: flex;
@@ -607,7 +612,7 @@ const StyledPagination = styled.div`
 `
 const Message = styled.p`
    text-align: center;
-   font-size: 18px;
+   font-size: clamp(14px, 2vw, 16px);
    font-weight: bold;
    color: gray;
    margin: 20px 0;
