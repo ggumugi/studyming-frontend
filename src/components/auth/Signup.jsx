@@ -218,7 +218,11 @@ const Signup = () => {
 
    const handleSubmit = (e) => {
       e.preventDefault()
-      if (!validate()) return
+      //  회원가입 전 최종 검증(이메일,비밀번호 형식)
+      if (!validate()) {
+         alert('🚨 입력한 정보를 다시 확인해주세요.')
+         return
+      }
 
       // ✅ 아이디 & 닉네임 중복 확인을 했는지 검사
       if (!successMessages.loginId || !successMessages.nickname) {
@@ -236,18 +240,15 @@ const Signup = () => {
             navigate('/login')
          })
          .catch((error) => {
-            console.error('❌ 회원가입 실패 (서버 응답 전체):', error) // ✅ 전체 오류 로그 확인
-            // ✅ 백엔드 응답 메시지 확인 (일반적으로 `error.response.data.message` 형태일 가능성 높음)
-            const errorMsg = error?.response?.data?.message.trim() || error.message?.trim() || ''
-            console.log('📢 서버에서 받은 오류 메시지:', errorMsg) // ✅ 백엔드에서 어떤 메시지를 보내는지 확인
+            console.error('❌ 회원가입 실패 (서버 응답 전체):', error) //  전체 오류 로그 확인
+            console.log('📢 서버 응답:', error) // `error` 자체를 확인
 
-            // ✅ 이메일 중복 체크 (다양한 가능성을 고려)
-            if (
-               errorMsg === '중복된 이메일입니다' || //  마침표 없는 경우
-               errorMsg === '중복된 이메일입니다.' || //마침표 있는 경우
-               errorMsg.includes('Duplicate entry') ||
-               errorMsg.includes('email must be unique')
-            ) {
+            const errorMsg = error || '알 수 없는 오류 발생' // 기본 메시지 설정
+
+            console.log('📢 서버에서 받은 오류 메시지:', errorMsg) //  백엔드에서 어떤 메시지를 보내는지 확인
+
+            // ✅ 이메일 중복 체크 (에러 메시지가 직접 "중복된 이메일입니다."인지 비교)
+            if (errorMsg === '중복된 이메일입니다' || errorMsg === '중복된 이메일입니다.') {
                alert('🚨 이미 가입된 이메일입니다! 다른 이메일을 사용해주세요.')
                setErrors((prevErrors) => ({
                   ...prevErrors,
@@ -255,6 +256,7 @@ const Signup = () => {
                }))
                return
             }
+
             // ✅ 기타 회원가입 실패 처리 (예상치 못한 오류)
             alert('🚨 회원가입 중 오류가 발생했습니다. 다시 시도해주세요.')
             console.error('회원가입 실패:', error)
@@ -297,7 +299,17 @@ const Signup = () => {
                      />
                   </InputRow>
                   <StyledTextField label="이메일" name="email" type="email" value={formData.email} onChange={handleChange} error={!!errors.email} helperText={errors.email || ''} autoComplete="email" disabled={isEmailDisabled} />
-                  <StyledTextField label="비밀번호" name="password" type="password" value={formData.password} onChange={handleChange} helperText="비밀번호는 최소 8자 이상, 영문/숫자/특수문자를 포함해야 합니다." autoComplete="new-password" />
+                  <StyledTextField
+                     label="비밀번호"
+                     name="password"
+                     type="password"
+                     value={formData.password}
+                     onChange={handleChange}
+                     helperText={errors.password ? errors.password : '비밀번호는 최소 8자 이상, 영문/숫자/특수문자를 포함해야 합니다.'}
+                     error={Boolean(errors.password)}
+                     autoComplete="new-password"
+                  />
+
                   <StyledTextField label="비밀번호 확인" name="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleChange} error={!!errors.confirmPassword} helperText={errors.confirmPassword || ''} autoComplete="new-password" />
                </InputWrapper>
                <StyledButton type="submit">회원가입</StyledButton>

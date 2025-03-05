@@ -193,7 +193,7 @@ const DropdownItem = styled.li`
    display: flex;
    justify-content: space-between;
    align-items: center;
-   font-size: 16px;
+   font-size: clamp(12px, 1vw, 16px);
    cursor: pointer;
    color: #333;
 
