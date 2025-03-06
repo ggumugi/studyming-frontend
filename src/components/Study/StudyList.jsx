@@ -24,6 +24,9 @@ const StudyList = () => {
    const [isSearching, setIsSearching] = useState(false) // 검색 중인지 여부
    const [localSearchResults, setLocalSearchResults] = useState([]) // 로컬 검색 결과 (해시태그 검색용)
 
+   // 정렬 관련 상태 추가
+   const [sortType, setSortType] = useState('latest') // 'latest' 또는 'likes'
+
    // 페이징 처리 관련 상태
    const [myCurrentPage, setMyCurrentPage] = useState(1) // 내 스터디 페이지 번호
    const myStudiesPerPage = 4 // 한 페이지당 4개 표시
@@ -320,15 +323,48 @@ const StudyList = () => {
       navigate(`/study/detail/${studyId}`)
    }
 
+   /**
+    * 정렬 타입 변경 핸들러
+    */
+   const handleSortTypeChange = (type) => {
+      setSortType(type)
+      setAllCurrentPage(1) // 정렬 변경 시 페이지 초기화
+   }
+
+   // 정렬된 스터디 목록 생성
+   const getSortedStudies = (studies) => {
+      if (!studies) return []
+
+      // 불변성을 유지하기 위해 배열 복사
+      const sortedStudies = [...studies]
+
+      if (sortType === 'latest') {
+         // 최신순 정렬 (ID가 높을수록 최신)
+         return sortedStudies.sort((a, b) => b.id - a.id)
+      } else if (sortType === 'likes') {
+         // 좋아요순 정렬
+         return sortedStudies.sort((a, b) => {
+            const likesA = likeCounts[a.id] || 0
+            const likesB = likeCounts[b.id] || 0
+            return likesB - likesA
+         })
+      }
+
+      return sortedStudies
+   }
+
    // 페이징 처리된 내 스터디 목록
    const indexOfLastMyStudy = myCurrentPage * myStudiesPerPage
    const indexOfFirstMyStudy = indexOfLastMyStudy - myStudiesPerPage
    const currentUserStudies = myStudyGroups.slice(indexOfFirstMyStudy, indexOfLastMyStudy)
 
+   // 정렬된 스터디 목록
+   const sortedStudies = getSortedStudies(displayedStudies)
+
    // 페이징 처리된 전체 스터디 목록
    const indexOfLastAllStudy = allCurrentPage * allStudiesPerPage
    const indexOfFirstAllStudy = indexOfLastAllStudy - allStudiesPerPage
-   const currentAllStudies = displayedStudies.slice(indexOfFirstAllStudy, indexOfLastAllStudy)
+   const currentAllStudies = sortedStudies.slice(indexOfFirstAllStudy, indexOfLastAllStudy)
 
    // 페이징 버튼 렌더링 함수
    const renderPaginationButtons = (totalPages, currentPage, onPageChange) => {
@@ -405,6 +441,15 @@ const StudyList = () => {
 
          <TitleWrapper>
             <Title>스터디 목록</Title>
+            <SortButtons>
+               <SortButton onClick={() => handleSortTypeChange('latest')} $active={sortType === 'latest'}>
+                  최신순
+               </SortButton>
+               <SortDivider>|</SortDivider>
+               <SortButton onClick={() => handleSortTypeChange('likes')} $active={sortType === 'likes'}>
+                  좋아요순
+               </SortButton>
+            </SortButtons>
          </TitleWrapper>
          <StyledDivider />
 
@@ -451,7 +496,7 @@ const StudyList = () => {
                ))
             )}
          </StudyContainer2>
-         {renderPaginationButtons(Math.ceil(displayedStudies.length / allStudiesPerPage), allCurrentPage, handleAllPageClick)}
+         {renderPaginationButtons(Math.ceil(sortedStudies.length / allStudiesPerPage), allCurrentPage, handleAllPageClick)}
 
          {/* 검색 컨트롤 - 원래 위치로 이동 */}
          <SearchContainer>
@@ -481,6 +526,31 @@ const TitleWrapper = styled.div`
    justify-content: space-between;
    align-items: center;
    margin-bottom: 10px;
+`
+
+// 정렬 버튼 스타일 추가
+const SortButtons = styled.div`
+   display: flex;
+   align-items: center;
+   gap: 5px;
+`
+
+const SortButton = styled.button`
+   background: none;
+   border: none;
+   font-size: clamp(12px, 1vw, 14px);
+   cursor: pointer;
+   color: ${(props) => (props.$active ? '#ff7a00' : '#888')};
+   font-weight: ${(props) => (props.$active ? 'bold' : 'normal')};
+
+   &:hover {
+      color: #ff7a00;
+   }
+`
+
+const SortDivider = styled.span`
+   color: #ddd;
+   font-size: clamp(12px, 1vw, 14px);
 `
 
 const Wrapper = styled.div`
@@ -657,6 +727,8 @@ const SearchInput = styled.input`
 `
 
 const SearchButton = styled.button`
+   padding: 10px 20px;
+   background-color: #e76f00;
    padding: 10px 20px;
    background-color: #e76f00;
    color: white;

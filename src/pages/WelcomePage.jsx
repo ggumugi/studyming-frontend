@@ -54,11 +54,9 @@ const HeroSection = () => {
             <FooterText>
                스터디밍이 처음이신가요?
                <br />
-               <Link>
-                  <span>
-                     <Link to="/info">소개페이지로 이동 →</Link>
-                  </span>
-               </Link>
+               <span>
+                  <Link to="/info">소개페이지로 이동 →</Link>
+               </span>
             </FooterText>
          </Card>
       </Container>
