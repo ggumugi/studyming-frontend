@@ -48,7 +48,7 @@ const Container = styled.div`
 `
 
 const SidebarContainer = styled.nav`
-   width: 200px;
+   width: clamp(100px, 10vw, 200px);
    height: 100vh;
    padding: 20px;
    display: flex;
