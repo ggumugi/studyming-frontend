@@ -55,7 +55,7 @@ const ItemList = ({ items, isAuthenticated, user }) => {
                      <ImageWrapper>
                         {item.type !== 'cash' && <Tag>7일</Tag>}
                         <Image
-                           src={item.img ? `$http://ec2-13-125-242-248.ap-northeast-2.compute.amazonaws.com:8000/${item.img}` : '/img/default.png'} // ✅ 기본 이미지 추가
+                           src={item.img ? `$http://ec2-13-125-242-248.ap-northeast-2.compute.amazonaws.com:8000${item.img}` : '/img/default.png'} // ✅ 기본 이미지 추가
                            alt={item.name}
                         />
                      </ImageWrapper>
