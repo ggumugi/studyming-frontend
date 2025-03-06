@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Menu, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material'
 import { FaRegEnvelope, FaEnvelope } from 'react-icons/fa'
+import { IoMdClose } from 'react-icons/io'
 import { useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -188,47 +189,84 @@ const Header = ({ isAuthenticated, user }) => {
                      {menuOpen && (
                         <MobileMenu>
                            {/* 닫기 버튼 */}
-                           <CloseButton onClick={() => setMenuOpen(false)}>✖</CloseButton>
+                           <CloseButton onClick={() => setMenuOpen(false)}>
+                              <IoMdClose style={{ fontSize: '35px' }} />
+                           </CloseButton>
 
                            {/* 유저 정보 (스터디 위) */}
-                           <MobileUserContainer>
+                           <MobileUserContainer onClick={() => setMenuOpen(false)}>
                               <MobileUserInfo onClick={() => navigate('/mypage')}>{user?.nickname} 님</MobileUserInfo>
                            </MobileUserContainer>
 
                            {/* 기존 메뉴 */}
-                           <NavItem>
+                           <NavItem
+                              onClick={() => setMenuOpen(false)}
+                              style={{
+                                 color: 'white',
+                                 fontSize: '24px',
+                                 fontWeight: '500',
+                                 marginBottom: '70px',
+                              }}
+                           >
                               <Link to="/study/list">스터디</Link>
                            </NavItem>
-                           <NavItem>
+                           <NavItem
+                              style={{
+                                 color: 'white',
+                                 fontSize: '24px',
+                                 fontWeight: '500',
+                                 marginBottom: '70px',
+                              }}
+                              onClick={() => setMenuOpen(false)}
+                           >
                               <Link to="/mingshop">밍샵</Link>
                            </NavItem>
 
                            {/* 게시판 - 드롭다운 제거 */}
-                           <NavItem>
+                           <NavItem
+                              style={{
+                                 color: 'white',
+                                 fontSize: '24px',
+                                 fontWeight: '500',
+                                 marginBottom: '70px',
+                              }}
+                              onClick={() => setMenuOpen(false)}
+                           >
                               <Link to="/board">게시판</Link>
                            </NavItem>
 
                            {/* 관리자 메뉴 (관리자만 보임) */}
                            {user?.role === 'ADMIN' && (
-                              <NavItem>
+                              <NavItem
+                                 style={{
+                                    color: 'white',
+                                    fontSize: '24px',
+                                    fontWeight: '500',
+                                    marginBottom: '70px',
+                                 }}
+                                 onClick={() => setMenuOpen(false)}
+                              >
                                  <Link to="/admin">관리</Link>
                               </NavItem>
                            )}
 
                            {/* 로그아웃 버튼 */}
-                           <NavItem onClick={handleLogout}>로그아웃</NavItem>
+                           <NavItem
+                              onClick={handleLogout}
+                              style={{
+                                 color: 'white',
+                                 fontSize: '24px',
+                                 fontWeight: '500',
+                                 marginBottom: '20px',
+                              }}
+                           >
+                              로그아웃
+                           </NavItem>
                         </MobileMenu>
                      )}
                   </>
                )}
             </LeftSection>
-
-            {/* 햄버거 메뉴 (모바일 전용) */}
-            {isAuthenticated && (
-               <HamburgerMenu onClick={() => setMenuOpen(!menuOpen)}>
-                  <RxHamburgerMenu size={30} />
-               </HamburgerMenu>
-            )}
 
             {/* 오른쪽 영역: 알림 아이콘 + 유저 메뉴 + 로그아웃 버튼 */}
             <RightSection>
@@ -270,6 +308,13 @@ const Header = ({ isAuthenticated, user }) => {
                            </NotiDropdownMenu>
                         )}
                      </NotificationWrapper>
+
+                     {/* 햄버거 메뉴 (모바일 전용) */}
+                     {isAuthenticated && (
+                        <HamburgerMenu onClick={() => setMenuOpen(!menuOpen)}>
+                           <RxHamburgerMenu size={30} />
+                        </HamburgerMenu>
+                     )}
 
                      {/* 유저 닉네임 - 드롭다운 제거하고 직접 /mypage로 이동 */}
                      <UserWrapper>
@@ -401,6 +446,7 @@ const NavMenu = styled.ul`
 const HamburgerMenu = styled.div`
    display: none;
    cursor: pointer;
+   color: #ff7f00;
 
    @media (max-width: 580px) {
       display: block;
@@ -569,18 +615,20 @@ const MessageContent = styled.div`
    min-height: 100px;
    white-space: pre-wrap;
 `
+// 모바일 전용 유저 정보 스타일
 const MobileMenu = styled.div`
    position: fixed;
    top: 0;
    left: 0;
    width: 100%;
    height: 100vh;
-   background: orange;
+   background: #ff7a00;
    display: flex;
    flex-direction: column;
    align-items: center;
    justify-content: center;
    z-index: 100;
+   padding-bottom: 80px;
 `
 
 const CloseButton = styled.div`
@@ -591,26 +639,24 @@ const CloseButton = styled.div`
    cursor: pointer;
    color: white;
 `
-// 모바일 전용 유저 정보 스타일
+
 const MobileUserContainer = styled.div`
    display: flex;
    flex-direction: column;
    align-items: center;
    width: 100%;
    padding: 15px;
-   background-color: white;
-   border-bottom: 1px solid #ddd;
    position: relative;
    z-index: 101;
 `
 
 const MobileUserInfo = styled.div`
-   font-size: 16px;
-   font-weight: 600;
-   color: #000;
+   font-size: 24px;
+   font-weight: 500;
+   color: white;
+   margin-bottom: 70px;
+   border: 2px solid white;
+   border-radius: 10px;
    cursor: pointer;
-   padding: 10px;
-   &:hover {
-      color: #ff7f00;
-   }
+   padding: 15px 25px 15px 25px;
 `
