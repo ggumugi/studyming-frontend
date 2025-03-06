@@ -90,7 +90,7 @@ const MenuList = styled.ul`
    @media (max-width: 965px) {
       flex-direction: row;
       margin-top: 10px;
-      gap: clamp(30px, 1vw, 50px);
+      gap: clamp(60px, 20vw, 80px);
    }
 `
 

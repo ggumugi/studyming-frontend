@@ -28,7 +28,7 @@ export default GroupSidebar
 
 // ⭐ Styled Components
 const SidebarContainer = styled.nav`
-   width: 250px;
+   width: clamp(100px, 10vw, 200px);
    height: 180vh;
    padding: 20px;
    display: flex;

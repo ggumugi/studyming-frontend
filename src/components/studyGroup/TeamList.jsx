@@ -67,10 +67,13 @@ const TeamList = ({ groupmembers, studygroup }) => {
    }, [dispatch, groupId])
 
    return (
-      <TeamListWrapper $isFixed={isFixed} $position={position} ref={teamListRef}>
-         <TitleWrapper>
-            <Title>스터디원 목록</Title>
-         </TitleWrapper>
+      <>
+         <TeamListWrapper $isFixed={isFixed} $position={position} ref={teamListRef}>
+            <TitleWrapper>
+               <Title>스터디원 목록</Title>
+            </TitleWrapper>
+         </TeamListWrapper>
+
          <TeamMembers>
             {safeGroupmembers.map((member) => (
                <Member key={member.id}>
@@ -84,7 +87,7 @@ const TeamList = ({ groupmembers, studygroup }) => {
                </Member>
             ))}
          </TeamMembers>
-      </TeamListWrapper>
+      </>
    )
 }
 
@@ -99,6 +102,12 @@ const TeamListWrapper = styled.div`
    top: ${(props) => (props.$isFixed ? 'auto' : `${props.$position.top}px`)};
    bottom: ${(props) => (props.$isFixed ? '0' : 'auto')};
    transition: top 0.3s ease, bottom 0.3s ease;
+   @media (max-width: 965px) {
+      position: static; /* ✅ position을 기본값으로 되돌림 */
+      top: unset; /* ✅ top 속성 제거 */
+      bottom: unset; /* ✅ bottom 속성 제거 */
+      transition: none; /* ✅ 애니메이션 제거 */
+   }
 `
 
 const TitleWrapper = styled.div`
@@ -112,6 +121,10 @@ const TitleWrapper = styled.div`
    display: flex;
    flex-direction: column;
    align-items: flex-end;
+
+   @media (max-width: 965px) {
+      display: none;
+   }
 `
 
 const Title = styled.h3`
@@ -125,6 +138,26 @@ const TeamMembers = styled.ul`
    list-style: none;
    padding: 0;
    margin: 0;
+
+   @media (max-width: 965px) {
+      padding: 0px 20px 0px 20px;
+      display: flex;
+      overflow-x: auto; /* ✅ 가로 스크롤 활성화 */
+      white-space: nowrap; /* ✅ 줄바꿈 방지 */
+
+      &::-webkit-scrollbar {
+         height: 3px; /* ✅ 스크롤바 높이 조정 */
+      }
+
+      &::-webkit-scrollbar-thumb {
+         background: #ccc; /* ✅ 스크롤바 색상 */
+         border-radius: 4px;
+      }
+
+      &::-webkit-scrollbar-track {
+         background: #f0f0f0; /* ✅ 스크롤바 배경 */
+      }
+   }
 `
 
 const Member = styled.li`
@@ -134,6 +167,10 @@ const Member = styled.li`
    font-size: 20px;
    font-weight: 300;
    transition: background-color 0.3s;
+
+   @media (max-width: 965px) {
+      margin-right: 30px;
+   }
 `
 
 const MemberGrid = styled.div`

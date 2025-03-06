@@ -63,7 +63,6 @@ const MenuList = styled.ul`
    display: flex;
    flex-direction: column;
    align-items: flex-end;
-   gap: 70px; /* ✅ 메뉴 간 간격 */
 `
 
 const MenuItem = styled.li`

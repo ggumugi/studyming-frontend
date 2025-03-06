@@ -312,7 +312,7 @@ const Header = ({ isAuthenticated, user }) => {
                      {/* 햄버거 메뉴 (모바일 전용) */}
                      {isAuthenticated && (
                         <HamburgerMenu onClick={() => setMenuOpen(!menuOpen)}>
-                           <RxHamburgerMenu size={30} />
+                           <RxHamburgerMenu size={20} />
                         </HamburgerMenu>
                      )}
 

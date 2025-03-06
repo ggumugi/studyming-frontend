@@ -196,6 +196,9 @@ export default StudyRoomLayout
 const Container = styled.div`
    display: flex;
    height: 100%;
+   @media (max-width: 965px) {
+      flex-direction: column;
+   }
 `
 
 const SidebarContainer = styled.nav`
@@ -206,6 +209,17 @@ const SidebarContainer = styled.nav`
    flex-direction: column;
    border-right: 1px solid #ddd;
    justify-content: space-between;
+
+   @media (max-width: 965px) {
+      width: 100%;
+      height: auto;
+      flex-direction: column;
+      border-right: none;
+      justify-content: center;
+      align-items: center;
+      padding: 0;
+      margin-left: 0px;
+   }
 `
 
 const MenuList = styled.ul`
@@ -216,6 +230,14 @@ const MenuList = styled.ul`
    flex-direction: column;
    align-items: flex-end;
    gap: 40px;
+
+   @media (max-width: 965px) {
+      margin-top: 0;
+      display: grid; /* flex 대신 grid */
+      grid-template-columns: repeat(2, 1fr);
+      width: 100%;
+      gap: 0;
+   }
 `
 
 const MenuItem = styled.li`
@@ -227,6 +249,13 @@ const MenuItem = styled.li`
    font-weight: ${(props) => (props.$isActive ? '500' : '300')};
    color: ${(props) => (props.$isActive ? '#FF7A00' : '#000')};
    cursor: pointer;
+
+   @media (max-width: 965px) {
+      padding: 15px 0;
+      background-color: ${(props) => (props.$isActive ? '#FF7A00' : 'transparent')};
+      color: ${(props) => (props.$isActive ? 'white' : 'black')};
+      margin-right: 0;
+   }
 `
 
 const StyledButton = styled.button`
@@ -249,11 +278,19 @@ const ActiveIndicator = styled.div`
    height: 8px;
    background-color: #ff7f00;
    border-radius: 50%;
+
+   @media (max-width: 965px) {
+      display: none;
+   }
 `
 
 const TeamListWrapper = styled.div`
    width: 100%;
    margin-top: auto;
+
+   @media (max-width: 965px) {
+      margin-top: 0;
+   }
 `
 
 const ContentArea = styled.div`
