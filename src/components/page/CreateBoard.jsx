@@ -53,8 +53,6 @@ const CreateBoard = ({ setIsWriting, post = null }) => {
          formData.append('images', file)
       })
 
-      console.log('🔥 FormData 확인:', [...formData.entries()])
-
       if (post) {
          dispatch(updatePostThunk({ id: post.id, postData: formData }))
             .unwrap()

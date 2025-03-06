@@ -13,10 +13,6 @@ export const initSocket = () => {
          reconnectionDelay: 1000,
       })
 
-      socket.on('connect', () => {
-         console.log('Socket.IO 연결 성공:', socket.id)
-      })
-
       socket.on('connect_error', (error) => {
          console.error('Socket.IO 연결 오류:', error)
       })

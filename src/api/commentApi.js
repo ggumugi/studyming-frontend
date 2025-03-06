@@ -19,20 +19,10 @@ export const createComment = async (commentData) => {
          formData.append('image', commentData.imageFile) // ✅ 이미지 파일 추가
       }
 
-      console.log('✅ FormData.append() 실행 완료!')
-      formData.forEach((value, key) => {
-         console.log(`✅ FormData key: ${key}, value:`, value)
-      })
-
       // ✅ FormData 객체 복사 (혹시 모를 객체 변형 방지)
       const formDataCopy = new FormData()
       commentData.formData.forEach((value, key) => {
          formDataCopy.append(key, value)
-      })
-
-      console.log('🔥 API로 보낼 최종 FormData 데이터:')
-      formDataCopy.forEach((value, key) => {
-         console.log(`✅ API FormData key: ${key}, value:`, value)
       })
 
       const config = {
@@ -41,7 +31,7 @@ export const createComment = async (commentData) => {
          },
       }
 
-      console.log("✅ FormData.get('content') (append 실행 직후):", formData.get('content'))
+      // console.log("✅ FormData.get('content') (append 실행 직후):", formData.get('content'))
 
       const response = await studymingApi.post(`${API_URL}/${commentData.postId}`, formDataCopy, config)
       return response.data
@@ -60,7 +50,7 @@ export const fetchComments = async ({ postId, postCategory, page = 1, limit = 10
    }
 
    try {
-      console.log('📢 fetchComments 요청 시작! postId:', postId)
+      // console.log('📢 fetchComments 요청 시작! postId:', postId)
 
       const response = await studymingApi.get(`${API_URL}/${postId}`, {
          params: { page, limit },
@@ -95,11 +85,6 @@ export const fetchCommentById = async ({ commentId, postCategory }) => {
  */
 export const updateComment = async (id, commentData) => {
    try {
-      console.log('🔥 API로 보낼 최종 FormData 데이터:')
-      commentData.forEach((value, key) => {
-         console.log(`✅ API commentData key: ${key}, value:`, value)
-      })
-
       const config = {
          headers: {
             'Content-Type': 'multipart/form-data',
@@ -119,7 +104,6 @@ export const updateComment = async (id, commentData) => {
  */
 export const deleteComment = async (commentId) => {
    try {
-      console.log(`${API_URL}/${commentId}`) // 요청 URL 로그 확인
       const response = await studymingApi.delete(`${API_URL}/${commentId}`)
       return response.data
    } catch (error) {

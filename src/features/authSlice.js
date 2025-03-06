@@ -188,7 +188,7 @@ export const fetchKakaoUserInfoThunk = createAsyncThunk('auth/fetchKakaoUserInfo
 export const fetchUsersThunk = createAsyncThunk('auth/fetchUsers', async (_, { rejectWithValue }) => {
    try {
       const users = await fetchUsers() // 서버에서 유저 리스트 가져오기
-      console.log('✅ 서버에서 가져온 회원 데이터:', users)
+
       return users
    } catch (error) {
       return rejectWithValue(error.message || '회원 목록 불러오기 실패')
@@ -288,7 +288,6 @@ const authSlice = createSlice({
       // 로그인
       builder
          .addCase(loginUserThunk.pending, (state) => {
-            console.log('🔄 로그인 요청 중...')
             state.loading = true
             state.error = null
          })
@@ -304,7 +303,6 @@ const authSlice = createSlice({
             state.isAuthenticated = true
          })
          .addCase(loginUserThunk.rejected, (state, action) => {
-            console.log('❌ 로그인 실패:', action.payload)
             state.loading = false
             state.error = action.payload
          })

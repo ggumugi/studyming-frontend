@@ -26,7 +26,7 @@ const FindIdPage = () => {
             setStep(2) // ✅ 성공한 경우에만 실행
          })
          .catch((err) => {
-            console.log('🚨 [DEBUG] 이메일 인증 오류 응답:', err) // ✅ 오류 데이터 확인
+            // console.log('🚨 [DEBUG] 이메일 인증 오류 응답:', err) // ✅ 오류 데이터 확인
             alert(err?.message || err?.error || JSON.stringify(err) || '이메일 인증 요청 중 오류가 발생했습니다.')
          })
    }
@@ -43,7 +43,7 @@ const FindIdPage = () => {
             setStep(3) // ✅ 성공한 경우에만 실행
          })
          .catch((err) => {
-            console.log('🚨 [DEBUG] 인증 코드 오류 응답:', err) // ✅ 오류 데이터 확인
+            // console.log('🚨 [DEBUG] 인증 코드 오류 응답:', err) // ✅ 오류 데이터 확인
             alert(err?.message || err?.error || JSON.stringify(err) || '인증 코드 확인 중 오류가 발생했습니다.')
          })
    }

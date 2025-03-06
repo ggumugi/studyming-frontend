@@ -19,12 +19,6 @@ const AdminBoardSidebar = ({ isAuthenticated, user }) => {
 
    // 🔥 메뉴에 따른 더미 데이터 설정
 
-   useEffect(() => {
-      if (isWriting) {
-         console.log('글쓰기 모드 활성화!')
-      }
-   }, [isWriting]) // ✅ isWriting이 변경될 때 실행
-
    const boardContent = {
       회원정보: <MemberRecordsBoard category="회원정보" />, // 회원내역 게시판
       신고내역: <ReportsBoard category="신고내역" isAuthenticated={isAuthenticated} user={user} />, // 신고내역 게시판

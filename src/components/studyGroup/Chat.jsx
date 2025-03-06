@@ -38,18 +38,15 @@ const Chat = ({ studygroup, groupmembers, user }) => {
             return
          }
 
-         console.log('과거 메시지 수신:', newMessages.length, '개')
          setMessages(newMessages)
       })
 
       chatSocket.on('receive_message', (newMessage) => {
-         console.log('새 메시지 수신:', newMessage)
          setMessages((prevMessages) => [...prevMessages, newMessage])
          scrollToBottom()
       })
 
       chatSocket.on('fetch_myitems', (items) => {
-         console.log('내 아이템 목록 수신:', items)
          setMyItems(items)
       })
 
@@ -62,8 +59,6 @@ const Chat = ({ studygroup, groupmembers, user }) => {
 
    // 아이템 전송
    const sendItem = (item) => {
-      console.log('선택한 아이템:', item)
-
       setSelectedItem({
          id: item.id,
          name: item.name,
@@ -96,7 +91,6 @@ const Chat = ({ studygroup, groupmembers, user }) => {
             messageType: isItem ? 'item' : 'text',
          }
 
-         console.log('메시지 전송:', chatData)
          chatSocket.emit('send_message', chatData)
          setMessage('')
          setSelectedItem(null)

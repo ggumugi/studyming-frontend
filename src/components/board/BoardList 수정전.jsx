@@ -27,7 +27,6 @@ const BoardList = ({ category }) => {
    const [searchKeyword, setSearchKeyword] = useState('')
 
    useEffect(() => {
-      console.log('페이지 변경 또는 검색 조건 변경:', { page, category, searchType, searchKeyword })
       dispatch(fetchPostsThunk({ page, category, limit: rowsPerPage, searchType, searchKeyword }))
    }, [dispatch, category, rowsPerPage, searchType, searchKeyword])
 

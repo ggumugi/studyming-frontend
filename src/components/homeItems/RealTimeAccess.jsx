@@ -36,7 +36,7 @@ const RealTimeAccess = () => {
             dispatch(fetchGroupMembersThunk(selectedStudy.id))
                .unwrap()
                .then(() => {
-                  console.log('멤버 상태 업데이트 완료:', new Date().toLocaleTimeString())
+                  // console.log('멤버 상태 업데이트 완료:', new Date().toLocaleTimeString())
                })
                .catch((error) => {
                   console.error('멤버 상태 업데이트 실패:', error)
