@@ -56,10 +56,10 @@ const ItemList = ({ items, isAuthenticated, user }) => {
                         {item.type !== 'cash' && <Tag>7일</Tag>}
                         <Image
                            src={item.img ? `http://localhost:8000${item.img}` : '/img/default.png'} // ✅ 기본 이미지 추가
-                           alt={item.title}
+                           alt={item.name}
                         />
                      </ImageWrapper>
-                     <ItemTitle>{item.title}</ItemTitle>
+                     <ItemTitle>{item.name}</ItemTitle>
                      <ItemDescriptionContainer>
                         <ItemDescription>{item.detail}</ItemDescription>
                         {isAuthenticated && user?.role === 'ADMIN' && (
@@ -88,7 +88,7 @@ const ItemList = ({ items, isAuthenticated, user }) => {
                   </ItemCard>
                ))
             ) : (
-               <p style={{ textAlign:'center' }}>상품이 없습니다.</p> // ✅ 데이터가 없을 때 메시지 표시
+               <p style={{ textAlign: 'center' }}>상품이 없습니다.</p> // ✅ 데이터가 없을 때 메시지 표시
             )}
          </Grid>
       </Container>

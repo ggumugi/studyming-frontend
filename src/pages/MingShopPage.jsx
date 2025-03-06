@@ -204,6 +204,8 @@ const Container = styled.div`
    align-items: center;
    padding: 50px;
    width: 100%;
+   max-width: 1200px;
+   margin: 0 auto;
    @media (max-width: 1024px) {
       padding: 30px;
    }
