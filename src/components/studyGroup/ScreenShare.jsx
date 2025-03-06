@@ -1,9 +1,12 @@
-// components/studyGroup/ScreenShare.jsx
 import React, { useEffect, useState, useRef } from 'react'
 import { JitsiMeeting } from '@jitsi/react-sdk'
 import { useDispatch, useSelector } from 'react-redux'
 import { updateGroupMemberThunk } from '../../features/groupmemberSlice'
 import styled from 'styled-components'
+
+// 배포 환경의 도메인 설정
+const JITSI_DOMAIN = 'meet.jit.si' // 공개 Jitsi 서버 사용
+const APP_DOMAIN = 'http://ec2-13-125-242-248.ap-northeast-2.compute.amazonaws.com'
 
 const ScreenShare = ({ studygroup, groupmembers }) => {
    const dispatch = useDispatch()
@@ -20,8 +23,9 @@ const ScreenShare = ({ studygroup, groupmembers }) => {
    const currentMember = safeGroupmembers.find((member) => member.userId === user?.id)
    const leaderMember = safeGroupmembers.find((member) => member.role === 'leader')
 
-   // 그룹 ID를 회의실 ID로 사용
-   const roomName = `studyming_${studygroup?.id}_room`
+   // 그룹 ID와 도메인을 결합하여 고유한 회의실 ID 생성
+   // 배포 환경의 도메인을 포함시켜 다른 Jitsi 서버와 충돌 방지
+   const roomName = `studyming_${APP_DOMAIN.replace(/[^a-zA-Z0-9]/g, '_')}_${studygroup?.id}_room`
 
    useEffect(() => {
       // 컴포넌트 언마운트 시 화면 공유 상태 초기화
@@ -184,7 +188,7 @@ const ScreenShare = ({ studygroup, groupmembers }) => {
          {statusMessage && <StatusMessage>{statusMessage}</StatusMessage>}
 
          <JitsiMeeting
-            domain="meet.jit.si"
+            domain={JITSI_DOMAIN}
             roomName={roomName}
             configOverwrite={{
                startWithAudioMuted: true,
@@ -216,6 +220,17 @@ const ScreenShare = ({ studygroup, groupmembers }) => {
                   logo: '',
                },
                backgroundColor: '#000000',
+               // 배포 환경에 맞는 추가 설정
+               disableThirdPartyRequests: false,
+               analytics: {
+                  disabled: true,
+               },
+               // 서버 연결 관련 설정
+               websocket: 'wss://meet-jit-si-turnrelay.jitsi.net/colibri-ws/default-id/studyming',
+               p2p: {
+                  enabled: true,
+                  preferH264: true,
+               },
             }}
             interfaceConfigOverwrite={{
                DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
@@ -233,9 +248,16 @@ const ScreenShare = ({ studygroup, groupmembers }) => {
                SHARING_FEATURES: ['desktop'],
                SETTINGS_SECTIONS: ['devices', 'language', 'moderator'],
                DESKTOP_SHARING_ENABLE_LOCALHOST: true,
+               // 배포 환경에 맞는 추가 설정
+               MOBILE_APP_PROMO: false,
+               HIDE_INVITE_MORE_HEADER: true,
+               DISABLE_FOCUS_INDICATOR: true,
+               DISABLE_VIDEO_BACKGROUND: true,
             }}
             userInfo={{
                displayName: user?.nickname || '사용자',
+               email: user?.email || '',
+               avatarUrl: '', // 사용자 아바타 URL (선택적)
             }}
             onApiReady={handleApiReady}
             getIFrameRef={(iframeRef) => {
@@ -251,8 +273,8 @@ const ScreenShare = ({ studygroup, groupmembers }) => {
                         const iframeDocument = iframeRef.contentWindow.document
                         const style = document.createElement('style')
                         style.textContent = `
-                  body { background-color: #000 !important; }
-                `
+                           body { background-color: #000 !important; }
+                        `
                         iframeDocument.head.appendChild(style)
                      } catch (e) {
                         console.warn('iframe 스타일 적용 실패:', e)
