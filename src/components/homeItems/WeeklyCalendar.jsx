@@ -250,11 +250,13 @@ const ScheduleList = styled.div`
    color: #666 !important;
 `
 
-const ScheduleItem = styled.div`
+const ScheduleItem = styled.div.attrs(({ isEditing }) => ({
+   'data-editing': isEditing, // ✅ HTML data 속성으로 변환 (DOM에 직접 전달 X)
+}))`
    display: flex;
    justify-content: space-between;
    padding: 5px;
-   background: ${({ isEditing }) => (isEditing ? '#ffe0b2' : '#f9f9f9')}; // 수정 중일 때 배경색 변경
+   background: ${({ isEditing }) => (isEditing ? '#ffe0b2' : '#f9f9f9')};
    border-radius: 5px;
    transition: background 0.3s ease;
 `
