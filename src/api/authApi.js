@@ -286,7 +286,6 @@ export const connectSnsAccount = async (data) => {
       const response = await studymingApi.patch('/auth/connect-sns', data, {
          withCredentials: true,
       })
-      console.log('✅ SNS 계정 연동 성공:', response.data)
       return response.data
    } catch (error) {
       console.error('❌ SNS 계정 연동 실패:', error)
@@ -300,7 +299,6 @@ export const deleteAccount = async () => {
       const response = await studymingApi.delete('/auth/delete-account', {
          withCredentials: true,
       })
-      console.log('✅ 회원 탈퇴 성공:', response.data)
       return response.data
    } catch (error) {
       console.error('❌ 회원 탈퇴 실패:', error)
