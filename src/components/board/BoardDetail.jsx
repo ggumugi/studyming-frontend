@@ -95,7 +95,7 @@ const BoardDetail = () => {
          {post.Images && post.Images.length > 0 && (
             <ImageContainer>
                {post.Images.map((image) => {
-                  const imagePath = `http://localhost:8000/${image.path}`
+                  const imagePath = `http://ec2-13-125-242-248.ap-northeast-2.compute.amazonaws.com:8000/${image.path}`
                   console.log('이미지 최종 경로:', imagePath) // ✅ 최종 경로 확인
                   return <Image key={image.id} src={imagePath} alt="게시글 이미지" />
                })}
