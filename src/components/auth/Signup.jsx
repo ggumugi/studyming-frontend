@@ -70,7 +70,6 @@ const Signup = () => {
    }
 
    const validate = (e) => {
-      const { name, value } = e.target
       let newErrors = {}
 
       // 이메일 형식 검사 및 비밀번호 일치 확인
@@ -88,11 +87,6 @@ const Signup = () => {
       // 비밀번호 확인
       if (formData.password !== formData.confirmPassword) {
          newErrors.confirmPassword = '비밀번호가 일치하지 않습니다.'
-      }
-
-      // ✅ 닉네임 길이 검사 (최대 6자)
-      if (name === 'nickname' && value.length > 6) {
-         newErrors.nickname = '닉네임은 최대 6자까지만 가능합니다.'
       }
 
       setErrors(newErrors)
@@ -293,10 +287,11 @@ const Signup = () => {
                         name="nickname"
                         value={formData.nickname}
                         onChange={handleChange}
-                        onBlur={checkDuplicateNickname} // ✅ 입력 후 포커스 아웃 시 자동 실행
+                        onBlur={checkDuplicateNickname}
                         error={!!errors.nickname}
                         helperText={errors.nickname || successMessages.nickname || ''}
                         placeholder="닉네임은 6자 이하로 작성해주세요"
+                        inputProps={{ maxLength: 6 }} // 최대 6자로 제한
                      />
                   </InputRow>
 
