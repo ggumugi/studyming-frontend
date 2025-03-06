@@ -23,7 +23,6 @@ const ActionsTakenBoard = ({ category, isAuthenticated, user }) => {
    }, [dispatch, isAuthenticated, user])
 
    useEffect(() => {
-      console.log('🚀 [DEBUG] Redux에서 받은 bannedUsers:', bannedUsersFromStore)
       setBannedUsers(bannedUsersFromStore)
    }, [bannedUsersFromStore])
 
@@ -39,9 +38,6 @@ const ActionsTakenBoard = ({ category, isAuthenticated, user }) => {
 
    // ✅ 정지 기간 변경 요청
    const handleApply = async (bannedId) => {
-      console.log('🚀 [DEBUG] handleApply 실행 - bannedId:', bannedId)
-      console.log('🚀 [DEBUG] bannedUsers 상태:', bannedUsers)
-
       if (!bannedId) {
          console.error('❌ bannedId가 존재하지 않습니다.', { bannedId, bannedUsers })
          alert('🚨 오류: bannedId가 존재하지 않습니다.')
@@ -49,7 +45,6 @@ const ActionsTakenBoard = ({ category, isAuthenticated, user }) => {
       }
 
       const selectedUser = bannedUsers.find((user) => user.bannedId === bannedId)
-      console.log('🚀 [DEBUG] selectedUser:', selectedUser)
 
       if (!selectedUser) {
          alert('🚨 해당 유저의 정지 기록을 찾을 수 없습니다.')
@@ -57,7 +52,6 @@ const ActionsTakenBoard = ({ category, isAuthenticated, user }) => {
       }
 
       const selectedDate = selectedUser?.endDate
-      console.log('🚀 [DEBUG] 선택된 날짜:', selectedDate)
 
       if (!selectedDate) {
          alert('🚨 변경할 정지 기간을 선택해주세요.')

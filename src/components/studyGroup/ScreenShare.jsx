@@ -44,16 +44,13 @@ const ScreenShare = ({ studygroup, groupmembers }) => {
 
    const handleApiReady = (apiObj) => {
       setApi(apiObj)
-      console.log('Jitsi API 준비 완료')
 
       // 초기 설정 - 비디오 비활성화
       apiObj.executeCommand('toggleVideo')
 
       // 참가자 수 제한 (최대 6명)
       apiObj.addEventListener('participantJoined', (event) => {
-         console.log('참가자 입장:', event)
          const participants = apiObj.getParticipantsInfo()
-         console.log('현재 참가자 수:', participants.length)
 
          if (participants.length > 6) {
             alert('최대 6명까지만 참여할 수 있습니다.')
@@ -63,7 +60,6 @@ const ScreenShare = ({ studygroup, groupmembers }) => {
 
       // 화면 공유 상태 변경 이벤트 감지
       apiObj.addEventListener('screenSharingStatusChanged', (event) => {
-         console.log('화면 공유 상태 변경:', event)
          setIsScreenSharing(event.on)
 
          // DB에 화면 공유 상태 업데이트
@@ -89,7 +85,6 @@ const ScreenShare = ({ studygroup, groupmembers }) => {
 
       // 회의 참가 완료 이벤트
       apiObj.addEventListener('videoConferenceJoined', (event) => {
-         console.log('회의 참가 완료:', event)
          setStatusMessage('회의에 참가했습니다')
          setTimeout(() => {
             setStatusMessage('')
@@ -110,8 +105,6 @@ const ScreenShare = ({ studygroup, groupmembers }) => {
          return
       }
 
-      console.log('화면 공유 버튼 클릭됨, 현재 상태:', isScreenSharing)
-
       try {
          // 이미 공유 중이면 중지
          if (isScreenSharing) {
@@ -131,7 +124,6 @@ const ScreenShare = ({ studygroup, groupmembers }) => {
                audio: false,
             })
 
-            console.log('화면 공유 권한 허용됨')
             setStatusMessage('화면 공유 권한이 허용되었습니다. 공유를 시작합니다...')
 
             // Jitsi의 비디오 트랙을 교체
@@ -139,7 +131,6 @@ const ScreenShare = ({ studygroup, groupmembers }) => {
 
             // 화면 공유 종료 감지
             stream.getVideoTracks()[0].addEventListener('ended', () => {
-               console.log('사용자가 화면 공유를 종료했습니다.')
                setIsScreenSharing(false)
 
                // DB에 화면 공유 상태 업데이트

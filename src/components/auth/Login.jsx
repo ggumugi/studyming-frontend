@@ -49,7 +49,7 @@ const Login = () => {
    useEffect(() => {
       if (window.Kakao && !window.Kakao.isInitialized()) {
          window.Kakao.init(process.env.REACT_APP_KAKAO_JS_KEY)
-         console.log('카카오 SDK 초기화 완료')
+         // console.log('카카오 SDK 초기화 완료')
       }
    }, [])
 
@@ -66,14 +66,14 @@ const Login = () => {
          window.Kakao.Auth.login({
             scope: 'profile_nickname, account_email',
             success: function (authObj) {
-               console.log('카카오 로그인 성공:', authObj)
+               // console.log('카카오 로그인 성공:', authObj)
                const accessToken = authObj.access_token // 액세스 토큰 가져오기
                const sns = 'kakao'
 
                dispatch(fetchKakaoUserInfoThunk(accessToken))
                   .unwrap()
                   .then((response) => {
-                     console.log('정보', response) // 사용자 정보 로그
+                     // console.log('정보', response) // 사용자 정보 로그
                      const kakaoEmail = response.email // 이메일
                      const kakaoNickname = response.nickname // 닉네임
 
@@ -162,7 +162,7 @@ const Login = () => {
             navigate('/home') // 메인 페이지로 이동
          })
          .catch((error) => {
-            console.log(error)
+            // console.log(error)
             if (error === '회원가입이 필요합니다.') {
                // 회원가입 페이지로 리다이렉트
                const { email, name: nickname } = decoded

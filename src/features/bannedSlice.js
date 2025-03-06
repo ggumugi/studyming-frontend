@@ -34,7 +34,7 @@ export const submitReport = createAsyncThunk('banned/submitReport', async ({ rep
 export const getBannedUsers = createAsyncThunk('banned/getBannedUsers', async (_, { rejectWithValue }) => {
    try {
       const response = await fetchBannedUsers()
-      console.log('🚀 벤된 유저 목록:', response) // ✅ 디버깅용
+
       return response
    } catch (error) {
       return rejectWithValue(error)
@@ -52,8 +52,6 @@ export const applyBan = createAsyncThunk('banned/applyBan', async ({ reportId, a
 
 // ✅ 정지 기간 변경하기
 export const changeBanPeriod = createAsyncThunk('banned/changeBanPeriod', async ({ bannedId, newEndDate }, { rejectWithValue }) => {
-   console.log('🚀 정지 기간 변경 요청:', { bannedId, newEndDate }) // ✅ 추가!
-
    try {
       const response = await updateBanPeriod(bannedId, newEndDate)
       return response
@@ -128,7 +126,7 @@ const bannedSlice = createSlice({
          // ✅ Redux 상태 업데이트 확인
          .addCase(getBannedUsers.fulfilled, (state, action) => {
             state.loading = false
-            console.log('🚀 Redux 상태 업데이트 (bannedUsers):', action.payload) // ✅ 여기에 추가
+
             state.bannedUsers = action.payload
          })
 
@@ -141,8 +139,6 @@ const bannedSlice = createSlice({
             state.loading = true
          })
          .addCase(changeBanPeriod.fulfilled, (state, action) => {
-            console.log('🚀 Redux State Updated (bannedUsers):', state.bannedUsers)
-            console.log('🚀 업데이트된 유저 데이터:', action.payload)
             state.bannedUsers = state.bannedUsers.map((user) => (user.bannedId === action.payload.bannedId ? { ...user, endDate: action.payload.newEndDate } : user))
          })
 

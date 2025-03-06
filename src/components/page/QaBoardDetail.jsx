@@ -7,7 +7,6 @@ import { createCommentThunk } from '../../features/commentSlice'
 import { Paper, Typography, Button, TextField, Box } from '@mui/material'
 
 const QaBoardtDetail = ({ post, onBack }) => {
-   console.log('PostDetail에서 받은 post 데이터:', post)
    const [comments, setComments] = useState([
       { id: 1, author: '식원강', text: '저요', date: '2025.01.06. 15:30' },
       { id: 2, author: '희경이', text: '어? 기사시험 그저께였는데요?', date: '2025.01.06. 15:35' },
@@ -18,7 +17,6 @@ const QaBoardtDetail = ({ post, onBack }) => {
    const [selectedFile, setSelectedFile] = useState(null)
    const [newComment, setNewComment] = useState('')
    const { postId } = useParams()
-   console.log('✅ 현재 postId:', postId)
 
    useEffect(() => {
       if (postId) {

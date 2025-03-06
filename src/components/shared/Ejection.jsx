@@ -28,7 +28,6 @@ const Ejection = ({ isOpen, onClose, groupId }) => {
 
       if (!window.confirm(`${selectedNickname}님을 강퇴하시겠습니까?`)) return
 
-      console.log('🔥 강퇴 요청 전송 - groupId:', groupId, 'userId:', userId) // ✅ 확인용
       dispatch(kickGroupMemberThunk({ groupId, userId: selectedMember }))
          .unwrap()
          .then(() => {

@@ -27,13 +27,6 @@ export const fetchActivePeers = async (groupId) => {
    }
 }
 
-// 피어 연결 상태 로깅
-export const logPeerConnectionStatus = (peerId, status, details = {}) => {
-   console.log(`[Peer ${peerId}] ${status}`, details)
-   // 필요한 경우 서버에 로그를 전송할 수도 있습니다
-   // studymingApi.post('/screenShare/logs', { peerId, status, details });
-}
-
 // 그룹의 화면 공유 상태 조회
 export const getGroupScreenShareStatus = async (groupId) => {
    try {
