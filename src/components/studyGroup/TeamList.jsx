@@ -67,12 +67,10 @@ const TeamList = ({ groupmembers, studygroup }) => {
    }, [dispatch, groupId])
 
    return (
-      <>
-         <TeamListWrapper $isFixed={isFixed} $position={position} ref={teamListRef}>
-            <TitleWrapper>
-               <Title>스터디원 목록</Title>
-            </TitleWrapper>
-         </TeamListWrapper>
+      <TeamListWrapper $isFixed={isFixed} $position={position} ref={teamListRef}>
+         <TitleWrapper>
+            <Title>스터디원 목록</Title>
+         </TitleWrapper>
 
          <TeamMembers>
             {safeGroupmembers.map((member) => (
@@ -87,7 +85,7 @@ const TeamList = ({ groupmembers, studygroup }) => {
                </Member>
             ))}
          </TeamMembers>
-      </>
+      </TeamListWrapper>
    )
 }
 
@@ -144,7 +142,7 @@ const TeamMembers = styled.ul`
       display: flex;
       overflow-x: auto; /* ✅ 가로 스크롤 활성화 */
       white-space: nowrap; /* ✅ 줄바꿈 방지 */
-
+      width: 100vw;
       &::-webkit-scrollbar {
          height: 3px; /* ✅ 스크롤바 높이 조정 */
       }

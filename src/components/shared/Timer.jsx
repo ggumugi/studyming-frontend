@@ -19,6 +19,8 @@ const Timer = () => {
    const [captchaTimer, setCaptchaTimer] = useState(60) // 캡차 제한시간 (60초)
    const [captchaInterval, setCaptchaInterval] = useState(null) // 캡차 간격 (분)
    const [captchaTimerId, setCaptchaTimerId] = useState(null) // 캡차 타이머 ID
+   const [isTimeAlmostUp, setIsTimeAlmostUp] = useState(false) // 시간이 얼마 남지 않았을 때 상태
+   const [showFailureMessage, setShowFailureMessage] = useState(false) // 실패 메시지 표시 상태
    const dispatch = useDispatch()
    const { captcha } = useSelector((state) => state.captcha)
    const { studygroup } = useSelector((state) => state.studygroups)
@@ -99,22 +101,44 @@ const Timer = () => {
          setIsMinimized(false)
          dispatch(fetchCaptchaThunk())
          setShowCaptcha(true)
-         setCaptchaTimer(60) // 60초 제한시간 설정
+         setCaptchaTimer(60)
+         setIsTimeAlmostUp(false) // 타이머 경고 초기화
+         setShowFailureMessage(false) // 실패 메시지 초기화
 
-         // 캡차 제한시간 타이머 시작
+         // 캡차 제한시간 타이머 시작 - 수정된 부분
          const timerId = setInterval(() => {
             setCaptchaTimer((prev) => {
+               console.log('타이머 감소:', prev) // 디버깅용 로그
+
+               // 10초 이하로 남았을 때 경고 상태 활성화
+               if (prev <= 10 && prev > 0) {
+                  setIsTimeAlmostUp(true)
+               }
+
                if (prev <= 1) {
                   // 제한시간 종료 시 처리
                   clearInterval(timerId)
-                  handleCaptchaTimeout()
+                  setShowFailureMessage(true) // 실패 메시지 표시
+
+                  // 3초 후에 handleCaptchaTimeout 실행
+                  setTimeout(() => {
+                     handleCaptchaTimeout()
+                  }, 3000)
+
                   return 0
                }
-               return prev - 1
+               return prev - 1 // 1초씩 감소
             })
-         }, 1000)
+         }, 1000) // 정확히 1초 간격으로 실행
 
          setCaptchaTimerId(timerId)
+
+         // 컴포넌트 언마운트 또는 의존성 변경 시 타이머 정리
+         return () => {
+            if (timerId) {
+               clearInterval(timerId)
+            }
+         }
       }
    }, [time, dispatch, captchaInterval])
 
@@ -166,6 +190,7 @@ const Timer = () => {
                   alert('정답입니다.')
                   setShowCaptcha(false) // 입력창 숨기기
                   setCount(3) // 카운트 초기화
+                  setIsTimeAlmostUp(false) // 타이머 경고 초기화
 
                   // 캡차 타이머 정리
                   if (captchaTimerId) {
@@ -184,26 +209,32 @@ const Timer = () => {
                            setCaptchaTimerId(null)
                         }
 
-                        // 현재 타이머 시간 저장
-                        const timeString = formatTime(time)
+                        // 실패 메시지 표시
+                        setShowFailureMessage(true)
 
-                        // 타이머 시간 업데이트 후 상태 변경
-                        dispatch(updateGrouptimeThunk({ groupId, time: timeString }))
-                           .unwrap()
-                           .then(() => {
-                              // 스터디 그룹 참여 상태 변경 (off)
-                              return dispatch(captchaFailThunk(groupId)).unwrap()
-                           })
-                           .then(() => {
-                              alert('캡차 인증에 실패했습니다. 홈으로 이동합니다.')
-                              navigate('/home')
-                           })
-                           .catch((error) => {
-                              console.error('캡차 실패 처리 오류:', error)
-                              navigate('/home')
-                           })
+                        // 3초 후에 홈으로 이동
+                        setTimeout(() => {
+                           // 현재 타이머 시간 저장
+                           const timeString = formatTime(time)
 
-                        return 3 // 카운트 초기화
+                           // 타이머 시간 업데이트 후 상태 변경
+                           dispatch(updateGrouptimeThunk({ groupId, time: timeString }))
+                              .unwrap()
+                              .then(() => {
+                                 // 스터디 그룹 참여 상태 변경 (off)
+                                 return dispatch(captchaFailThunk(groupId)).unwrap()
+                              })
+                              .then(() => {
+                                 alert('캡차 인증에 실패했습니다. 홈으로 이동합니다.')
+                                 navigate('/home')
+                              })
+                              .catch((error) => {
+                                 console.error('캡차 실패 처리 오류:', error)
+                                 navigate('/home')
+                              })
+                        }, 3000)
+
+                        return 0 // 기회 소진
                      }
                   })
                }
@@ -294,6 +325,20 @@ const Timer = () => {
          50% { height: 40px; width: 320px; }
          100% { height: 280px; width: 320px; }
       }
+      
+      @keyframes pulseWarning {
+         0% { color: #fff; }
+         50% { color: #ff0000; font-weight: bold; }
+         100% { color: #fff; }
+      }
+      
+      @keyframes shakeFail {
+         0% { transform: translateX(0); }
+         25% { transform: translateX(-5px); }
+         50% { transform: translateX(5px); }
+         75% { transform: translateX(-5px); }
+         100% { transform: translateX(0); }
+      }
    `
 
    return (
@@ -308,7 +353,7 @@ const Timer = () => {
                padding: isMinimized ? '0' : '10px 20px',
                width: '300px',
                height,
-               backgroundColor: '#FF8C00',
+               backgroundColor: showFailureMessage ? '#FF3333' : isTimeAlmostUp ? '#FF5500' : '#FF8C00',
                color: '#fff',
                borderRadius: '5px',
                zIndex: 1000,
@@ -326,15 +371,17 @@ const Timer = () => {
                      <ul>
                         <li>{captcha && <CaptchaImage src={`data:image/png;base64,${captcha.img}`} alt="Captcha" />}</li>
                         <li>
-                           <CountText>
-                              입력 기회: {count} | 남은 시간: {captchaTimer}초
+                           <CountText $isTimeAlmostUp={isTimeAlmostUp} $showFailureMessage={showFailureMessage}>
+                              {showFailureMessage ? '인증 시간이 초과되었습니다!' : `입력 기회: ${count} | 남은 시간: ${captchaTimer}초`}
                            </CountText>
                         </li>
                         <li>
-                           <CaptchaInput type="text" value={userInput} onChange={(e) => setUserInput(e.target.value)} placeholder="보안문자를 입력하세요" />
+                           <CaptchaInput type="text" value={userInput} onChange={(e) => setUserInput(e.target.value)} placeholder="보안문자를 입력하세요" disabled={showFailureMessage} $isTimeAlmostUp={isTimeAlmostUp} />
                         </li>
                         <li>
-                           <CaptchaButton onClick={handleVerifyCaptcha}>확인</CaptchaButton>
+                           <CaptchaButton onClick={handleVerifyCaptcha} disabled={showFailureMessage} $isTimeAlmostUp={isTimeAlmostUp}>
+                              확인
+                           </CaptchaButton>
                         </li>
                      </ul>
                   )}
@@ -353,7 +400,7 @@ const Timer = () => {
                right,
                width: '40px',
                height: '40px',
-               backgroundColor: '#FF8C00',
+               backgroundColor: showFailureMessage ? '#FF3333' : isTimeAlmostUp ? '#FF5500' : '#FF8C00',
                color: 'white',
                borderRadius: isMinimized ? '5px' : '0 5px 5px 0',
                display: 'flex',
@@ -389,18 +436,23 @@ const CountText = styled.div`
    transform: translateY(5px);
    font-size: 16px;
    margin-bottom: 10px;
+   font-weight: ${(props) => (props.$isTimeAlmostUp || props.$showFailureMessage ? 'bold' : 'normal')};
+   color: ${(props) => (props.$showFailureMessage ? 'white' : props.$isTimeAlmostUp ? '#FFFF00' : 'white')};
+   animation: ${(props) => (props.$isTimeAlmostUp ? 'pulseWarning 1s infinite' : props.$showFailureMessage ? 'shakeFail 0.5s' : 'none')};
+   text-shadow: ${(props) => (props.$showFailureMessage ? '0 0 5px rgba(0,0,0,0.5)' : 'none')};
 `
 
 const CaptchaInput = styled.input`
    padding: 10px;
    font-size: 16px;
    width: 80%;
-   border: 1px solid #ddd;
+   border: 1px solid ${(props) => (props.$isTimeAlmostUp ? '#FF0000' : '#ddd')};
    border-radius: 5px;
    outline: none;
    transform: translateY(-10px);
    &:focus {
-      border-color: orange;
+      border-color: ${(props) => (props.$isTimeAlmostUp ? '#FF0000' : 'orange')};
+      box-shadow: ${(props) => (props.$isTimeAlmostUp ? '0 0 5px rgba(255,0,0,0.5)' : 'none')};
    }
 `
 
@@ -409,13 +461,14 @@ const CaptchaButton = styled.button`
    font-size: 16px;
    border: none;
    border-radius: 5px;
-   background-color: white;
-   color: #ff8c00;
+   background-color: ${(props) => (props.$isTimeAlmostUp ? '#FFFF00' : 'white')};
+   color: ${(props) => (props.$isTimeAlmostUp ? '#FF0000' : '#ff8c00')};
    cursor: pointer;
    transition: background-color 0.3s;
    transform: translateY(-25px);
    margin-top: 10px;
+   font-weight: ${(props) => (props.$isTimeAlmostUp ? 'bold' : 'normal')};
    &:hover {
-      background-color: #f0f0f0;
+      background-color: ${(props) => (props.$isTimeAlmostUp ? '#FFFFAA' : '#f0f0f0')};
    }
 `

@@ -15,7 +15,9 @@ const ActionsTakenBoard = ({ category, isAuthenticated, user }) => {
    const [filter, setFilter] = useState('reportedUser')
    const [editingId, setEditingId] = useState(null)
    const [selectedDates, setSelectedDates] = useState(null) // ✅ 개별 행의 날짜 상태 저장
-
+   const formatDate = (date) => {
+      return date ? moment(date).format('YY-MM-DD') : '날짜 없음'
+   }
    useEffect(() => {
       if (isAuthenticated && user?.role === 'ADMIN') {
          dispatch(getBannedUsers()) // ✅ 벤된 유저 목록 불러오기
@@ -123,15 +125,21 @@ const ActionsTakenBoard = ({ category, isAuthenticated, user }) => {
                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <TextField
                                        type="date"
-                                       value={user.endDate || ''}
+                                       value={user.endDate ? moment(user.endDate).format('YYYY-MM-DD') : ''}
                                        onChange={(e) => handleDateChange(e, user.bannedId)}
                                        sx={{
                                           width: '110px',
                                           height: '30px',
                                           '& .MuiInputBase-root': { height: '30px' },
-                                          '& .MuiInputBase-input': { height: '30px', padding: '0 5px', lineHeight: '30px', fontSize: '14px' },
+                                          '& .MuiInputBase-input': {
+                                             height: '30px',
+                                             padding: '0 5px',
+                                             lineHeight: '30px',
+                                             fontSize: '14px',
+                                          },
                                        }}
                                     />
+
                                     <Button
                                        variant="contained"
                                        color="warning"
@@ -145,8 +153,17 @@ const ActionsTakenBoard = ({ category, isAuthenticated, user }) => {
                                     </Button>
                                  </div>
                               ) : (
-                                 <Button variant="outlined" color="primary" sx={{ width: '120px', height: '30px' }} onClick={() => setEditingId(user.bannedId)}>
-                                    {user.startDate && user.endDate ? `${user.startDate} ~ ${user.endDate}` : '정지 기간 없음'}
+                                 <Button variant="outlined" color="blue" sx={{ width: '120px', height: '30px' }} onClick={() => setEditingId(user.bannedId)}>
+                                    <TableCell sx={{ textAlign: 'center', fontSize: '12px', lineHeight: '1.2' }}>
+                                       {user.startDate && user.endDate ? (
+                                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', fontSize: '12px', lineHeight: '1.2' }}>
+                                             <span>{formatDate(user.startDate)}</span>
+                                             <span>{formatDate(user.endDate)}</span>
+                                          </div>
+                                       ) : (
+                                          '정지 기간 없음'
+                                       )}
+                                    </TableCell>
                                  </Button>
                               )}
                            </TableCell>

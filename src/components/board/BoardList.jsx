@@ -94,7 +94,8 @@ const BoardList = ({ category }) => {
                                  <StyledTableCell onClick={() => navigate(`/board/detail/${post.id}`)} style={{ cursor: 'pointer' }}>
                                     {post.title}
                                  </StyledTableCell>
-                                 <StyledTableCell onClick={() => handleOpenReport(post.User)} style={{ cursor: 'pointer', color: 'blue', textDecoration: 'underline' }} /*벤실험 코드 */>
+                                 {/* 외부css 작성 */}
+                                 <StyledTableCell className="boardWriter" onClick={() => handleOpenReport(post.User)} style={{ cursor: 'pointer', color: 'black' }} /*벤실험 코드 */>
                                     {post?.User?.nickname}
                                  </StyledTableCell>
                                  <StyledTableCell>{new Date(post.createdAt).toLocaleDateString()}</StyledTableCell>

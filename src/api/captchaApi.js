@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const apiUrl = 'http://localhost:5000'
+const apiUrl = process.env.REACT_APP_CAPTCHA_URL
 
 //axios 인스턴스 생성
 const pythonApi = axios.create({
