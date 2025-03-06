@@ -2,8 +2,6 @@ import React, { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Menu, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material'
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 import { FaRegEnvelope, FaEnvelope } from 'react-icons/fa'
 import { useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -34,22 +32,7 @@ const Header = ({ isAuthenticated, user }) => {
    const [messageDetailOpen, setMessageDetailOpen] = useState(false)
    const [selectedMessage, setSelectedMessage] = useState(null)
 
-   // 게시판 드롭다운 상태
-   const [boardOpen, setBoardOpen] = useState(false)
-   const boardRef = useRef(null)
-
-   // 유저 드롭다운 상태
-   const [userOpen, setUserOpen] = useState(false)
-   const userRef = useRef(null)
-
    const [menuOpen, setMenuOpen] = useState(false)
-
-   const [mobileUserOpen, setMobileUserOpen] = useState(false)
-   const mobileUserRef = useRef(null)
-
-   const handleMobileUserClick = () => {
-      setMobileUserOpen(!mobileUserOpen)
-   }
 
    // 알림 데이터 불러오기
    useEffect(() => {
@@ -75,12 +58,6 @@ const Header = ({ isAuthenticated, user }) => {
          if (notiRef.current && !notiRef.current.contains(event.target)) {
             setNotiOpen(false)
          }
-         if (boardRef.current && !boardRef.current.contains(event.target)) {
-            setBoardOpen(false)
-         }
-         if (userRef.current && !userRef.current.contains(event.target)) {
-            setUserOpen(false)
-         }
       }
 
       document.addEventListener('mousedown', handleClickOutside)
@@ -99,33 +76,6 @@ const Header = ({ isAuthenticated, user }) => {
             alert(`로그아웃 실패: ${error}`)
          })
    }, [dispatch])
-
-   // 게시판 카테고리 매핑
-   const categoryMap = {
-      자유: 'free',
-      질문: 'QnA',
-      정보: 'noti',
-      문의: 'inquiry',
-   }
-
-   // 게시판 버튼 클릭 시 드롭다운 열기
-   const handleBoardClick = () => {
-      setBoardOpen(!boardOpen)
-   }
-
-   // 게시판 카테고리 클릭 시 Redux 상태 업데이트 (URL 변경 X)
-   const handleBoardCategoryClick = (category) => {
-      dispatch(setCategory(categoryMap[category])) // Redux 상태 업데이트
-
-      if (location.pathname !== '/board') {
-         navigate('/board') // 다른 페이지에서는 먼저 `/board`로 이동
-      }
-
-      setBoardOpen(false) // 드롭다운 닫기
-   }
-
-   // 유저 메뉴 열기/닫기
-   const handleUserClick = () => setUserOpen(!userOpen)
 
    // 알림 아이콘 클릭 시 드롭다운 열기
    const handleNotiClick = () => {
@@ -221,18 +171,11 @@ const Header = ({ isAuthenticated, user }) => {
                            <Link to="/mingshop">밍샵</Link>
                         </NavItem>
 
-                        {/* 게시판 드롭다운 */}
-                        <NavItemDropdown>
-                           <NavItem onClick={() => setBoardOpen(!boardOpen)}>게시판 {boardOpen ? <KeyboardArrowUpIcon style={{ fontSize: 'clamp(14px, 2vw, 20px)' }} /> : <KeyboardArrowDownIcon style={{ fontSize: 'clamp(14px, 2vw, 20px)' }} />}</NavItem>
-                           {boardOpen && (
-                              <DropdownMenu>
-                                 <DropdownItem onClick={() => navigate('/board/free')}>자유</DropdownItem>
-                                 <DropdownItem onClick={() => navigate('/board/QnA')}>질문</DropdownItem>
-                                 <DropdownItem onClick={() => navigate('/board/noti')}>정보</DropdownItem>
-                                 <DropdownItem onClick={() => navigate('/board/inquiry')}>문의</DropdownItem>
-                              </DropdownMenu>
-                           )}
-                        </NavItemDropdown>
+                        {/* 게시판 - 드롭다운 제거하고 직접 /board로 이동 */}
+                        <NavItem>
+                           <Link to="/board">게시판</Link>
+                        </NavItem>
+
                         {/* 관리자만 "관리" 메뉴 표시 */}
                         {user?.role === 'ADMIN' && (
                            <Link to="/admin">
@@ -249,22 +192,7 @@ const Header = ({ isAuthenticated, user }) => {
 
                            {/* 유저 정보 (스터디 위) */}
                            <MobileUserContainer>
-                              <MobileUserDropdown ref={mobileUserRef}>
-                                 <MobileUserMenu onClick={handleMobileUserClick} $isOpen={mobileUserOpen}>
-                                    {user?.nickname} 님 {mobileUserOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                                 </MobileUserMenu>
-
-                                 {/* 사용자 드롭다운 메뉴 */}
-                                 {mobileUserOpen && (
-                                    <MobileUserDropdownMenu>
-                                       <DropdownItem onClick={() => navigate('/mypage')}>내 프로필</DropdownItem>
-                                       <DropdownItem onClick={() => navigate('/info')}>내 정보</DropdownItem>
-                                       <DropdownItem onClick={() => navigate('/items')}>내 아이템</DropdownItem>
-                                       <DropdownItem onClick={() => navigate('/payment')}>결제 및 밍 내역</DropdownItem>
-                                       <DropdownItem style={{ color: 'red' }}>회원 탈퇴</DropdownItem>
-                                    </MobileUserDropdownMenu>
-                                 )}
-                              </MobileUserDropdown>
+                              <MobileUserInfo onClick={() => navigate('/mypage')}>{user?.nickname} 님</MobileUserInfo>
                            </MobileUserContainer>
 
                            {/* 기존 메뉴 */}
@@ -275,19 +203,10 @@ const Header = ({ isAuthenticated, user }) => {
                               <Link to="/mingshop">밍샵</Link>
                            </NavItem>
 
-                           {/* 게시판 드롭다운 */}
-                           <NavItemDropdown>
-                              <NavItem onClick={handleBoardClick}>게시판 {boardOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}</NavItem>
-                              {boardOpen && (
-                                 <DropdownMenu>
-                                    {Object.keys(categoryMap).map((item) => (
-                                       <DropdownItem key={item} onClick={() => handleBoardCategoryClick(item)}>
-                                          {item}
-                                       </DropdownItem>
-                                    ))}
-                                 </DropdownMenu>
-                              )}
-                           </NavItemDropdown>
+                           {/* 게시판 - 드롭다운 제거 */}
+                           <NavItem>
+                              <Link to="/board">게시판</Link>
+                           </NavItem>
 
                            {/* 관리자 메뉴 (관리자만 보임) */}
                            {user?.role === 'ADMIN' && (
@@ -352,24 +271,9 @@ const Header = ({ isAuthenticated, user }) => {
                         )}
                      </NotificationWrapper>
 
-                     {/* 유저 닉네임 + 로그아웃 버튼 추가 */}
+                     {/* 유저 닉네임 - 드롭다운 제거하고 직접 /mypage로 이동 */}
                      <UserWrapper>
-                        <UserDropdown ref={userRef}>
-                           <UserMenu onClick={handleUserClick} $isOpen={userOpen}>
-                              {user?.nickname} 님 {userOpen ? <KeyboardArrowUpIcon style={{ fontSize: 'clamp(14px, 2vw, 20px)' }} /> : <KeyboardArrowDownIcon style={{ fontSize: 'clamp(14px, 2vw, 20px)' }} />}
-                           </UserMenu>
-
-                           {/* 사용자 드롭다운 메뉴 */}
-                           {userOpen && (
-                              <DropdownMenu style={{ right: 0 }}>
-                                 <DropdownItem onClick={() => navigate('/mypage')}>내 프로필</DropdownItem>
-                                 <DropdownItem onClick={() => navigate('/info')}>내 정보</DropdownItem>
-                                 <DropdownItem onClick={() => navigate('/items')}>내 아이템</DropdownItem>
-                                 <DropdownItem onClick={() => navigate('/payment')}>결제 및 밍 내역</DropdownItem>
-                                 <DropdownItem style={{ color: 'red' }}>회원 탈퇴</DropdownItem>
-                              </DropdownMenu>
-                           )}
-                        </UserDropdown>
+                        <UserMenu onClick={() => navigate('/mypage')}>{user?.nickname} 님</UserMenu>
                         <LogoutButton onClick={handleLogout}>로그아웃</LogoutButton>
                      </UserWrapper>
 
@@ -482,15 +386,6 @@ const NotificationIconWrapper = styled.div`
    }
 `
 
-const MenuIcon = styled.div`
-   cursor: pointer;
-   font-size: 24px;
-
-   @media (max-width: 580px) {
-      display: block;
-   }
-`
-
 // 네비게이션 메뉴
 const NavMenu = styled.ul`
    display: flex;
@@ -498,20 +393,10 @@ const NavMenu = styled.ul`
    align-items: center;
 
    @media (max-width: 580px) {
-      display: ${(props) => (props.$menuOpen ? 'flex' : 'none')};
-      flex-direction: column;
-      position: absolute;
-      top: 60px;
-      left: 0;
-      width: 100%;
-      background: white;
-      padding: 20px;
-      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-      z-index: 100;
+      display: none;
    }
 `
 
-/*  */
 // 햄버거 메뉴 버튼 (모바일 전용)
 const HamburgerMenu = styled.div`
    display: none;
@@ -525,57 +410,13 @@ const HamburgerMenu = styled.div`
 const NavItem = styled.li`
    font-size: clamp(14px, 1vw, 20px);
    font-weight: 300;
-   color: ${(props) => (props.$isOpen ? '#ff7f00' : '#000')};
+   color: #000;
    cursor: pointer;
    display: flex;
    align-items: center;
    gap: 3px;
    &:hover {
       color: #ff7f00;
-   }
-`
-
-const NavItemDropdown = styled.div`
-   position: relative;
-`
-
-const DropdownMenu = styled.ul`
-   position: absolute;
-   top: 100%;
-   left: 0;
-   width: 150px;
-   background-color: white;
-   border-radius: 5px;
-   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-   z-index: 100;
-   padding: 0; /* 패딩 제거 */
-   margin-top: 5px;
-   list-style: none;
-   overflow: hidden; /* 내부 항목이 테두리를 넘지 않도록 */
-`
-
-const DropdownItem = styled.li`
-   padding: 10px 25px;
-   font-size: 14px;
-   color: #333;
-   cursor: pointer;
-   text-align: center;
-   margin: 0; /* 마진 제거 */
-   border-radius: 0; /* 테두리 둥글기 제거 */
-
-   &:first-child {
-      border-top-left-radius: 4px; /* 첫 번째 아이템의 상단 모서리만 둥글게 */
-      border-top-right-radius: 4px;
-   }
-
-   &:last-child {
-      border-bottom-left-radius: 4px; /* 마지막 아이템의 하단 모서리만 둥글게 */
-      border-bottom-right-radius: 4px;
-   }
-
-   &:hover {
-      background-color: #ff7f00;
-      color: white;
    }
 `
 
@@ -688,17 +529,13 @@ const UserWrapper = styled.div`
    gap: clamp(10px, 2vw, 50px);
 `
 
-const UserDropdown = styled.div`
-   position: relative;
-`
-
 const UserMenu = styled.div`
    font-size: clamp(14px, 1vw, 20px);
    font-weight: 600;
-   color: ${(props) => (props.$isOpen ? '#ff7f00' : '#000')};
+   color: #000;
+   cursor: pointer;
    display: flex;
    align-items: center;
-   cursor: pointer;
 
    &:hover {
       color: #ff7f00;
@@ -767,31 +604,13 @@ const MobileUserContainer = styled.div`
    z-index: 101;
 `
 
-const MobileUserDropdown = styled.div`
-   position: relative;
-   width: 100%;
-   text-align: center;
-`
-
-const MobileUserMenu = styled.div`
+const MobileUserInfo = styled.div`
    font-size: 16px;
    font-weight: 600;
-   color: ${(props) => (props.$isOpen ? '#ff7f00' : '#000')};
+   color: #000;
    cursor: pointer;
    padding: 10px;
    &:hover {
       color: #ff7f00;
    }
-`
-
-const MobileUserDropdownMenu = styled.div`
-   width: 100%;
-   background-color: white;
-   border-radius: 5px;
-   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-   padding: 5px 0;
-   text-align: center;
-   margin-top: 10px;
-   position: relative;
-   animation: slideDown 0.3s ease-in-out;
 `
