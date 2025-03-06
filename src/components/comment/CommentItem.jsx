@@ -207,7 +207,7 @@ const CommentItem = () => {
                      </>
                   ) : (
                      <>
-                        {comment.img && <CommentImg src={`http://ec2-13-125-242-248.ap-northeast-2.compute.amazonaws.com:8000/${comment.img}`} alt="댓글 이미지" />}
+                        {comment.img && <CommentImg src={`http://ec2-13-125-242-248.ap-northeast-2.compute.amazonaws.com:8000${comment.img}`} alt="댓글 이미지" />}
                         <CommentContent>{comment.content || '내용 없음'}</CommentContent>
                         <CommentDate>{new Date(comment.createdAt).toLocaleString()}</CommentDate>
                      </>
