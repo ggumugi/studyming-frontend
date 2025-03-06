@@ -55,8 +55,6 @@ const FindPassword = () => {
 
    // 인증 코드 검증
    const handleCodeVerify = () => {
-      console.log('📡 인증 코드 검증 요청:', email, inputCode) // ✅ 디버깅 로그 추가
-
       dispatch(verifyCodepwThunk({ email, verificationCodepw: inputCode }))
          .unwrap()
          .then((result) => {
@@ -81,7 +79,7 @@ const FindPassword = () => {
          return
       }
 
-      console.log('📡 비밀번호 변경 요청:', { email, newPassword }) // ✅ 디버깅 로그 추가
+      // console.log('📡 비밀번호 변경 요청:', { email, newPassword }) // ✅ 디버깅 로그 추가
 
       dispatch(updatePasswordThunk({ email: email, newPassword: newPassword })) // 🔥 중첩되지 않도록 수정!
          .unwrap()

@@ -11,8 +11,6 @@ const FreeBoard = () => {
    const posts = useSelector((state) => state.posts.posts)
    const pagination = useSelector((state) => state.posts.pagination)
 
-   console.log('현재 리덕스 상태:', { posts, pagination })
-
    const loading = useSelector((state) => state.posts.loading)
    const [page, setPage] = useState(1)
    const [rowsPerPage] = useState(10)
@@ -42,7 +40,6 @@ const FreeBoard = () => {
    }
 
    const handleReport = () => {
-      console.log('사용자를 신고했습니다.')
       setIsModalOpen(false)
    }
    const handleSearch = () => {

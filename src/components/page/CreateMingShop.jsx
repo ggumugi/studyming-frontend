@@ -36,7 +36,7 @@ const CreateMingShop = ({ isAuthenticated }) => {
             limit: existingItem.limit || '7',
             type: existingItem.type || '',
             image: existingItem.img || null,
-            preview: existingItem.img ? `http://localhost:8000${existingItem.img}` : null,
+            preview: existingItem.img ? `http://ec2-15-164-103-85.ap-northeast-2.compute.amazonaws.com:8000${existingItem.img}` : null,
          })
       }
    }, [dispatch, existingItem, isEditing])

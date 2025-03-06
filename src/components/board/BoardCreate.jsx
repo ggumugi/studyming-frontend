@@ -22,13 +22,6 @@ const BoardCreate = ({ user, category, onSubmit, initialValues = {} }) => {
       noti: '정보',
       inquiry: '문의',
    }
-   useEffect(() => {
-      console.log('images 상태:', images) // ✅ 현재 상태 확인
-   }, [images])
-
-   useEffect(() => {
-      console.log('🛠 삭제된 이미지 리스트 변경됨:', removedImages)
-   }, [removedImages]) // ✅ removedImages가 변경될 때마다 콘솔 찍기
 
    // 기존 게시글이 있다면 (수정 모드), 초기값 설정
    useEffect(() => {
@@ -59,7 +52,7 @@ const BoardCreate = ({ user, category, onSubmit, initialValues = {} }) => {
 
    const handleImageUpload = (e) => {
       const files = Array.from(e.target.files)
-      console.log('📌 업로드된 파일:', files)
+      // console.log('📌 업로드된 파일:', files)
 
       // 🔥 현재 업로드된 이미지 개수 체크
       const totalImages = images.length + files.length
@@ -107,14 +100,6 @@ const BoardCreate = ({ user, category, onSubmit, initialValues = {} }) => {
          imageFiles.forEach((file) => formData.append('images', file))
       }
 
-      console.log('📌 수정 요청 formData:', {
-         title,
-         content,
-         category,
-         removedImages,
-         imageFiles,
-      })
-
       if (initialValues) {
          try {
             const response = await dispatch(
@@ -125,7 +110,6 @@ const BoardCreate = ({ user, category, onSubmit, initialValues = {} }) => {
                })
             ).unwrap()
 
-            console.log('✅ 수정 완료:', response)
             navigate(`/board/detail/${initialValues.id}`) // ✅ 수정 완료 후 해당 게시글 상세 페이지로 이동!
          } catch (error) {
             console.error('🚨 수정 실패:', error)

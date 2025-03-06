@@ -36,17 +36,13 @@ const ReportsBoard = () => {
 
    // 정지 기간 변경
    const handleBanChange = (id, value) => {
-      console.log('🚀 정지 기간 변경됨 - ID:', id, '값:', value) // ✅ 추가!
       setBanPeriods((prev) => ({ ...prev, [id]: value }))
    }
 
    // 적용 버튼 클릭 시 알림
    // ✅ 적용 버튼 클릭 시 동작
    const handleApply = (reportId, reportedUser) => {
-      console.log('🚀 적용 버튼 클릭됨 - 현재 banPeriods 상태:', banPeriods)
       const banDays = banPeriods[reportId]
-
-      console.log('🚀 적용 버튼 클릭됨 - banDays 값:', banDays) // ✅ 값 확인!
 
       // 🚀 "없음" 선택 시 신고 삭제
       if (banDays === '없음') {

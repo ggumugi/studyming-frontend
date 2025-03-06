@@ -9,7 +9,7 @@ import { createAdminPost, fetchAdminPosts, updateAdminPost, deleteAdminPost, get
 export const createAdminPostThunk = createAsyncThunk('adminPosts/createPost', async (postData, { rejectWithValue }) => {
    try {
       const response = await createAdminPost(postData)
-      console.log(response.data, '슬라이스')
+
       return response.data.post
    } catch (err) {
       return rejectWithValue(err.response?.data?.message || '게시물 등록 실패')

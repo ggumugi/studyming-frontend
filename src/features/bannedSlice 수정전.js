@@ -34,7 +34,7 @@ export const submitReport = createAsyncThunk('banned/submitReport', async ({ rep
 export const getBannedUsers = createAsyncThunk('banned/getBannedUsers', async (_, { rejectWithValue }) => {
    try {
       const response = await fetchBannedUsers()
-      console.log('🚀 벤된 유저 목록:', response) // ✅ 디버깅용
+
       return response
    } catch (error) {
       return rejectWithValue(error)
@@ -53,7 +53,6 @@ export const applyBan = createAsyncThunk('banned/applyBan', async ({ reportId, a
 // ✅ 정지 기간 변경하기
 export const changeBanPeriod = createAsyncThunk('banned/changeBanPeriod', async ({ userId, newEndDate }, { rejectWithValue }) => {
    try {
-      console.log('🚀 정지 기간 변경 요청:', { userId, newEndDate })
       const response = await updateBanPeriod(userId, newEndDate) // ✅ API 요청
       return response
    } catch (error) {
@@ -105,7 +104,7 @@ const bannedSlice = createSlice({
          })
          .addCase(getBannedUsers.fulfilled, (state, action) => {
             state.loading = false
-            console.log('🚀 Redux State Updated (bannedUsers):', action.payload) // ✅ 상태 확인
+
             state.bannedUsers = action.payload
          })
          .addCase(getBannedUsers.rejected, (state, action) => {

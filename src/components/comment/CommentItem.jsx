@@ -71,7 +71,7 @@ const CommentItem = () => {
    const startEditing = (comment) => {
       setIsEditing(comment.id)
       setEditModeComment(comment.content)
-      setSelectedImage(comment.img ? `http://localhost:8000${comment.img}` : null)
+      setSelectedImage(comment.img ? `http://ec2-15-164-103-85.ap-northeast-2.compute.amazonaws.com:8000${comment.img}` : null)
    }
 
    // 댓글 수정 확정
@@ -89,12 +89,6 @@ const CommentItem = () => {
       if (imageFile) {
          formData.append('image', imageFile)
       }
-
-      // 🔥 FormData 내부 값 확인 (디버깅)
-      console.log('🔍 댓글 수정 요청:', { id: isEditing, formData })
-      formData.forEach((value, key) => {
-         console.log(`✅ FormData Key: ${key}, Value:`, value)
-      })
 
       dispatch(updateCommentThunk({ id: isEditing, commentData: formData }))
          .unwrap()
@@ -122,7 +116,7 @@ const CommentItem = () => {
       dispatch(selectCommentThunk(id))
          .unwrap()
          .then(() => {
-            console.log('✅ 댓글 채택 성공')
+            // console.log('✅ 댓글 채택 성공')
 
             // ✅ Redux 상태를 즉시 갱신하여 UI에 반영 (채택 로고가 즉시 보이게 함)
             dispatch(fetchCommentsThunk({ postId })) // 🔥 Redux에서 새 데이터 불러오기
@@ -207,7 +201,7 @@ const CommentItem = () => {
                      </>
                   ) : (
                      <>
-                        {comment.img && <CommentImg src={`http://ec2-13-125-242-248.ap-northeast-2.compute.amazonaws.com:8000${comment.img}`} alt="댓글 이미지" />}
+                        {comment.img && <CommentImg src={`http://ec2-15-164-103-85.ap-northeast-2.compute.amazonaws.com:8000${comment.img}`} alt="댓글 이미지" />}
                         <CommentContent>{comment.content || '내용 없음'}</CommentContent>
                         <CommentDate>{new Date(comment.createdAt).toLocaleString()}</CommentDate>
                      </>

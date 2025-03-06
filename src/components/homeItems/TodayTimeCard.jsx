@@ -8,7 +8,7 @@ const TodayTimeCard = ({ user, title }) => {
    const { time, loading } = useSelector((state) => state.time)
 
    useEffect(() => {
-      console.log('📌 useEffect 실행됨! userId:', user)
+      // console.log('📌 useEffect 실행됨! userId:', user)
       if (user) dispatch(fetchTimeData(user.id))
    }, [dispatch, user])
 

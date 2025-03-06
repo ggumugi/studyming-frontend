@@ -108,8 +108,6 @@ const Timer = () => {
          // 캡차 제한시간 타이머 시작 - 수정된 부분
          const timerId = setInterval(() => {
             setCaptchaTimer((prev) => {
-               console.log('타이머 감소:', prev) // 디버깅용 로그
-
                // 10초 이하로 남았을 때 경고 상태 활성화
                if (prev <= 10 && prev > 0) {
                   setIsTimeAlmostUp(true)

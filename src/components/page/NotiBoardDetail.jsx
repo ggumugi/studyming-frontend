@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { Paper, Typography, Button, TextField, Box } from '@mui/material'
 
 const PostDetail = ({ post, onBack }) => {
-   console.log('PostDetail에서 받은 post 데이터:', post)
    const [comments, setComments] = useState([
       { id: 1, author: '수험박', text: '덤벼', date: '2025.01.06. 15:30' },
       { id: 2, author: '희경이', text: '어? 기사시험 그저께였는데요?', date: '2025.01.06. 15:35' },

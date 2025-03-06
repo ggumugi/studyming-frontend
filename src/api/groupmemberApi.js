@@ -69,7 +69,7 @@ export const getGroupMemberById = async (groupId, userId) => {
 // 방장 위임
 export const transferGroupLeader = async (groupId, newLeaderId) => {
    try {
-      console.log(`API 요청 - groupId: ${groupId}, newLeaderId: ${newLeaderId}`)
+      // console.log(`API 요청 - groupId: ${groupId}, newLeaderId: ${newLeaderId}`)
       const response = await studymingApi.put(`/groupmember/${groupId}`, { newLeaderId })
       return response
    } catch (error) {
@@ -81,7 +81,7 @@ export const transferGroupLeader = async (groupId, newLeaderId) => {
 // 멤버 강퇴
 export const kickGroupMember = async (groupId, userId) => {
    try {
-      console.log('🔥 API 요청 - groupId:', groupId, 'userId:', userId) // ✅ 확인용
+      // console.log('🔥 API 요청 - groupId:', groupId, 'userId:', userId) // ✅ 확인용
       const response = await studymingApi.delete(`/groupmember/kick/${groupId}/${userId}`)
       return response
    } catch (error) {

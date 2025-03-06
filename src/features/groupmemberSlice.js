@@ -24,7 +24,6 @@ export const createGroupMemberThunk = createAsyncThunk('groupmembers/create', as
 // 그룹 멤버 참여
 export const participateInGroupThunk = createAsyncThunk('groupmember/participate', async ({ groupId, status }, { rejectWithValue }) => {
    try {
-      console.log(`그룹 참여 상태 변경 요청: 그룹 ID ${groupId}, 상태 ${status}`)
       const response = await participateInGroup(groupId, status)
       return response.data
    } catch (error) {
@@ -76,7 +75,6 @@ export const transferGroupLeaderThunk = createAsyncThunk('groupmembers/transferL
 // 멤버 강퇴
 export const kickGroupMemberThunk = createAsyncThunk('groupmembers/kick', async ({ groupId, userId }, { rejectWithValue }) => {
    try {
-      console.log('🔥 Redux 강퇴 요청 - groupId:', groupId, 'userId:', userId) // ✅ 확인용
       const response = await kickGroupMember(groupId, userId) // API 호출
       return { userId, groupId }
    } catch (error) {

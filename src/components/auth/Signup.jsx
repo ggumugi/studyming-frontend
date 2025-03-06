@@ -148,14 +148,14 @@ const Signup = () => {
          window.Kakao.Auth.login({
             scope: 'profile_nickname, account_email',
             success: function (authObj) {
-               console.log('카카오 로그인 성공:', authObj)
+               // console.log('카카오 로그인 성공:', authObj)
                const accessToken = authObj.access_token // 액세스 토큰 가져오기
                const sns = 'kakao'
 
                dispatch(fetchKakaoUserInfoThunk(accessToken))
                   .unwrap()
                   .then((response) => {
-                     console.log('정보', response) // 사용자 정보 로그
+                     // console.log('정보', response) // 사용자 정보 로그
                      const kakaoEmail = response.email // 이메일
                      const kakaoNickname = response.nickname // 닉네임
 
@@ -202,7 +202,7 @@ const Signup = () => {
             navigate('/home') // 메인 페이지로 이동
          })
          .catch((error) => {
-            console.log(error)
+            // console.log(error)
             if (error === '회원가입이 필요합니다.') {
                // 회원가입 페이지로 리다이렉트
                const { email, name: nickname } = decoded
@@ -247,11 +247,11 @@ const Signup = () => {
          })
          .catch((error) => {
             console.error('❌ 회원가입 실패 (서버 응답 전체):', error) //  전체 오류 로그 확인
-            console.log('📢 서버 응답:', error) // `error` 자체를 확인
+            // console.log('📢 서버 응답:', error) // `error` 자체를 확인
 
             const errorMsg = error || '알 수 없는 오류 발생' // 기본 메시지 설정
 
-            console.log('📢 서버에서 받은 오류 메시지:', errorMsg) //  백엔드에서 어떤 메시지를 보내는지 확인
+            // console.log('📢 서버에서 받은 오류 메시지:', errorMsg) //  백엔드에서 어떤 메시지를 보내는지 확인
 
             // ✅ 이메일 중복 체크 (에러 메시지가 직접 "중복된 이메일입니다."인지 비교)
             if (errorMsg === '중복된 이메일입니다' || errorMsg === '중복된 이메일입니다.') {

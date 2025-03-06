@@ -47,11 +47,8 @@ const MyInfo = () => {
    useEffect(() => {
       if (window.Kakao && !window.Kakao.isInitialized()) {
          window.Kakao.init(process.env.REACT_APP_KAKAO_JS_KEY)
-         console.log('카카오 SDK 초기화 완료')
+         // console.log('카카오 SDK 초기화 완료')
       }
-   }, [])
-   useEffect(() => {
-      console.log(user, 'tq')
    }, [])
 
    // user 정보가 변경될 때 폼 데이터 업데이트
@@ -302,7 +299,7 @@ const MyInfo = () => {
          window.Kakao.Auth.login({
             scope: 'profile_nickname, account_email',
             success: function (authObj) {
-               console.log('카카오 로그인 성공:', authObj)
+               // console.log('카카오 로그인 성공:', authObj)
                const accessToken = authObj.access_token
 
                // 카카오 사용자 정보 가져오기
@@ -465,7 +462,7 @@ const MyInfo = () => {
                            <GoogleLogin
                               onSuccess={handleGoogleConnect}
                               onError={() => {
-                                 console.log('구글 로그인 실패')
+                                 // console.log('구글 로그인 실패')
                                  setSnsConnecting(false)
                               }}
                               width="100%"

@@ -5,10 +5,6 @@ import { createComment, updateComment, fetchComments, fetchCommentById, deleteCo
 export const createCommentThunk = createAsyncThunk('comments/createComment', async (commentData, { rejectWithValue }) => {
    try {
       const response = await createComment(commentData)
-      console.log('🔥 최종 보낼 FormData 데이터 확인 (axios 직전):')
-      commentData.formData.forEach((value, key) => {
-         console.log(`✅ FormData key: ${key}, value:`, value)
-      })
 
       return response.comment // ✅ API 응답에서 comment 데이터만 반환
    } catch (err) {
@@ -18,8 +14,6 @@ export const createCommentThunk = createAsyncThunk('comments/createComment', asy
 
 export const fetchCommentsThunk = createAsyncThunk('comments/fetchComments', async ({ postId, page, limit }, { rejectWithValue }) => {
    try {
-      console.log('📢 fetchCommentsThunk 실행! 전달받은 postId:', postId)
-
       // 🔥 `postId`가 `undefined`이거나 숫자로 변환할 수 없는 경우 방어 코드 추가
       if (!postId || isNaN(parseInt(postId, 10))) {
          console.error('❌ fetchCommentsThunk 실행 중 postId가 잘못됨:', postId)
@@ -27,10 +21,9 @@ export const fetchCommentsThunk = createAsyncThunk('comments/fetchComments', asy
       }
 
       const numericPostId = parseInt(postId, 10)
-      console.log('✅ 변환된 numericPostId:', numericPostId)
 
       const response = await fetchComments({ postId: numericPostId, page, limit })
-      console.log('📢 API 응답 데이터:', response) // ✅ 이거 콘솔 확인!!
+
       return {
          comments: response.comments, // ✅ 댓글 데이터
          totalPages: response.totalPages, // ✅ 총 페이지 수 (백엔드에서 전달)
@@ -54,7 +47,6 @@ export const fetchCommentByIdThunk = createAsyncThunk('comments/fetchCommentById
 //  댓글 수정 Thunk
 export const updateCommentThunk = createAsyncThunk('comments/updateComment', async ({ id, commentData }, { rejectWithValue }) => {
    try {
-      console.log('🛠 댓글 수정 요청:', { id, commentData }) // ✅ id 확인
       const response = await updateComment(id, commentData)
       return response.comment
    } catch (err) {
@@ -65,7 +57,6 @@ export const updateCommentThunk = createAsyncThunk('comments/updateComment', asy
 //  댓글 삭제 Thunk
 export const deleteCommentThunk = createAsyncThunk('comments/deleteComment', async (id, { rejectWithValue }) => {
    try {
-      console.log('댓글삭제슬라이스:', id)
       await deleteComment(id)
       return id // 삭제된 댓글의 id 반환
    } catch (err) {
@@ -118,7 +109,6 @@ const commentSlice = createSlice({
             state.error = null
          })
          .addCase(fetchCommentsThunk.fulfilled, (state, action) => {
-            console.log('📢 Redux 상태 업데이트 실행! 응답 데이터:', action.payload) // ✅ 확인!
             state.loading = false
             state.totalPages = action.payload.totalPages
             state.currentPage = action.payload.currentPage
