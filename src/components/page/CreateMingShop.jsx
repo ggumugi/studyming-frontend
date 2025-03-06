@@ -105,7 +105,8 @@ const CreateMingShop = ({ isAuthenticated }) => {
       <Container
          maxWidth="sm"
          sx={{
-            mt: 6,
+            mt: 2,
+            mb: 7,
             height: 'auto',
             maxWidth: { xs: '100%', sm: '600px', md: '700px' },
             padding: { xs: 2, sm: 4 },

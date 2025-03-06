@@ -28,6 +28,18 @@ const SidebarContainer = styled.nav`
    display: flex;
    flex-direction: column;
    border-right: 1px solid #ddd;
+
+   @media (max-width: 965px) {
+      width: 100%;
+      height: auto;
+      flex-direction: row;
+      border-right: none;
+      border-bottom: 2px solid #ddd;
+      justify-content: center;
+      align-items: center;
+      padding: 10px 0;
+      margin-left: 0px;
+   }
 `
 
 const MenuList = styled.ul`
@@ -38,6 +50,12 @@ const MenuList = styled.ul`
    flex-direction: column;
    align-items: flex-end;
    gap: 70px;
+
+   @media (max-width: 965px) {
+      flex-direction: row;
+      margin-top: 10px;
+      gap: clamp(80px, 20vw, 200px);
+   }
 `
 
 const MenuItem = styled.li`
@@ -49,6 +67,10 @@ const MenuItem = styled.li`
    font-weight: ${(props) => (props.$isActive ? '500' : '300')};
    color: ${(props) => (props.$isActive ? '#FF7A00' : '#000')};
    cursor: pointer;
+
+   @media (max-width: 965px) {
+      margin-right: 0;
+   }
 `
 
 const StyledButton = styled.button`
@@ -72,4 +94,11 @@ const ActiveIndicator = styled.div`
    height: 8px;
    background-color: #ff7f00;
    border-radius: 50%;
+
+   @media (max-width: 965px) {
+      right: auto;
+      top: 135%;
+      left: 50%;
+      transform: translateX(-50%);
+   }
 `

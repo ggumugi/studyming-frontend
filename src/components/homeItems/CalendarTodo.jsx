@@ -203,6 +203,7 @@ const Input = styled.input`
 `
 
 const AddButton = styled.button`
+   margin-top: 15px;
    background: #ff7a00;
    width: 100%;
    color: white;
@@ -256,6 +257,7 @@ const ErrorText = styled.p`
    color: red;
    font-size: 12px;
    margin-top: 5px;
+
    position: absolute;
    bottom: -18px; /* 입력창 바로 아래에 표시 */
    left: 5px;

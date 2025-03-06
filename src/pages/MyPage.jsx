@@ -79,10 +79,14 @@ export default MyPage
 const Container = styled.div`
    display: flex;
    height: 100%;
+
+   @media (max-width: 965px) {
+      flex-direction: column; /* 화면이 965px 이하일 때 상하 정렬 */
+   }
 `
 
 const ContentArea = styled.div`
-   flex: 1;
+   // flex: 1;
    padding: 70px 70px 0 70px;
    background-color: #fff;
 
