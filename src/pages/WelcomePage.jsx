@@ -54,11 +54,9 @@ const HeroSection = () => {
             <FooterText>
                스터디밍이 처음이신가요?
                <br />
-               <Link>
-                  <span>
-                     <Link to="/info">소개페이지로 이동 →</Link>
-                  </span>
-               </Link>
+               <span>
+                  <Link to="/info">소개페이지로 이동 →</Link>
+               </span>
             </FooterText>
          </Card>
       </Container>
@@ -133,7 +131,7 @@ const Card = styled.div`
    margin-top: 150px;
    position: absolute;
    background: white;
-   padding: clamp(10px, 1vw, 50px) clamp(30px, 10vw, 150px);
+   padding: clamp(20px, 1vw, 50px) clamp(30px, 10vw, 150px);
    border-radius: 15px;
    text-align: center;
    box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.2);
@@ -145,7 +143,7 @@ const Title = styled.h1`
    font-weight: 500;
    span {
       color: #ff7a00;
-      font-size: clamp(38px, 2vw, 64px);
+      font-size: clamp(40px, 5vw, 50px);
       font-weight: clamp(300, 900, 900);
 
       display: inline-block;
@@ -163,7 +161,7 @@ const SubTitle = styled.p`
       font-size: clamp(28px, 2vw, 48px);
       color: #ffa654;
    }
-   margin-bottom: 50px;
+   margin-bottom: 40px;
 `
 
 const Button = styled.button`
@@ -179,7 +177,7 @@ const Button = styled.button`
    &:hover {
       background-color: #e56e00;
    }
-   margin-bottom: 60px;
+   margin-bottom: 30px;
 `
 
 const FooterText = styled.p`

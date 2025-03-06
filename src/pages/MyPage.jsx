@@ -79,6 +79,10 @@ export default MyPage
 const Container = styled.div`
    display: flex;
    height: 100%;
+   margin-bottom: 70px;
+   @media (max-width: 965px) {
+      flex-direction: column; /* 화면이 965px 이하일 때 상하 정렬 */
+   }
 `
 
 const ContentArea = styled.div`
@@ -88,10 +92,13 @@ const ContentArea = styled.div`
 
    h2 {
       font-weight: 300;
-      font-size: 32px;
+      font-size: clamp(14px, 2vw, 20px);
       border-bottom: 2px solid #ff7a00;
       padding-bottom: 10px;
       margin-bottom: 20px;
+   }
+   @media (max-width: 965px) {
+      padding: 0px 70px 0 70px;
    }
 `
 
@@ -100,7 +107,7 @@ const AuthPlaceholder = styled.div`
    justify-content: center;
    align-items: center;
    height: 300px;
-   font-size: 18px;
+   font-size: clamp(14px, 2vw, 18px);
    color: #888;
    background-color: #f9f9f9;
    border-radius: 8px;

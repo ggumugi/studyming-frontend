@@ -22,22 +22,42 @@ export default MyPageSidebar
 
 // ⭐ Styled Components
 const SidebarContainer = styled.nav`
-   width: 300px;
-   height: 120vh;
+   width: clamp(100px, 10vw, 200px);
+   margin-left: 40px;
+   height: 100vh;
    padding: 20px;
    display: flex;
    flex-direction: column;
    border-right: 1px solid #ddd;
+   margin-bottom: 50px;
+
+   @media (max-width: 965px) {
+      width: 100%;
+      height: auto;
+      flex-direction: row;
+      border-right: none;
+      border-bottom: 2px solid #ddd;
+      justify-content: center;
+      align-items: center;
+      padding: 10px 0;
+      margin-left: 0px;
+   }
 `
 
 const MenuList = styled.ul`
-   margin-top: 170px;
+   margin-top: 120px;
    list-style: none;
    padding: 0;
    display: flex;
    flex-direction: column;
    align-items: flex-end;
    gap: 70px;
+
+   @media (max-width: 965px) {
+      flex-direction: row;
+      margin-top: 10px;
+      gap: clamp(60px, 15vw, 70px);
+   }
 `
 
 const MenuItem = styled.li`
@@ -45,10 +65,14 @@ const MenuItem = styled.li`
    display: flex;
    margin-right: 20px;
    justify-content: center;
-   font-size: 20px;
+   font-size: clamp(14px, 1vw, 20px);
    font-weight: ${(props) => (props.$isActive ? '500' : '300')};
    color: ${(props) => (props.$isActive ? '#FF7A00' : '#000')};
    cursor: pointer;
+
+   @media (max-width: 965px) {
+      margin-right: 0;
+   }
 `
 
 const StyledButton = styled.button`
@@ -72,4 +96,11 @@ const ActiveIndicator = styled.div`
    height: 8px;
    background-color: #ff7f00;
    border-radius: 50%;
+
+   @media (max-width: 965px) {
+      right: auto;
+      top: 135%;
+      left: 50%;
+      transform: translateX(-50%);
+   }
 `

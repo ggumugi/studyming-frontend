@@ -20,7 +20,7 @@ const RealTimeAccess = () => {
    const [selectedStudy, setSelectedStudy] = useState(null)
    const [dropdownOpen, setDropdownOpen] = useState(false)
 
-   // 유저가 가입한 스터디 그룹 목록 가져오기
+   // 유저가 가입한 스터디 그룹 목록 가져오기 (처음 한 번만)
    useEffect(() => {
       dispatch(fetchUserStudyGroupsThunk())
    }, [dispatch])
@@ -28,7 +28,23 @@ const RealTimeAccess = () => {
    // 선택된 스터디가 변경되면 해당 스터디의 멤버 목록 가져오기
    useEffect(() => {
       if (selectedStudy) {
+         // 초기 데이터 로딩
          dispatch(fetchGroupMembersThunk(selectedStudy.id))
+
+         // 10초마다 멤버 상태 업데이트 (폴링)
+         const intervalId = setInterval(() => {
+            dispatch(fetchGroupMembersThunk(selectedStudy.id))
+               .unwrap()
+               .then(() => {
+                  console.log('멤버 상태 업데이트 완료:', new Date().toLocaleTimeString())
+               })
+               .catch((error) => {
+                  console.error('멤버 상태 업데이트 실패:', error)
+               })
+         }, 10000) // 10초 간격
+
+         // 선택된 스터디가 변경되거나 컴포넌트 언마운트 시 인터벌 정리
+         return () => clearInterval(intervalId)
       }
    }, [dispatch, selectedStudy])
 
@@ -48,13 +64,6 @@ const RealTimeAccess = () => {
 
    // 접속 중인 멤버 수 계산
    const onlineMembersCount = groupmembers ? groupmembers.filter((member) => member.status === 'on').length : 0
-
-   // RealTimeAccess 컴포넌트 내에서 데이터 확인 로그 추가
-   useEffect(() => {
-      console.log('유저 스터디 그룹 상태:', userStudyGroups)
-      console.log('유저 스터디 개수:', userStudyCount)
-      console.log('그룹 멤버 목록:', groupmembers)
-   }, [userStudyGroups, userStudyCount, groupmembers])
 
    return (
       <Container>
@@ -271,6 +280,7 @@ const UserList = styled.div`
    justify-content: space-around;
    gap: 30px;
    margin-top: 20px;
+   min-height: 100px; /* 최소 높이 설정으로 로딩 시 레이아웃 변동 방지 */
 `
 
 const UserIcon = styled.div`
@@ -279,6 +289,7 @@ const UserIcon = styled.div`
    align-items: center;
    font-size: 14px;
    color: ${({ $isOnline }) => ($isOnline ? 'orange' : 'black')};
+   position: relative;
    p {
       margin-top: 5px;
       padding-right: 14px;
@@ -295,6 +306,10 @@ const LoadingText = styled.p`
    color: #666;
    margin: 20px 0;
    font-size: 14px;
+   height: 180px; /* 로딩 시 충분한 높이 확보 */
+   display: flex;
+   justify-content: center;
+   align-items: center;
 `
 
 const NoStudyMessage = styled.div`
@@ -306,6 +321,8 @@ const NoStudyMessage = styled.div`
    flex-direction: column;
    align-items: center;
    gap: 15px;
+   min-height: 180px; /* 최소 높이 설정으로 로딩 시 레이아웃 변동 방지 */
+   justify-content: center;
 `
 
 const JoinStudyButton = styled.button`
@@ -338,4 +355,9 @@ const NoMembersMessage = styled.p`
    color: #888;
    margin: 20px 0;
    font-size: 14px;
+   width: 100%;
+   min-height: 100px; /* 최소 높이 설정으로 로딩 시 레이아웃 변동 방지 */
+   display: flex;
+   justify-content: center;
+   align-items: center;
 `

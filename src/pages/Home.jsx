@@ -75,27 +75,44 @@ const MainVisualWrapper = styled.div`
 
 const StudyTimeWrapper = styled.div`
    grid-column: span 1;
+   @media (max-width: 700px) {
+      grid-column: span 3;
+   }
 `
 
 /* ✅ 다짐 (Mindset)과 D-day 배치 조정 */
 const MindsetWrapper = styled.div`
    margin-top: 50px;
    grid-column: span 2; /* 다짐은 공부 시간 2칸과 같은 너비 */
+   @media (max-width: 700px) {
+      grid-column: span 3;
+   }
 `
 
 const DdayWrapper = styled.div`
    margin-top: 50px;
    grid-column: span 1; /* D-day는 한 칸 */
+   @media (max-width: 700px) {
+      grid-column: span 3;
+      display: flex;
+      justify-content: center;
+   }
 `
 
 const CalendarTodoWrapper = styled.div`
    grid-column: span 1;
    margin-top: 50px;
+   @media (max-width: 700px) {
+      grid-column: span 3;
+   }
 `
 
 const WeeklyCalendarWrapper = styled.div`
    grid-column: span 2;
    margin-top: 50px;
+   @media (max-width: 700px) {
+      display: none;
+   }
 `
 
 const RealTimeAccessWrapper = styled.div`

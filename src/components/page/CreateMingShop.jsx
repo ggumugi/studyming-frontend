@@ -105,7 +105,8 @@ const CreateMingShop = ({ isAuthenticated }) => {
       <Container
          maxWidth="sm"
          sx={{
-            mt: 6,
+            mt: 2,
+            mb: 7,
             height: 'auto',
             maxWidth: { xs: '100%', sm: '600px', md: '700px' },
             padding: { xs: 2, sm: 4 },
@@ -144,8 +145,8 @@ const CreateMingShop = ({ isAuthenticated }) => {
                   {/* 이미지 미리보기 박스 */}
                   <Box
                      sx={{
-                        width: { xs: '100%', sm: '373px' },
-                        height: { xs: '200px', sm: '250px' },
+                        width: { xs: '100%', sm: '550px' },
+                        height: { xs: '200px', sm: '270px' },
                         border: '1px solid #ccc',
                         borderRadius: '8px',
                         display: 'flex',
@@ -154,10 +155,10 @@ const CreateMingShop = ({ isAuthenticated }) => {
                         backgroundColor: '#f8f8f8',
                      }}
                   >
-                     {formData.preview ? <img src={formData.preview} alt="미리보기" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} /> : <Typography color="gray">이미지 미리보기</Typography>}
+                     {formData.preview ? <img src={formData.preview} alt="미리보기" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '8px' }} /> : <Typography color="gray">이미지 미리보기</Typography>}
                   </Box>
                </Box>
-               <Box sx={{ display: 'flex', justifyContent: 'flex-start', mt: 1 }}>
+               <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
                   <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} id="image-upload" />
                   <label htmlFor="image-upload">
                      <Button variant="contained" component="span" color="warning">

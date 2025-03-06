@@ -56,10 +56,10 @@ const ItemList = ({ items, isAuthenticated, user }) => {
                         {item.type !== 'cash' && <Tag>7일</Tag>}
                         <Image
                            src={item.img ? `http://localhost:8000${item.img}` : '/img/default.png'} // ✅ 기본 이미지 추가
-                           alt={item.title}
+                           alt={item.name}
                         />
                      </ImageWrapper>
-                     <ItemTitle>{item.title}</ItemTitle>
+                     <ItemTitle>{item.name}</ItemTitle>
                      <ItemDescriptionContainer>
                         <ItemDescription>{item.detail}</ItemDescription>
                         {isAuthenticated && user?.role === 'ADMIN' && (
@@ -88,7 +88,7 @@ const ItemList = ({ items, isAuthenticated, user }) => {
                   </ItemCard>
                ))
             ) : (
-               <p>상품이 없습니다.</p> // ✅ 데이터가 없을 때 메시지 표시
+               <p style={{ textAlign: 'center' }}>상품이 없습니다.</p> // ✅ 데이터가 없을 때 메시지 표시
             )}
          </Grid>
       </Container>
@@ -109,6 +109,12 @@ const Grid = styled.div`
    grid-template-columns: repeat(4, 1fr);
    gap: 20px;
    width: 100%;
+   @media (max-width: 1270px) {
+      grid-template-columns: repeat(2, 1fr);
+   }
+   @media (max-width: 620px) {
+      grid-template-columns: repeat(1, 1fr);
+   }
 `
 
 const ItemCard = styled.div`
@@ -119,7 +125,7 @@ const ItemCard = styled.div`
    flex-direction: column;
    justify-content: space-between;
    height: 320px; /* 고정된 높이 */
-   max-width: 325px;
+   // max-width: 325px;
    text-align: left;
    overflow: hidden;
 `
@@ -127,7 +133,7 @@ const ItemCard = styled.div`
 const ImageWrapper = styled.div`
    position: relative; /* 부모 요소를 relative로 설정 */
    width: 100%;
-   max-width: 280px;
+   // max-width: 280px;
    height: 200px;
    margin-bottom: 10px;
    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);

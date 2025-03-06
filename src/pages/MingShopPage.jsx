@@ -83,7 +83,7 @@ const MingShopPage = ({ isAuthenticated, user }) => {
       <Container>
          <Title>
             <UserPointsContainer>
-               현재 보유 포인트: {userPoints} 밍
+               <UserPoint>현재 보유 포인트: {userPoints} 밍</UserPoint>
                <div>
                   <Button
                      variant="contained"
@@ -183,7 +183,6 @@ const UserPointsContainer = styled.div`
    flex-wrap: wrap; /* 💡 요소가 너무 넓어지지 않도록 wrap 적용 */
 
    @media (max-width: 1024px) {
-      max-width: 90%;
       flex-direction: column; /* 📌 태블릿에서는 세로 정렬 */
       text-align: center;
    }
@@ -205,6 +204,8 @@ const Container = styled.div`
    align-items: center;
    padding: 50px;
    width: 100%;
+   max-width: 1200px;
+   margin: 0 auto;
    @media (max-width: 1024px) {
       padding: 30px;
    }
@@ -219,7 +220,7 @@ const Title = styled.h2`
    justify-content: space-between; /* 🔹 좌우 정렬 */
    align-items: center; /* 🔹 세로 정렬 */
    width: 100%; /* 컨테이너의 전체 길이 */
-   max-width: 1200px; /* 최대 너비 설정 */
+   // max-width: 1200px; /* 최대 너비 설정 */
    text-align: left; /* 왼쪽 정렬 */
    font-weight: 300;
    font-size: clamp(14px, 2vw, 20px);
@@ -231,17 +232,14 @@ const Title = styled.h2`
    }
    @media (max-width: 1024px) {
       font-size: 18px;
-      max-width: 90%;
    }
 
    @media (max-width: 768px) {
       font-size: 16px;
-      max-width: 80%;
    }
 
    @media (max-width: 480px) {
       font-size: 14px;
-      max-width: 100%;
       text-align: center;
    }
 `
@@ -261,58 +259,8 @@ const ModalContent = styled.div`
       width: 250px; /* 작은 화면에서 모달 크기 조정 */
    }
 `
-/* ???????????????????????????????????? */
-// const ItemGrid = styled.div`
-//    display: grid;
-//    grid-template-columns: repeat(4, 1fr); /* 한 줄에 네 개씩 */
-//    gap: 20px;
-//    max-width: 1200px; /* 최대 너비 설정 */
-//    width: 100%;
-//    margin: 0 auto; /* 가운데 정렬 */
-//    margin-bottom: 50px; /* 다음 title과 간격 추가 */
-// `
-
-// const ItemCard = styled.div`
-//    background-color: #fff; /* 흰색 배경 */
-//    border-radius: 8px;
-//    padding: 20px;
-//    text-align: center;
-//    display: flex;
-//    flex-direction: column;
-//    justify-content: space-between;
-//    height: 300px; /* 아이템 카드 고정 높이 설정 */
-//    max-width: 325px;
-// `
-
-// const ImageWrapper = styled.div`
-//    width: 100%;
-//    max-width: 280px;
-//    height: 200px; /* 고정된 이미지 높이 */
-//    margin-bottom: 10px;
-//    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
-//    border-radius: 16px; /* 부드러운 곡선 */
-//    overflow: hidden;
-// `
-
-// const ItemImage = styled.img`
-//    width: 100%;
-//    height: 100%;
-//    object-fit: contain; /* 이미지를 잘라서 박스에 맞게 크기 조정 */
-//    transform: scale(0.6);
-// `
-
-// const ItemTitle = styled.h3`
-//    font-size: clamp(16px, 2vw, 18px);
-//    margin-bottom: 5px;
-// `
-
-// const ItemDescription = styled.p`
-//    font-size: 14px;
-//    color: #999;
-//    margin-bottom: 5px;
-// `
-
-// const ItemDate = styled.p`
-//    font-size: 12px;
-//    color: #999;
-// `
+const UserPoint = styled.div`
+   @media (max-width: 1024px) {
+      margin-bottom: 10px;
+   }
+`

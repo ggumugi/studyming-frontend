@@ -48,7 +48,7 @@ const Container = styled.div`
 `
 
 const SidebarContainer = styled.nav`
-   width: 200px;
+   width: clamp(100px, 10vw, 200px);
    height: 100vh;
    padding: 20px;
    display: flex;
@@ -63,7 +63,6 @@ const MenuList = styled.ul`
    display: flex;
    flex-direction: column;
    align-items: flex-end;
-   gap: 70px; /* ✅ 메뉴 간 간격 */
 `
 
 const MenuItem = styled.li`
