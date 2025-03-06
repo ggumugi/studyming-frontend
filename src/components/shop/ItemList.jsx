@@ -88,7 +88,7 @@ const ItemList = ({ items, isAuthenticated, user }) => {
                   </ItemCard>
                ))
             ) : (
-               <p style={{ textAlign:'center' }}>상품이 없습니다.</p> // ✅ 데이터가 없을 때 메시지 표시
+               <p style={{ textAlign: 'center' }}>상품이 없습니다.</p> // ✅ 데이터가 없을 때 메시지 표시
             )}
          </Grid>
       </Container>
