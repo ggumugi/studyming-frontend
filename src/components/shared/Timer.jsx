@@ -71,7 +71,7 @@ const Timer = () => {
       return () => clearInterval(interval)
    }, [])
 
-   // 10초마다 Redux 상태 업데이트 (필요한 경우)
+   // 30초마다 Redux 상태 업데이트
    useEffect(() => {
       if (time % 30 === 0 && time > 0) {
          dispatch(
@@ -105,7 +105,12 @@ const Timer = () => {
          setIsTimeAlmostUp(false) // 타이머 경고 초기화
          setShowFailureMessage(false) // 실패 메시지 초기화
 
-         // 캡차 제한시간 타이머 시작 - 수정된 부분
+         // 기존 타이머가 있다면 제거
+         if (captchaTimerId) {
+            clearInterval(captchaTimerId)
+         }
+
+         // 캡차 제한시간 타이머 시작
          const timerId = setInterval(() => {
             setCaptchaTimer((prev) => {
                // 10초 이하로 남았을 때 경고 상태 활성화
@@ -125,18 +130,12 @@ const Timer = () => {
 
                   return 0
                }
+               console.log(captchaTimer)
                return prev - 1 // 1초씩 감소
             })
-         }, 1000) // 정확히 1초 간격으로 실행
+         }, 1000)
 
          setCaptchaTimerId(timerId)
-
-         // 컴포넌트 언마운트 또는 의존성 변경 시 타이머 정리
-         return () => {
-            if (timerId) {
-               clearInterval(timerId)
-            }
-         }
       }
    }, [time, dispatch, captchaInterval])
 
@@ -152,11 +151,18 @@ const Timer = () => {
          if (groupId && time > 0) {
             const timeString = formatTime(time)
             dispatch(updateGrouptimeThunk({ groupId, time: timeString }))
+               .then(() => {
+                  // 총 학습 시간 정보 갱신 (선택적)
+                  dispatch(fetchTotalStudyTimeThunk())
+               })
+               .catch((error) => {
+                  console.error('언마운트 시 타이머 저장 실패:', error)
+               })
          }
       }
    }, [captchaTimerId, groupId, time, dispatch])
 
-   // 캡차 제한시간 초과 처리 - 수정
+   // 캡차 제한시간 초과 처리
    const handleCaptchaTimeout = () => {
       // 현재 타이머 시간 저장
       const timeString = formatTime(time)
@@ -282,29 +288,6 @@ const Timer = () => {
       return `${hours}:${minutes}:${seconds}`
    }
 
-   // 컴포넌트 언마운트 시 캡차 타이머 정리 및 타이머 시간 저장
-   useEffect(() => {
-      return () => {
-         // 캡차 타이머 정리
-         if (captchaTimerId) {
-            clearInterval(captchaTimerId)
-         }
-
-         // 컴포넌트 언마운트 시 시간 저장
-         if (groupId && time > 0) {
-            const timeString = formatTime(time)
-            dispatch(updateGrouptimeThunk({ groupId, time: timeString }))
-               .then(() => {
-                  // 총 학습 시간 정보 갱신 (선택적)
-                  dispatch(fetchTotalStudyTimeThunk())
-               })
-               .catch((error) => {
-                  console.error('언마운트 시 타이머 저장 실패:', error)
-               })
-         }
-      }
-   }, [captchaTimerId, groupId, time, dispatch])
-
    const timerAnimation = `
       @keyframes minimizeTimer {
          0% { height: 90px; width: 300px; }
@@ -409,6 +392,7 @@ const Timer = () => {
                cursor: 'pointer',
                transition: 'all 0.1s ease',
                boxShadow: isMinimized ? '0 0 10px rgba(0,0,0,0.2)' : 'none',
+               zIndex: 1001,
             }}
          >
             {isMinimized ? '●' : '○'}
@@ -420,7 +404,8 @@ const Timer = () => {
 export default Timer
 
 const Container = styled.div`
-   // 컨테이너 스타일링
+   position: relative;
+   z-index: 1000;
 `
 
 const CaptchaImage = styled.img`
