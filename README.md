@@ -45,27 +45,35 @@
 
 
 # 팀원
-<p align="center">
-  <a href="https://github.com/ggumugi">
-    <img src="https://github.com/ggumugi.png" width="100" height="100"><br>
-    팀장: <strong>박현수</strong>
-  </a>
+<table>
+  <tr align="center">
+    <td>
+      <a href="https://github.com/ggumugi">
+        <img src="https://github.com/ggumugi.png" width="100" height="100"><br>
+        <strong>팀장: 박현수</strong>
+      </a>
+    </td>
+    <td>
+      <a href="https://github.com/kangwonsik07">
+        <img src="https://github.com/kangwonsik07.png" width="100" height="100"><br>
+        <strong>팀원: 강원식</strong>
+      </a>
+    </td>
+    <td>
+      <a href="https://github.com/jiwoo1114">
+        <img src="https://github.com/jiwoo1114.png" width="100" height="100"><br>
+        <strong>팀원: 박지우</strong>
+      </a>
+    </td>
+    <td>
+      <a href="https://github.com/000Lee">
+        <img src="https://github.com/000Lee.png" width="100" height="100"><br>
+        <strong>팀원: 이경희</strong>
+      </a>
+    </td>
+  </tr>
+</table>
 
-  <a href="https://github.com/kangwonsik07">
-    <img src="https://github.com/kangwonsik07.png" width="100" height="100"><br>
-    팀원: <strong>강원식</strong>
-  </a>
-
-  <a href="https://github.com/jiwoo1114">
-    <img src="https://github.com/jiwoo1114.png" width="100" height="100"><br>
-    팀원: <strong>박지우</strong>
-  </a>
-
-  <a href="https://github.com/000Lee">
-    <img src="https://github.com/000Lee.png" width="100" height="100"><br>
-    팀원: <strong>이경희</strong>
-  </a>
-</p>
 
 
 
