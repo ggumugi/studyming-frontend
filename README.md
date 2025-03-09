@@ -88,7 +88,10 @@
 
 ### [ERD](https://www.erdcloud.com/d/BZx5MLdTEuL4ALwRz)
 
-### [아키텍처 다이어그램](https://github.com/ggumugi/studyming-frontend/blob/main/public/img/%EC%95%84%ED%82%A4%ED%85%8D%EC%B3%90.webp)
+<br/>
+
+# 아키텍처 다이어그램
+![아키텍처 다이어그램](https://github.com/ggumugi/studyming-frontend/blob/main/public/img/%EC%95%84%ED%82%A4%ED%85%8D%EC%B3%90.webp)
 
 <br/>
 
