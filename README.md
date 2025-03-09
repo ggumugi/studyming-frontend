@@ -1,70 +1,42 @@
-# Getting Started with Create React App
+![스터디밍](https://github.com/ggumugi/studyming-frontend/blob/main/public/img/%EC%8A%A4%ED%84%B0%EB%94%94%EB%B0%8D.png)
+# STUDYMING
+---
+캠 & 화면공유와 인증 시스템이 포함된 타이머를 활용하여 함께 집중하고 학습할 수 있는 스터디 플랫폼
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+#개발기간
+---
+25.01.31 ~ 25.03.06
 
-## Available Scripts
+#소개
+---
+* 혼자하는 공부가 아닌 "같이하는 공부" *
+우리는 공부를 보다 효과적으로 실천 할 수 있도록 돕는 스터디 플랫폼을 개발했습니다.
+스터디를 진행할 때 회원들을 관리하고, 집중력을 유지하는 것이 중요합니다. 이를 위해 다양한 기능을 제공하여 스터디 그룹이 원활하게 운영될 수 있도록 지원합니다.
 
-In the project directory, you can run:
+** 핵심 기능 - 캠 & 화면 공유 , 채팅 , 타이머, 카카오페이 **
 
-### `yarn start`
+> ** 캠 & 화면 공유 **
+> JITSI Meet
+> 스터디 참가자들은 화상 카메라를 통하여 서로의 학습 모습을 확인할 수 있습니다.
+> 화면 공유 기능을 통해 자료를 함께 보며 협업 또는 확인이 가능 합니다.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+> ** 채팅 **
+> Socket.io
+> 스터디 룸 내 채팅을 통해 실시간으로 소통하며, 서로 응원하고 피드백을 주고받아 몰입감 있는 학습 환경을 조성할 수 있습니다.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+> ** 참여 인증 시스템이 포함된 타이머 **
+> Python ( 보안코드 이미지 )
+> 스터디 중 방장이 설정한 시간마다 나타나는 보안코드가 탑재된 타이머를 사용하여 참가자들이 실시간으로 참여하고 있는지 확인할 수 있습니다.
+> 특정 시간마다 인증을 요구하는 방식으로 스터디 집중도와 참여율을 관리할 수 있습니다.
 
-### `yarn test`
+> ** 카카오페이 결제 시스템 **
+> i'mport
+> 스터디방 채팅에서 사용할 수 있는 이모티콘 및 아이템을 구매할 수 있는 스토어를 운영하며, 이를 위한 결제 시스템을 구축하였습니다.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+# 팀원
+---
+팀장 박현수 [![박현수](https://github.com/ggumugi.png)](https://github.com/ggumugi)
+팀원 강원식 [![강원식](https://github.com/kangwonsik07.png)](https://github.com/kangwonsik07)
+팀원 박지우 [![박지우](https://github.com/jiwoo1114.png)](https://github.com/jiwoo1114)
+팀원 이경희 [![이경희](https://github.com/000Lee.png)](https://github.com/000Lee)
 
-### `yarn build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `yarn build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
