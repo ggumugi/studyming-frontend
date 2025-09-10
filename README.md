@@ -80,13 +80,13 @@
 </table>
 <br/>
 
-### [기능 정의서](https://docs.google.com/spreadsheets/d/1GyhSdizAc_mKuu_jn3LiYD9yki2tpgDF2tIXBE6shh0/edit?gid=0#gid=0)
+### [기능 정의서](https://docs.google.com/spreadsheets/d/1I2MoGMJaKYxN_koUClxVCo37FfeTB7ZJXELmgS2L358/edit?gid=0#gid=0)
 
-### [API 명세서](https://docs.google.com/spreadsheets/d/1GyhSdizAc_mKuu_jn3LiYD9yki2tpgDF2tIXBE6shh0/edit?gid=1039081252#gid=1039081252)
+### [API 명세서](https://docs.google.com/spreadsheets/d/1I2MoGMJaKYxN_koUClxVCo37FfeTB7ZJXELmgS2L358/edit?gid=1039081252#gid=1039081252)
 
 ### [화면 설계서](https://www.figma.com/design/bPH7YyiRWYclDMpJbxT2zb/Studyming?node-id=0-1&t=mG50EjOrFCx8irmo-1)
 
-### [ERD](https://www.erdcloud.com/d/BZx5MLdTEuL4ALwRz)
+### [ERD](https://github.com/ggumugi/studyming-frontend/blob/main/public/img/studyming_erd.png)
 
 <br/>
 
@@ -96,6 +96,7 @@
 <br/>
 
 # 사용 기술 스택  
+<br/>
 
 ## 🖥 Front-end  
 - **React** v19.0.0  
@@ -107,6 +108,8 @@
   - `slick-carousel`  
   - `react-router-dom`  
 
+<br/>
+
 ## 🛠 Back-end  
 - **Node.js** v20.15.1  
 - **사용 라이브러리**  
@@ -117,8 +120,12 @@
   - `axios`  
   - `socket.io`  
 
+<br/>
+
 ## 🗄 Database  
 - **MySQL** v8.0.36  
+
+<br/>
 
 ## 🐍 추가 Python 서비스  
 - **Flask 기반 서비스**  
@@ -127,6 +134,8 @@
   - `captcha`  
   - `mysql-connector-python`  
   - `python-dotenv`, `dotenv`  
+
+<br/>
 
 ## ☁ Deploy
 - **AWS**  
